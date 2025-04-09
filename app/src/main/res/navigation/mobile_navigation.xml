@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.example.billkmotolinkltd.ui.home.HomeFragment"
+        android:label="@string/menu_home"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/nav_reports"
+        android:name="com.example.billkmotolinkltd.ui.reports.ReportsFragment"
+        android:label="@string/menu_reports"
+        tools:layout="@layout/fragment_reports" />
+
+    <fragment
+        android:id="@+id/nav_clockouts"
+        android:name="com.example.billkmotolinkltd.ui.clockouts.ClockoutsFragment"
+        android:label="@string/menu_clockouts"
+        tools:layout="@layout/fragment_clockouts" />
+
+    <fragment
+        android:id="@+id/nav_user"
+        android:name="com.example.billkmotolinkltd.ui.users.UsersFragment"
+        android:label="@string/menu_user"
+        tools:layout="@layout/fragment_bikes" />
+
+    <fragment
+        android:id="@+id/nav_bike"
+        android:name="com.example.billkmotolinkltd.ui.bikes.BikesFragment"
+        android:label="@string/menu_bike"
+        tools:layout="@layout/fragment_bikes" />
+    <fragment
+        android:id="@+id/nav_approvals"
+        android:name="com.example.billkmotolinkltd.ui.approvals.ApprovalsFragment"
+        android:label="@string/menu_approvals"
+        tools:layout="@layout/fragment_approvals" />
+    <fragment
+        android:id="@+id/nav_hr"
+        android:name="com.example.billkmotolinkltd.ui.hr.HrFragment"
+        android:label="@string/menu_hr"
+        tools:layout="@layout/fragment_hr" />
+    <fragment
+        android:id="@+id/nav_incidences"
+        android:name="com.example.billkmotolinkltd.ui.incidences.IncidencesFragment"
+        android:label="@string/menu_incidents"
+        tools:layout="@layout/fragment_incidences" />
+    <fragment
+        android:id="@+id/nav_dailyreports"
+        android:name="com.example.billkmotolinkltd.ui.dailyreports.DailyreportsFragment"
+        android:label="@string/menu_dailyreports"
+        tools:layout="@layout/fragment_dailyreports" />
+    <fragment
+        android:id="@+id/nav_weeklyreports"
+        android:name="com.example.billkmotolinkltd.ui.weeklyreports.WeeklyreportsFragment"
+        android:label="@string/menu_weeklyreports"
+        tools:layout="@layout/fragment_weeklyreports" />
+    <fragment
+        android:id="@+id/nav_data"
+        android:name="com.example.billkmotolinkltd.ui.data.DataFragment"
+        android:label="@string/menu_data"
+        tools:layout="@layout/fragment_data" />
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.example.billkmotolinkltd.ui.settings.SettingsFragment"
+        android:label="@string/menu_settings"
+        tools:layout="@layout/fragment_settings" />
+    <fragment
+        android:id="@+id/nav_logout"
+        android:name="com.example.billkmotolinkltd.ui.logout.LogoutFragment"
+        android:label="@string/menu_logout"
+        tools:layout="@layout/fragment_logout" />
+    <fragment
+        android:id="@+id/nav_login"
+        android:name="com.example.billkmotolinkltd.ui.login.LoginFragment"
+        android:label="@string/menu_login"
+        tools:layout="@layout/fragment_login" />
+    <fragment
+        android:id="@+id/nav_loading"
+        android:name="com.example.billkmotolinkltd.ui.loading.LoadingFragment"
+        android:label="Loading"
+        tools:layout="@layout/fragment_loading" />
+
+</navigation>

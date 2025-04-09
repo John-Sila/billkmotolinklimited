@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.home.HomeFragment">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/text_hr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/write_a_new_budget"
+                android:textSize="25sp"
+                android:textColor="@android:color/holo_blue_dark"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/budgetDeclined"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/your_previous_budget_was_declined"
+                android:textSize="16sp"
+                android:layout_gravity="start"
+                android:visibility="gone"
+                android:layout_marginTop="20dp"
+                android:textColor="@android:color/holo_red_dark"
+                android:textStyle="bold"/>
+
+
+            <!--            hr budget-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="20dp"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:contentDescription="@string/money_image"
+                    android:src="@drawable/view"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:id="@+id/text1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/add_expenses"
+                    android:textSize="18sp"
+                    android:textStyle="bold"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:id="@+id/expenseContainer">
+
+
+
+                    <!-- Buttons for adding and removing expense sections -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center">
+
+                        <Button
+                            android:id="@+id/btnAddExpense"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="7.5dp"
+                            android:text="@string/plus" />
+
+                        <Button
+                            android:id="@+id/btnRemoveExpense"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="7.5dp"
+                            android:text="@string/minus" />
+
+                    </LinearLayout>
+
+                    <!-- Total cost display -->
+                    <TextView
+                        android:id="@+id/textTotalCost"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/total_ksh_0"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/holo_blue_dark"
+                        android:gravity="end"
+                        android:layout_marginTop="8dp"/>
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/hrProgressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_gravity="center"/>
+
+            <Button
+                android:id="@+id/btnSubmit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/submit"
+                android:backgroundTint="@android:color/holo_green_dark"
+                android:textColor="@android:color/white"
+                android:padding="12dp"
+                android:visibility="gone"
+                android:layout_marginTop="12dp"/>
+
+            <Button
+                android:id="@+id/btnCantSubmit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/last_budget_still_pending"
+                android:backgroundTint="@android:color/holo_red_dark"
+                android:textColor="@android:color/white"
+                android:padding="12dp"
+                android:visibility="gone"
+                android:enabled="false"
+                android:layout_marginTop="12dp"/>
+            <Button
+                android:id="@+id/approvedUnDisbursed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/undisbursed_funds_for_previous_budget"
+                android:backgroundTint="@android:color/holo_orange_dark"
+                android:textColor="@android:color/white"
+                android:padding="12dp"
+                android:enabled="false"
+                android:visibility="gone"
+                android:layout_marginTop="12dp"/>
+            <!--paused operations 1-->
+            <Button
+                android:id="@+id/btnOperationsPaused"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/company_operations_are_paused"
+                android:visibility="gone"
+                android:backgroundTint="@android:color/holo_red_dark"
+                android:textColor="@android:color/white"
+                android:padding="12dp"
+                android:enabled="false"
+                android:layout_marginTop="12dp"/>
+
+            <!-- Total cost display -->
+            <TextView
+                android:id="@+id/contactAccounts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/check_with_accounts"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                android:textColor="@android:color/holo_orange_dark"
+                android:gravity="center"
+                android:layout_marginTop="8dp"/>
+            <TextView
+                android:id="@+id/contactAdmin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/check_with_an_administrator"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                android:textColor="@android:color/holo_red_dark"
+                android:gravity="center"
+                android:layout_marginTop="8dp"/>
+
+        </LinearLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,560 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.settings.SettingsFragment">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
+
+
+            <!--profile-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/malePImage"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:contentDescription="@string/money_image"
+                    android:src="@drawable/male"
+                    android:visibility="gone"
+                    android:scaleType="centerCrop"
+                    android:background="@drawable/circle_bg"
+                    android:layout_marginEnd="8dp" />
+                <ImageView
+                    android:id="@+id/femalePImage"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:contentDescription="@string/money_image"
+                    android:src="@drawable/female"
+                    android:visibility="gone"
+                    android:scaleType="centerCrop"
+                    android:background="@drawable/circle_bg"
+                    android:layout_marginEnd="8dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="5dp"
+                    android:gravity="start">
+                    <TextView
+                        android:id="@+id/usernameTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="18sp"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/emailTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="18sp"
+                        android:layout_marginEnd="15dp"/>
+                    <TextView
+                        android:id="@+id/phoneTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="18sp"
+                        android:layout_marginEnd="15dp"/>
+                    <TextView
+                        android:id="@+id/rankTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textColor="@android:color/holo_green_dark"
+                        android:textSize="18sp"
+                        android:textStyle="italic"
+                        android:layout_marginEnd="15dp"/>
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!--actions-->
+            <LinearLayout
+                android:id="@+id/actionsLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="20dp"
+                android:visibility="gone"
+                android:gravity="start">
+
+                <ImageView
+                    android:id="@+id/keyImage"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:contentDescription="@string/money_image"
+                    android:src="@drawable/key"
+                    android:scaleType="centerCrop"
+                    android:background="@drawable/circle_bg"
+                    android:layout_marginEnd="8dp" />
+                <TextView
+                    android:id="@+id/actions"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/actions"
+                    android:textSize="20sp"
+                    android:textColor="@android:color/holo_blue_dark"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+<!--        username div-->
+            <LinearLayout
+                android:id="@+id/newUserNameLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="20dp"
+                android:visibility="gone"
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/userNameImage"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:contentDescription="@string/money_image"
+                    android:src="@drawable/address"
+                    android:scaleType="centerCrop"
+                    android:background="@drawable/circle_bg"
+                    android:layout_marginEnd="8dp" />
+                <EditText
+                    android:id="@+id/inputNewUsername"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autofillHints=""
+                    android:hint="@string/enter_new_username"
+                    android:inputType="textCapWords"
+                    android:padding="16dp"
+                    android:layout_marginStart="10dp"
+                    android:textColor="@color/gray"
+                    android:background="@drawable/rounded_inputs" />
+
+
+            </LinearLayout>
+
+            <!-- change username -->
+            <Button
+                android:id="@+id/btnChangeUsername"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/change_username"
+                android:backgroundTint="@android:color/holo_blue_dark"
+                android:textColor="@android:color/white"
+                android:padding="12dp"
+                android:visibility="gone"
+                android:layout_marginTop="12dp"/>
+
+            <!--password modal-->
+            <LinearLayout
+                android:id="@+id/changePasswordsModal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginStart="5dp"
+                android:gravity="start">
+
+
+                <!--old pw-->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="20dp"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:id="@+id/oldPwImage"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:contentDescription="@string/money_image"
+                        android:src="@drawable/secure"
+                        android:scaleType="centerCrop"
+                        android:background="@drawable/circle_bg"
+                        android:layout_marginEnd="8dp" />
+                    <EditText
+                        android:id="@+id/oldPwInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:autofillHints=""
+                        android:hint="@string/old_password"
+                        android:inputType="text"
+                        android:padding="16dp"
+                        android:layout_marginEnd="10dp"
+                        android:textColor="@color/gray"
+                        android:background="@drawable/rounded_inputs" />
+
+                </LinearLayout>
+
+                <!--                new pw-->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="20dp"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:id="@+id/newPwImage"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:contentDescription="@string/money_image"
+                        android:src="@drawable/secure"
+                        android:scaleType="centerCrop"
+                        android:background="@drawable/circle_bg"
+                        android:layout_marginEnd="8dp" />
+                    <EditText
+                        android:id="@+id/newPwInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:autofillHints=""
+                        android:hint="@string/new_password"
+                        android:inputType="text"
+                        android:padding="16dp"
+                        android:layout_marginEnd="10dp"
+                        android:textColor="@color/gray"
+                        android:background="@drawable/rounded_inputs" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- change password -->
+            <Button
+                android:id="@+id/btnChangePassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/change_password"
+                android:backgroundTint="@android:color/holo_orange_dark"
+                android:textColor="@android:color/white"
+                android:padding="12dp"
+                android:visibility="gone"
+                android:layout_marginTop="12dp"/>
+
+            <ProgressBar
+                android:id="@+id/mainProgressBar"
+                android:visibility="visible"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"/>
+
+            <!--company income-->
+            <LinearLayout
+                android:id="@+id/companyIncomeLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="20dp"
+                android:visibility="gone"
+                android:gravity="start">
+
+    <!--            actual income text-->
+                <LinearLayout
+                    android:id="@+id/companyIncome"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="20dp"
+                    android:visibility="visible"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:id="@+id/incomeImage"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:contentDescription="@string/money_image"
+                        android:src="@drawable/wallet"
+                        android:scaleType="centerCrop"
+                        android:background="@drawable/circle_bg"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:id="@+id/incomeText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/company_income"
+                        android:textSize="18sp"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/incomeValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/zero_amount"
+                        android:layout_marginStart="10dp"
+                        android:textSize="22sp"
+                        android:textStyle="bold"/>
+
+                </LinearLayout>
+
+<!--                variables for income-->
+                <LinearLayout
+                    android:id="@+id/companyIncomeVariables"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="20dp"
+                    android:gravity="start">
+
+                    <TextView
+                        android:id="@+id/variablesText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/variables_directly"
+                        android:textSize="22sp"
+                        android:textColor="@android:color/holo_orange_dark"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/variable1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/income_approved_from_riders"
+                        android:textSize="18sp"/>
+                    <TextView
+                        android:id="@+id/variable2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/human_resource_budgets"
+                        android:textSize="18sp"/>
+                    <TextView
+                        android:id="@+id/variable3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/ploughed_back"
+                        android:textSize="18sp"/>
+                    <TextView
+                        android:id="@+id/variable4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/direct_withdrawals"
+                        android:textSize="18sp"/>
+
+                </LinearLayout>
+
+
+
+            </LinearLayout>
+
+
+
+<!--            ceo stuff-->
+            <LinearLayout
+                android:id="@+id/ceoDiv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginTop="15dp"
+                android:gravity="center">
+
+
+<!--                // withdrawal-->
+                <LinearLayout
+                    android:id="@+id/withdrawalLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="20dp"
+                    android:visibility="gone"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:id="@+id/withdrawalImage"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:contentDescription="@string/money_image"
+                        android:src="@drawable/minus"
+                        android:scaleType="centerCrop"
+                        android:background="@drawable/circle_bg"
+                        android:layout_marginEnd="8dp" />
+                    <EditText
+                        android:id="@+id/withdrawalInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:autofillHints=""
+                        android:hint="@string/amount"
+                        android:inputType="numberDecimal"
+                        android:padding="16dp"
+                        android:layout_marginStart="10dp"
+                        android:textColor="@color/gray"
+                        android:background="@drawable/rounded_inputs" />
+
+
+                </LinearLayout>
+                <ProgressBar
+                    android:id="@+id/progressBar3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layout_gravity="center"/>
+                <Button
+                    android:id="@+id/btnWithdrawCompanyMoney"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/record_withdraw_from_company_to_personal"
+                    android:backgroundTint="@android:color/holo_orange_dark"
+                    android:textColor="@android:color/white"
+                    android:padding="12dp"
+                    android:layout_marginTop="12dp"/>
+
+
+
+<!--                add income-->
+                <LinearLayout
+                    android:id="@+id/addingLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="20dp"
+                    android:visibility="gone"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:id="@+id/addingImage"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:contentDescription="@string/money_image"
+                        android:src="@drawable/plus"
+                        android:scaleType="centerCrop"
+                        android:background="@drawable/circle_bg"
+                        android:layout_marginEnd="8dp" />
+                    <EditText
+                        android:id="@+id/addInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:autofillHints=""
+                        android:hint="@string/amount"
+                        android:inputType="numberDecimal"
+                        android:padding="16dp"
+                        android:layout_marginStart="10dp"
+                        android:textColor="@color/gray"
+                        android:background="@drawable/rounded_inputs" />
+
+
+                </LinearLayout>
+                <ProgressBar
+                    android:id="@+id/progressBar4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layout_gravity="center"/>
+                <Button
+                    android:id="@+id/btnAddCompanyMoney"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/add_to_company_account"
+                    android:backgroundTint="@android:color/holo_green_dark"
+                    android:textColor="@android:color/white"
+                    android:padding="12dp"
+                    android:layout_marginTop="12dp"/>
+
+
+<!--                commission-->
+                <LinearLayout
+                    android:id="@+id/commissionCLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="20dp"
+                    android:visibility="gone"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:id="@+id/commissionImage"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:contentDescription="@string/money_image"
+                        android:src="@drawable/calc"
+                        android:scaleType="centerCrop"
+                        android:background="@drawable/circle_bg"
+                        android:layout_marginEnd="8dp" />
+                    <EditText
+                        android:id="@+id/commissionInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:autofillHints=""
+                        android:hint="@string/percentage"
+                        android:inputType="numberDecimal"
+                        android:padding="16dp"
+                        android:layout_marginStart="10dp"
+                        android:textColor="@color/gray"
+                        android:background="@drawable/rounded_inputs" />
+
+
+                </LinearLayout>
+                <ProgressBar
+                    android:id="@+id/cProgressBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layout_gravity="center"/>
+                <Button
+                    android:id="@+id/btnChangeCConstant"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/change_commission_constant"
+                    android:backgroundTint="@android:color/holo_blue_dark"
+                    android:textColor="@android:color/white"
+                    android:padding="12dp"
+                    android:layout_marginTop="12dp"/>
+
+
+                <ProgressBar
+                    android:id="@+id/progressBar5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layout_gravity="center"/>
+<!--                paused operations-->
+                <Button
+                    android:id="@+id/btnPauseOperations"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pause_operations"
+                    android:backgroundTint="@android:color/holo_red_dark"
+                    android:textColor="@android:color/white"
+                    android:visibility="gone"
+                    android:padding="12dp"
+                    android:layout_marginTop="12dp"/>
+
+
+                <!--                continue operations-->
+                <Button
+                    android:id="@+id/btnContinueOperations"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/continue_operations"
+                    android:backgroundTint="@android:color/holo_green_dark"
+                    android:textColor="@android:color/white"
+                    android:visibility="gone"
+                    android:padding="12dp"
+                    android:layout_marginTop="12dp"/>
+
+
+
+
+            </LinearLayout>
+
+
+
+
+
+
+
+        </LinearLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

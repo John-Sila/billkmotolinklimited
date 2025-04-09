@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "930252947055",
+    "project_id": "billkmotolinkltd",
+    "storage_bucket": "billkmotolinkltd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:930252947055:android:8c84131872658007b6179a",
+        "android_client_info": {
+          "package_name": "com.example.billkmotolinkltd"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJmpFHoj3zxTGm7cMtypdQm_UIsIjEivw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

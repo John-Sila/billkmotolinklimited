@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.bikes.BikesFragment">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/text_users"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_a_new_bike"
+                android:textSize="25sp"
+                android:textColor="@android:color/holo_blue_dark"
+                android:textStyle="bold"/>
+
+
+            <!--            plate number-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="20dp"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:contentDescription="@string/plate_number"
+                    android:src="@drawable/view"
+                    android:layout_marginEnd="8dp"/>
+
+                <TextView
+                    android:id="@+id/text1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/plate_number"
+                    android:textSize="18sp"
+                    android:layout_marginEnd="15dp"
+                    android:textStyle="bold"/>
+
+                <!-- plate Input -->
+                <EditText
+                    android:id="@+id/inputPlateNumber"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autofillHints=""
+                    android:hint="@string/kdaa_123f"
+                    android:inputType="textCapCharacters"
+                    android:padding="16dp"
+                    android:textColor="@color/gray"
+                    android:background="@drawable/rounded_inputs" />
+
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/progressBar1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:padding="12dp"
+                android:layout_marginTop="12dp"
+                android:layout_gravity="center"/>
+
+
+            <!-- Submit Button -->
+            <Button
+                android:id="@+id/btnAddBike"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/add_bike"
+                android:backgroundTint="@android:color/holo_blue_dark"
+                android:textColor="@android:color/white"
+                android:padding="12dp"
+                android:visibility="gone"
+                android:layout_marginTop="12dp"/>
+
+            <!--paused operations 1-->
+            <Button
+                android:id="@+id/btnOperationsPaused1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/company_operations_are_paused"
+                android:visibility="gone"
+                android:backgroundTint="@android:color/holo_red_dark"
+                android:textColor="@android:color/white"
+                android:padding="12dp"
+                android:enabled="false"
+                android:layout_marginTop="12dp"/>
+
+            <!--            EXISTING BIKES-->
+            <TextView
+                android:id="@+id/text_manage_existing_users"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/manage_existing_bikes"
+                android:textSize="25sp"
+                android:layout_marginTop="20dp"
+                android:textColor="@android:color/holo_blue_dark"
+                android:textStyle="bold"/>
+
+            <!--            bike to manage-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="15dp"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/text2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/select_bike"
+                    android:textSize="18sp"
+                    android:layout_marginEnd="15dp"
+                    android:textColor="@android:color/holo_blue_dark"
+                    android:textStyle="bold"/>
+                <Spinner
+                    android:id="@+id/bikeToManage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+            <!-- Submit Button -->
+            <ProgressBar
+                android:id="@+id/progressBar2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:padding="12dp"
+                android:layout_marginTop="12dp"
+                android:layout_gravity="center"/>
+
+            <Button
+                android:id="@+id/btnDeleteBike"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/delete_bike"
+                android:backgroundTint="@android:color/holo_red_dark"
+                android:textColor="@android:color/white"
+                android:padding="12dp"
+                android:visibility="gone"
+                android:layout_marginTop="12dp"/>
+
+            <Button
+                android:id="@+id/btnOperationsPaused2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/company_operations_are_paused"
+                android:visibility="gone"
+                android:backgroundTint="@android:color/holo_red_dark"
+                android:textColor="@android:color/white"
+                android:padding="12dp"
+                android:enabled="false"
+                android:layout_marginTop="12dp"/>
+
+        </LinearLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>
