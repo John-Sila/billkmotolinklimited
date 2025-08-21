@@ -1,0 +1,576 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ProgressBar
+                android:id="@+id/ClockInsProgressBar"
+                android:layout_width="wrap_content"
+                android:visibility="gone"
+                android:layout_marginTop="15dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"/>
+
+            <!--drop batteries manually-->
+            <Button
+                android:id="@+id/btnManualBatteryDrop"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/manually_drop_batteries"
+                android:visibility="gone"
+                android:backgroundTint="@android:color/holo_red_dark"
+                android:padding="12dp"
+                android:layout_marginTop="12dp"/>
+
+            <!--paused operations 1-->
+            <Button
+                android:id="@+id/btnOperationsPaused"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/company_operations_are_paused"
+                android:visibility="gone"
+                android:backgroundTint="@android:color/holo_red_dark"
+                android:padding="12dp"
+                android:enabled="false"
+                android:layout_marginTop="12dp"/>
+
+            <ProgressBar
+                android:id="@+id/clockInsProgressBar"
+                android:layout_width="wrap_content"
+                android:visibility="gone"
+                android:layout_marginTop="15dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="20dp"
+                android:paddingStart="30dp"
+                android:paddingEnd="30dp"
+                android:layout_marginBottom="30dp"
+                android:gravity="center">
+
+                <AnalogClock
+                    android:id="@+id/analogClock"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center" />
+
+            </LinearLayout>
+
+            <!--RIDERS-->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/forRiders"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:orientation="vertical"
+                android:padding="15dp"
+                android:visibility="visible"
+                android:layout_marginBottom="20dp"
+                android:gravity="center"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="6dp">
+
+                <!--clocking in-->
+                <LinearLayout
+                    android:id="@+id/clockInDiv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:padding="20dp"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="20sp"
+                        android:layout_marginBottom="15dp"
+                        android:textColor="@android:color/holo_green_dark"
+                        android:text="@string/clock_in"
+                        android:layout_gravity="start"
+                        android:textStyle="bold"/>
+
+                    <TableLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:padding="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textSize="18sp"
+                                android:textColor="@android:color/holo_orange_dark"
+                                android:text="@string/bike"
+                                android:layout_gravity="start"
+                                android:textStyle="bold"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textSize="18sp"
+                                android:textColor="@android:color/holo_orange_dark"
+                                android:text="@string/battery_s"
+                                android:layout_gravity="start"
+                                android:textStyle="bold"/>
+
+                        </TableRow>
+                        <!--divider-->
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height=".2dp"
+                            android:layout_marginTop="2dp"
+                            android:layout_marginBottom="2dp"
+                            android:background="@drawable/row_divider"/>
+
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:padding="8dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="20dp"
+                                android:orientation="vertical">
+
+                                <Spinner
+                                    android:id="@+id/bikeToClockIn"
+                                    android:layout_width="170dp"
+                                    android:layout_height="wrap_content"/>
+
+                                <View
+                                    android:layout_width="match_parent"
+                                    android:layout_height=".5dp"
+                                    android:background="@android:color/holo_orange_dark" /> <!-- underline color -->
+
+                            </LinearLayout>
+
+
+
+                            <LinearLayout
+                                android:id="@+id/batteryCheckboxContainer"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"/>
+
+                        </TableRow>
+                    </TableLayout>
+
+                    <!--mileage-->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:contentDescription="@string/money_image"
+                            android:src="@drawable/distance"
+                            android:layout_marginEnd="8dp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Mileage (KMs)"
+                            android:textSize="18sp"
+                            android:layout_marginEnd="15dp"
+                            android:textStyle="bold"/>
+
+                        <!-- Gross Income Input -->
+                        <EditText
+                            android:id="@+id/inputMileage"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:autofillHints=""
+                            android:hint="0"
+                            android:inputType="numberDecimal"
+                            android:padding="16dp"
+                            android:textColor="@android:color/holo_blue_bright"
+                            android:background="@drawable/rounded_inputs" />
+
+                    </LinearLayout>
+
+                    <ProgressBar
+                        android:id="@+id/clockInPBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        android:padding="12dp"
+                        android:layout_gravity="center"/>
+                    <Button
+                        android:id="@+id/btnClockIn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/clock_in"
+                        android:backgroundTint="@android:color/holo_green_dark"
+                        android:padding="12dp"
+                        android:visibility="gone"
+                        android:layout_marginTop="12dp"/>
+                    <Button
+                        android:id="@+id/btnClockedOut"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="A record in the system shows that you clocked out today."
+                        android:backgroundTint="@android:color/holo_red_light"
+                        android:padding="12dp"
+                        android:visibility="gone"
+                        android:layout_marginTop="12dp"/>
+
+                    <Button
+                        android:id="@+id/btnNoWorkingOnSunday"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/you_are_not_allowed_to_clock_out_today"
+                        android:backgroundTint="@android:color/holo_red_light"
+                        android:padding="12dp"
+                        android:visibility="gone"
+                        android:layout_marginTop="12dp"/>
+
+                    <TextView
+                        android:id="@+id/youCantClockIn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/you_cannot_clock_in"
+                        android:textSize="18sp"
+                        android:textColor="@android:color/holo_red_light"
+                        android:padding="16dp"
+                        android:textStyle="italic"
+                        android:visibility="gone"
+                        android:gravity="center"/>
+                </LinearLayout>
+
+                <!--this is a user who's clocked in-->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/clockedInDiv"
+                    android:visibility="gone"
+                    android:orientation="vertical">
+
+
+                    <!--battery swap-->
+                    <LinearLayout
+                        android:id="@+id/batterySwapDiv"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        android:gravity="center">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="20sp"
+                            android:textColor="@android:color/holo_green_dark"
+                            android:text="@string/swap_batteries"
+                            android:layout_margin="15dp"
+                            android:layout_gravity="start"
+                            android:textStyle="bold"/>
+
+                        <TableLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <TableRow
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:gravity="start"
+                                android:padding="8dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="18sp"
+                                    android:textColor="@android:color/holo_orange_dark"
+                                    android:text="@string/offload"
+                                    android:layout_marginEnd="20dp"
+                                    android:gravity="center"
+                                    android:layout_gravity="center"
+                                    android:textStyle="bold"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="18sp"
+                                    android:textColor="@android:color/holo_orange_dark"
+                                    android:text="@string/load"
+                                    android:layout_gravity="center"
+                                    android:gravity="center"
+                                    android:textStyle="bold"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="18sp"
+                                    android:layout_marginStart="40dp"
+                                    android:textColor="@android:color/holo_orange_dark"
+                                    android:text="@string/location"
+                                    android:layout_gravity="center"
+                                    android:textStyle="bold"/>
+
+                            </TableRow>
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height=".2dp"
+                                android:layout_marginTop="2dp"
+                                android:layout_marginBottom="2dp"
+                                android:background="@drawable/row_divider"/>
+
+                            <TableRow
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:gravity="center"
+                                android:padding="0dp">
+
+                                <LinearLayout
+                                    android:id="@+id/batteriesToOffloadCheckboxContainer"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical"/>
+
+                                <TextView
+                                    android:id="@+id/noBatteriesToSwap"
+                                    android:layout_width="wrap_content"
+                                    android:text="@string/dashes"
+                                    android:layout_gravity="center"
+                                    android:gravity="center"
+                                    android:visibility="gone"
+                                    android:layout_height="match_parent"/>
+
+                                <LinearLayout
+                                    android:id="@+id/batteriesToOnLoadCheckboxContainer"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical">
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:layout_width="180dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginEnd="20dp"
+                                    android:orientation="vertical">
+
+                                    <Spinner
+                                        android:id="@+id/batterySwapDestination"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"/>
+                                    <View
+                                        android:layout_width="match_parent"
+                                        android:layout_height=".5dp"
+                                        android:background="@android:color/holo_orange_dark" /> <!-- underline color -->
+
+                                </LinearLayout>
+                            </TableRow>
+
+                        </TableLayout>
+
+                        <ProgressBar
+                            android:id="@+id/batterySwapPBar"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            android:padding="12dp"
+                            android:layout_gravity="center"/>
+                        <Button
+                            android:id="@+id/btnSwapBatteries"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/swap_batteries"
+                            android:backgroundTint="@android:color/holo_orange_dark"
+                            android:padding="12dp"
+                            android:layout_margin="20dp"/>
+                    </LinearLayout>
+
+                    <!--charge battery-->
+                    <LinearLayout
+                        android:id="@+id/batteryChargeDiv"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        android:orientation="vertical">
+
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="8dp"
+                            android:orientation="vertical"
+                            android:padding="15dp"
+                            android:layout_marginBottom="20dp"
+                            android:gravity="center"
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="6dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:gravity="center">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="20sp"
+                                    android:textColor="@android:color/holo_green_dark"
+                                    android:text="@string/charge_batteries"
+                                    android:layout_margin="15dp"
+                                    android:layout_gravity="start"
+                                    android:textStyle="bold"/>
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+
+                                    android:orientation="horizontal">
+
+                                    <LinearLayout
+                                        android:id="@+id/batteriesToCharge"
+                                        android:layout_width="wrap_content"
+                                        android:layout_marginEnd="25dp"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="vertical"/>
+
+                                    <LinearLayout
+                                        android:layout_width="200dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginEnd="20dp"
+                                        android:orientation="vertical">
+
+                                        <Spinner
+                                            android:id="@+id/batteryChargeDestination"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"/>
+                                        <View
+                                            android:layout_width="match_parent"
+                                            android:layout_height=".5dp"
+                                            android:background="@android:color/holo_orange_dark" /> <!-- underline color -->
+                                    </LinearLayout>
+
+                                </LinearLayout>
+
+                                <ProgressBar
+                                    android:id="@+id/batteryChargePBar"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:visibility="gone"
+                                    android:padding="12dp"
+                                    android:layout_gravity="center"/>
+                                <Button
+                                    android:id="@+id/btnChargeBatteries"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/mark_battery_as_charging"
+                                    android:backgroundTint="@android:color/holo_orange_dark"
+                                    android:padding="12dp"
+                                    android:layout_margin="20dp"/>
+                            </LinearLayout>
+                        </androidx.cardview.widget.CardView>
+
+                    </LinearLayout>
+
+                    <!--reload battery-->
+                    <LinearLayout
+                        android:id="@+id/batteryReloadDiv"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        android:orientation="vertical">
+
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="8dp"
+                            android:orientation="vertical"
+                            android:padding="15dp"
+                            android:layout_marginBottom="20dp"
+                            android:gravity="center"
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="6dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:gravity="center">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="20sp"
+                                    android:textColor="@android:color/holo_green_dark"
+                                    android:text="@string/reload_charging_batteries"
+                                    android:layout_margin="15dp"
+                                    android:layout_gravity="start"
+                                    android:textStyle="bold"/>
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal">
+
+                                    <LinearLayout
+                                        android:id="@+id/batteriesToReload"
+                                        android:layout_width="wrap_content"
+                                        android:layout_marginEnd="25dp"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="vertical"/>
+
+                                </LinearLayout>
+
+                                <ProgressBar
+                                    android:id="@+id/batteryReloadPBar"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:visibility="gone"
+                                    android:padding="12dp"
+                                    android:layout_gravity="center"/>
+                                <Button
+                                    android:id="@+id/btnReloadBatteries"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="Load"
+                                    android:backgroundTint="@android:color/holo_orange_dark"
+                                    android:padding="12dp"
+                                    android:layout_margin="20dp"/>
+                            </LinearLayout>
+                        </androidx.cardview.widget.CardView>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+
+            </androidx.cardview.widget.CardView>
+
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

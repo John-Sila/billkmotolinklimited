@@ -1,6 +1,7 @@
 package com.example.billkmotolinkltd.ui.reports
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -23,10 +24,16 @@ import android.location.Location
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
+import android.util.Log
+import androidx.lifecycle.lifecycleScope
 import com.example.billkmotolinkltd.R
+import com.example.billkmotolinkltd.ui.Utility
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FieldValue
+import kotlinx.coroutines.launch
 
 class ReportsFragment : Fragment() {
 
@@ -51,13 +58,12 @@ class ReportsFragment : Fragment() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
 
         val spinner: Spinner = binding.reportType
-        val spinner2: Spinner = binding.involvedBike
         val layoutOption1 = binding.layoutOption1
         val layoutOption2 = binding.layoutOption2
         val layoutOption3 = binding.layoutOption3
 
         // Define options
-        val options = arrayOf("Mechanical Breakdown", "Police Arrest", "Traffic Accident")
+        val options = arrayOf("Mechanical Breakdown", "Police Arrest", "Accident")
 
         // Create an adapter
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, options)
@@ -72,6 +78,7 @@ class ReportsFragment : Fragment() {
                 layoutOption1.visibility = View.GONE
                 layoutOption2.visibility = View.GONE
                 layoutOption3.visibility = View.GONE
+                binding.inputOtherFormOfDescription.visibility = View.GONE
 
                 // Show the selected layout
                 when (position) {
@@ -92,64 +99,106 @@ class ReportsFragment : Fragment() {
 
         loadBikes()
 
+        val radioGroup1 = view.findViewById<RadioGroup>(R.id.layoutOption1)
+        val radioGroup2 = view.findViewById<RadioGroup>(R.id.layoutOption2)
+        val radioGroup3 = view.findViewById<RadioGroup>(R.id.layoutOption3)
+
+        radioGroup1.setOnCheckedChangeListener { group, checkedId ->
+            if (checkedId == R.id.mb5 && _binding != null && isAdded) {
+                binding.inputOtherFormOfDescription.visibility = View.VISIBLE
+            } else
+                binding.inputOtherFormOfDescription.visibility = View.GONE
+        }
+        radioGroup2.setOnCheckedChangeListener { group, checkedId ->
+            if (checkedId == R.id.pa9 && _binding != null && isAdded) {
+                binding.inputOtherFormOfDescription.visibility = View.VISIBLE
+            } else
+                binding.inputOtherFormOfDescription.visibility = View.GONE
+        }
+        radioGroup3.setOnCheckedChangeListener { group, checkedId ->
+            if (checkedId == R.id.ra5 && _binding != null && isAdded) {
+                binding.inputOtherFormOfDescription.visibility = View.VISIBLE
+            } else
+                binding.inputOtherFormOfDescription.visibility = View.GONE
+        }
+
 
         binding.btnSubmit.setOnClickListener {
-            val reportType = binding.reportType.selectedItem?.toString()?.trim() ?: ""
-            val involvedBike = binding.involvedBike.selectedItem?.toString()?.trim() ?: ""
-            val reportDescription = getCheckedRadioValue()
-
-            if (reportType.isEmpty() || reportDescription.isEmpty() || involvedBike.isEmpty()) {
-                Toast.makeText(requireContext(), "All 3 values are required", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
-
-            // Custom title with red color
-            val title = SpannableString("Confirm Submission")
-            title.setSpan(ForegroundColorSpan(Color.GREEN), 0, title.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-
-            // Custom message with black color
-            val message = SpannableString("Send report?")
-            message.setSpan(ForegroundColorSpan(Color.GRAY), 0, message.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-
-            alertDialog.setTitle(title)
-            alertDialog.setMessage(message)
-            alertDialog.setIcon(R.drawable.success)
-
-            alertDialog.setPositiveButton("Yes") { _, _ ->
-                submitReport()
-            }
-
-            alertDialog.setNegativeButton("No") { dialog, _ ->
-                dialog.dismiss() // Dismiss dialog if user cancels
-            }
-
-//            alertDialog.setNeutralButton("More Info") { _, _ ->
-//                Toast.makeText(requireContext(), "Deleting all reports is permanent.", Toast.LENGTH_SHORT).show()
-//            }
-
-            val dialog = alertDialog.create()
-            dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
-
-            dialog.show()
-
+            validateAndConfirmSubmission()
         }
+
+    }
+    private fun validateAndConfirmSubmission() {
+        // Validate inputs first
+        val reportType = binding.reportType.selectedItem?.toString()?.trim().orEmpty()
+        val involvedBike = binding.involvedBike.selectedItem?.toString()?.trim().orEmpty()
+        val reportDescription = getCheckedRadioValue().trim()
+
+        if (reportType.isEmpty() || reportDescription.isEmpty() || involvedBike.isEmpty()) {
+            showToast("All 3 values are required")
+            return
+        }
+
+        showConfirmationDialog(reportType, involvedBike, reportDescription)
+    }
+
+    private fun showConfirmationDialog(reportType: String, bike: String, description: String) {
+        AlertDialog.Builder(requireContext()).apply {
+            // Custom styled title
+            setTitle(createSpannable("Confirm Submission", Color.GREEN))
+
+            // Custom styled message
+            setMessage(createSpannable("Send report?", Color.GRAY))
+
+            setIcon(R.drawable.success)
+            setPositiveButton("Send") { _, _ -> submitReport() }
+            setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+
+            // Optional neutral button
+            // setNeutralButton("More Info") { _, _ ->
+            //     showToast("Deleting all reports is permanent.")
+            // }
+
+            create().apply {
+                window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                show()
+            }
+        }
+    }
+
+    private fun createSpannable(text: String, color: Int): SpannableString {
+        return SpannableString(text).apply {
+            setSpan(ForegroundColorSpan(color), 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
 
     private fun submitReport() {
         val reportType = binding.reportType.selectedItem?.toString()?.trim() ?: ""
         val involvedBike = binding.involvedBike.selectedItem?.toString()?.trim() ?: ""
-        val reportDescription = getCheckedRadioValue()
+        var reportDescription = getCheckedRadioValue()
 
-        if (reportType.isEmpty() || reportDescription.isEmpty() || involvedBike.isEmpty()) {
+        if (reportType.isEmpty() || reportDescription.isBlank() || involvedBike.isEmpty()) {
             Toast.makeText(requireContext(), "All 3 values are required", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val timestamp = System.currentTimeMillis()
-        val formattedTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(timestamp))
+        if (reportDescription == "Other") {
+            if (!isAdded || _binding == null) return
+            val description = binding.inputOtherFormOfDescription.text
+            if (description.isBlank() || description.length < 7) {
+                Toast.makeText(requireContext(), "Describe your report better.", Toast.LENGTH_SHORT).show()
+                return
+            } else reportDescription = description.toString()
+        }
+
+        if (!isAdded || _binding == null) return
+        binding.reportPBar.visibility = View.VISIBLE
+        binding.btnSubmit.visibility = View.GONE
 
         val currentUser = FirebaseAuth.getInstance().currentUser
         val userEmail = currentUser?.email ?: return
@@ -167,7 +216,7 @@ class ReportsFragment : Fragment() {
                             "reportType" to reportType,
                             "reportDescription" to reportDescription,
                             "involvedBike" to involvedBike,
-                            "time" to formattedTime,
+                            "time" to Timestamp.now(),
                             "location" to mapOf(
                                 "latitude" to latitude,
                                 "longitude" to longitude
@@ -178,18 +227,38 @@ class ReportsFragment : Fragment() {
                         db.collection("general").document("general_variables")
                             .update("reports", FieldValue.arrayUnion(reportData))
                             .addOnSuccessListener {
+                                if (!isAdded || _binding == null) return@addOnSuccessListener
+                                binding.reportPBar.visibility = View.GONE
+                                binding.btnSubmit.visibility = View.VISIBLE
+
+                                lifecycleScope.launch {
+                                    Utility.postTrace("Submitted a report on $reportType.")
+                                    val roles = listOf("Admin", "CEO", "Systems, IT")
+                                    Utility.notifyAdmins("$username just submitted a new $reportType report.", "Incidences & Accidents", roles)
+                                }
+
                                 Toast.makeText(requireContext(), "Report submitted successfully", Toast.LENGTH_SHORT).show()
                             }
                             .addOnFailureListener { e ->
+                                if (!isAdded || _binding == null) return@addOnFailureListener
+                                binding.reportPBar.visibility = View.GONE
+                                binding.btnSubmit.visibility = View.VISIBLE
                                 Toast.makeText(requireContext(), "Failed to submit report: ${e.message}", Toast.LENGTH_SHORT).show()
                             }
                     }
                 } else {
+                    if (!isAdded || _binding == null) return@addOnSuccessListener
+                    binding.reportPBar.visibility = View.GONE
+                    binding.btnSubmit.visibility = View.VISIBLE
                     Toast.makeText(requireContext(), "We couldn't get your username", Toast.LENGTH_SHORT).show()
                     return@addOnSuccessListener
                 }
             }
             .addOnFailureListener {
+                if (!isAdded || _binding == null) return@addOnFailureListener
+                binding.reportPBar.visibility = View.GONE
+                binding.btnSubmit.visibility = View.VISIBLE
+                Toast.makeText(requireContext(), "Something is not right. Contact an Administrator", Toast.LENGTH_LONG).show()
             }
     }
 
@@ -219,44 +288,121 @@ class ReportsFragment : Fragment() {
         }
     }
 
+
+    /*Get bike and company status*/
+
     private fun loadBikes() {
-        val db = FirebaseFirestore.getInstance()
-        val bikesRef = db.collection("general").document("general_variables")
+        if (!isAdded || _binding == null) return
 
-        bikesRef.get()
+        val currentUser = FirebaseAuth.getInstance().currentUser ?: run {
+            showToast("No user logged in")
+            return
+        }
+
+        // Load company status first (independent operation)
+        loadCompanyStatus()
+
+        // Load user-specific bike data
+        loadUserBikes(currentUser)
+    }
+
+    private fun loadCompanyStatus() {
+        FirebaseFirestore.getInstance()
+            .collection("general")
+            .document("general_variables")
+            .get()
             .addOnSuccessListener { document ->
-                if (!isAdded || _binding == null) return@addOnSuccessListener // Prevent crash
+                if (!isAdded || _binding == null) return@addOnSuccessListener
 
-                val bikesList = document.get("bikes") as? List<String> ?: emptyList()
+                when (document.getString("companyState") ?: "Unknown") {
+                    "Paused" -> {
+                        binding.btnOperationsPaused.visibility = View.VISIBLE
+                        binding.btnSubmit.visibility = View.GONE
+                    }
+                    "Continuing" -> {
+                        binding.btnOperationsPaused.visibility = View.GONE
+                        binding.btnSubmit.visibility = View.VISIBLE
+                    }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("CompanyStatus", "Failed to load company status", e)
+            }
+    }
 
-                if (bikesList.isEmpty()) {
-                    Toast.makeText(requireContext(), "No bikes found", Toast.LENGTH_SHORT).show()
+    private fun loadUserBikes(currentUser: FirebaseUser) {
+        FirebaseFirestore.getInstance()
+            .collection("users")
+            .whereEqualTo("email", currentUser.email)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val userDoc = querySnapshot.documents.firstOrNull() ?: run {
+                    showToast("User not found")
                     return@addOnSuccessListener
                 }
 
-                // Set up adapter
-                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, bikesList)
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                binding.involvedBike.adapter = adapter
+                val currentUserName = userDoc.getString("userName") ?: run {
+                    showToast("Invalid user data")
+                    return@addOnSuccessListener
+                }
+
+                loadAssignedBikes(currentUserName)
             }
             .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to load bikes: ${e.message}", Toast.LENGTH_SHORT).show()
+                showToast("Failed to fetch user: ${e.message}")
+                Log.e("UserData", "Failed to load user data", e)
             }
+    }
 
-        bikesRef.get().addOnSuccessListener { companyDoc ->
-            if (!isAdded || view == null || _binding == null) return@addOnSuccessListener // Prevent crash
+    private fun loadAssignedBikes(currentUserName: String) {
+        FirebaseFirestore.getInstance()
+            .collection("general")
+            .document("general_variables")
+            .get()
+            .addOnSuccessListener { document ->
+                if (!isAdded || _binding == null) return@addOnSuccessListener
 
-            val companyStatus = companyDoc.getString("companyState") ?: "Unknown"
-            if (companyStatus == "Paused") {
-                binding.btnOperationsPaused.visibility = View.VISIBLE
-                binding.btnSubmit.visibility = View.GONE
-            } else if (companyStatus == "Continuing") {
-                binding.btnOperationsPaused.visibility = View.GONE
-                binding.btnSubmit.visibility = View.VISIBLE
+                val batteriesMap = document.get("batteries") as? Map<String, Map<String, Any>> ?: emptyMap()
+                val bikesArray = batteriesMap.values
+                    .asSequence()  // Use sequence for lazy evaluation
+                    .filter { it["assignedRider"] == currentUserName }
+                    .mapNotNull { it["assignedBike"] as? String }
+                    .distinct()
+                    .toList()
+
+                if (bikesArray.isEmpty()) {
+                    showToast("You haven't clocked in with any bike", Toast.LENGTH_LONG)
+                    return@addOnSuccessListener
+                }
+
+                updateBikeSpinner(bikesArray)
             }
+            .addOnFailureListener { e ->
+                showToast("Failed to load batteries: ${e.message}")
+                Log.e("BatteryData", "Failed to load battery data", e)
+            }
+    }
+
+    private fun updateBikeSpinner(bikes: List<String>) {
+        val adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            bikes
+        ).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         }
 
+        binding.involvedBike.adapter = adapter
     }
+
+    private fun showToast(message: String, duration: Int = Toast.LENGTH_SHORT) {
+        if (isAdded && _binding != null) {
+            Toast.makeText(requireContext(), message, duration).show()
+        }
+    }
+
+    /*Bike and company status check ends here*/
+
 
     /**
      * Helper function to clear selected radio buttons in a given layout.

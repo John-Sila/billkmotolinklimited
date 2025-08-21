@@ -12,6 +12,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.OvershootInterpolator
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
@@ -25,11 +26,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.billkmotolinkltd.ui.User
 import com.example.billkmotolinkltd.ui.UsersAdapter
-import com.google.firebase.firestore.FieldValue
+import com.example.billkmotolinkltd.ui.Utility
+import com.example.billkmotolinkltd.ui.formatIncome
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.firestore.ktx.toObjects
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 class ApprovalsFragment : Fragment() {
 
@@ -38,10 +40,10 @@ class ApprovalsFragment : Fragment() {
     // This property is only valid between onCreateView and onDestroyView ofc.
     private val binding get() = _binding!!
 
-
     private lateinit var firestore: FirebaseFirestore
     private lateinit var recyclerView: RecyclerView
     private lateinit var usersAdapter: UsersAdapter
+    private var isTableVisible = true
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,7 +56,6 @@ class ApprovalsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        checkIfHrBudgetExists()
         binding.btnApproveBudget.setOnClickListener {
             val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
 
@@ -117,25 +118,35 @@ class ApprovalsFragment : Fragment() {
         // Initialize RecyclerView
         recyclerView = view.findViewById(R.id.recyclerViewUsers)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        usersAdapter = UsersAdapter()
+        usersAdapter = UsersAdapter(this)
         recyclerView.adapter = usersAdapter
 
         // Fetch users data
         fetchUsersData()
+        checkIfHrBudgetExists()
 
     }
 
-    private fun fetchUsersData() {
+    fun fetchUsersData() {
+        if (!isAdded || view == null) return
+        binding.approvalsProgressBar.visibility = View.VISIBLE
 
         val db = FirebaseFirestore.getInstance()
         val usersRef = db.collection("users")
         val query = usersRef
-//            .whereNotEqualTo("isDeleted", true)
             .orderBy("lastClockDate", Query.Direction.DESCENDING)
-        query
-            .get()
+
+        query.get()
             .addOnSuccessListener { documents ->
-                val usersList = documents.map { document ->
+                val usersList = documents.mapNotNull { document ->
+                    val isDeleted = document.getBoolean("isDeleted") == true
+                    val userRank = document.getString("userRank") ?: ""
+                    val thisEmail = document.getString("email") ?: ""
+
+                    val auth = FirebaseAuth.getInstance()
+                    val currentUserEmail = auth.currentUser?.email ?: return@addOnSuccessListener
+                    if (isDeleted || userRank == "CEO" || userRank == "Systems, IT" || thisEmail == currentUserEmail) return@mapNotNull null
+
                     User(
                         userName = document.getString("userName") ?: "",
                         email = document.getString("email") ?: "",
@@ -143,151 +154,189 @@ class ApprovalsFragment : Fragment() {
                         isWorkingOnSunday = document.getBoolean("isWorkingOnSunday") == true,
                         dailyTarget = document.getDouble("dailyTarget") ?: 0.0,
                         isActive = document.getBoolean("isActive") == true,
+                        isDeleted = false,
                         userRank = document.getString("userRank") ?: "",
                         currentInAppBalance = document.getDouble("currentInAppBalance") ?: 0.0,
                         sundayTarget = document.getDouble("sundayTarget") ?: 0.0
                     )
                 }
+
+                if (isAdded && view != null) {
+                    binding.approvalsProgressBar.visibility = View.GONE
+                }
+                if (!isAdded || view == null) return@addOnSuccessListener
+                if (usersList.isEmpty()) {
+                    binding.noUsers.visibility = View.VISIBLE
+                } else {
+                    binding.noUsers.visibility = View.GONE
+                }
                 usersAdapter.submitList(usersList)
+
             }
             .addOnFailureListener { exception ->
-                Log.e("FragmentApprovals", "Error fetching users data: ", exception)
+                Toast.makeText(requireContext(), "Failed to load users", Toast.LENGTH_SHORT).show()
+                if (!isAdded || view == null) return@addOnFailureListener
+                binding.approvalsProgressBar.visibility = View.GONE
             }
+    }
 
-
+    private fun slideDown(view: View) {
+        view.visibility = View.VISIBLE
+        view.alpha = 0f
+        view.translationY = -view.height.toFloat()
+        view.animate()
+            .translationY(0f)
+            .alpha(1f)
+            .setInterpolator(OvershootInterpolator())
+            .setDuration(500)
+            .start()
+    }
+    private fun slideUp(view: View) {
+        view.animate()
+            .translationY(-view.height.toFloat())
+            .alpha(0f)
+            .setDuration(300)
+            .withEndAction {
+                view.visibility = View.GONE
+                view.translationY = 0f // reset
+                view.alpha = 1f
+            }
+            .start()
     }
 
     private fun checkIfHrBudgetExists() {
         val db = FirebaseFirestore.getInstance()
         val docRef = db.collection("general").document("general_variables")
 
+        if (!isAdded || _binding == null) return
+
         docRef.get().addOnSuccessListener { document ->
             if (document.exists()) {
 
-                val budget = document.get("budget")
-                val budgetItems = document.get("budget.items")
-                if (!isAdded || _binding == null) return@addOnSuccessListener
-                binding.hrProgressBar.visibility = View.GONE
+                val budgetRaw = document.get("budget")
+                val budget = budgetRaw as? Map<*, *> ?: return@addOnSuccessListener
+                val budgetItems = budget["items"] as? List<*> ?: return@addOnSuccessListener
 
-                if (budgetItems != null) {
+                if (true) {
                     if (!isAdded || _binding == null) return@addOnSuccessListener
-                    Log.d("Firestore", "Budget exists: $budget")
-                    binding.budgetExists.visibility = View.VISIBLE
-                    binding.textHrUnavailable.visibility = View.GONE
+                    // Log.d("Firestore", "Budget exists: $budget")
 
-                    val budget = document.get("budget") as? Map<*, *>  // Retrieve `budget` as a Map
-                    val budgetStatus = budget?.get("budgetStatus") as? String
-                    val budgetCost = budget?.get("budgetCost") as? Double
-                    val items = budget?.get("items") as? List<Map<String, Any>>
+                    val budgetStatus = budget["budgetStatus"] as? String
+                    val budgetCost = budget["budgetCost"] as? Double
+                    val budgetHeading = budget["budgetHeading"] as? String ?: "No Heading Available"
+                    binding.budgetHeading.text = budgetHeading
 
-                    items?.forEach { itemMap ->
-                        val tableLayout = view?.findViewById<TableLayout>(R.id.tableLayout)
+                    binding.budgetToggleLayout.setOnClickListener {
+                        if (!isTableVisible) {
+                            slideDown(binding.tableLayout)
+                        } else {
+                            slideUp(binding.tableLayout)
+                        }
 
-                        // Clear existing rows except the header if needed
-                        tableLayout?.removeAllViews()
+                        isTableVisible = !isTableVisible
 
-                        // Optional: Add table header
-                        val headerRow = TableRow(context)
-                        val headerParams = TableRow.LayoutParams(
+                        val arrowRes = if (isTableVisible) {
+                            R.drawable.ic_arrow_up
+                        } else {
+                            R.drawable.ic_arrow_down
+                        }
+                        binding.arrowIcon.setImageResource(arrowRes)
+                    }
+
+                    val tableLayout = view?.findViewById<TableLayout>(R.id.tableLayout)
+                    tableLayout?.removeAllViews()
+
+                    val headerRow = TableRow(context).apply {
+                        layoutParams = TableRow.LayoutParams(
                             TableRow.LayoutParams.MATCH_PARENT,
                             TableRow.LayoutParams.WRAP_CONTENT
                         )
-                        headerRow.layoutParams = headerParams
+                    }
 
-                        val headerItem = TextView(context).apply {
-                            text = "Item"
-                            setPadding(8, 8, 8, 8)
-                            setTypeface(null, Typeface.BOLD)
-                            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f) // Larger text size
-                            setTextColor("#FFFF8800".toColorInt()) // Orange color
-                            gravity = Gravity.CENTER
+                    val headerItem = TextView(context).apply {
+                        text = "Item"
+                        setPadding(8, 8, 8, 8)
+                        setTypeface(null, Typeface.BOLD)
+                        setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+                        setTextColor("#FFFF8800".toColorInt())
+                        gravity = Gravity.CENTER
+                    }
+                    headerRow.addView(headerItem)
+
+                    val headerCost = TextView(context).apply {
+                        text = "Cost"
+                        setPadding(8, 8, 8, 8)
+                        setTypeface(null, Typeface.BOLD)
+                        setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+                        setTextColor("#FFFF8800".toColorInt())
+                        gravity = Gravity.CENTER
+                    }
+                    headerRow.addView(headerCost)
+
+                    tableLayout?.addView(headerRow)
+
+                    // Add item rows
+                    budgetItems.forEach { item ->
+                        val itemMap = item as? Map<*, *> ?: return@forEach
+
+                        val itemName = itemMap["name"] as? String ?: "Unknown Item"
+                        val itemCost = when (val cost = itemMap["cost"]) {
+                            is Number -> cost.toDouble()  // handles Long, Int, Double etc.
+                            else -> 0.0
                         }
-                        headerRow.addView(headerItem)
-
-                        val headerCost = TextView(context).apply {
-                            text = "Cost"
-                            setPadding(8, 8, 8, 8)
-                            setTypeface(null, Typeface.BOLD)
-                            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f) // Larger text size
-                            setTextColor("#FFFF8800".toColorInt()) // Orange color
-                            gravity = Gravity.CENTER
-                        }
-                        headerRow.addView(headerCost)
-
-
-                        tableLayout?.addView(headerRow)
-
-
-
-                        // Add rows dynamically
-                        items.forEach { itemMap ->
-                            val tableRow = TableRow(context)
-                            tableRow.layoutParams = TableRow.LayoutParams(
+                        val tableRow = TableRow(context).apply {
+                            layoutParams = TableRow.LayoutParams(
                                 TableRow.LayoutParams.MATCH_PARENT,
                                 TableRow.LayoutParams.WRAP_CONTENT
-                            )// Apply bottom border
-
-
-                            val itemName = itemMap["name"] as? String ?: "Unknown Item"
-                            val itemCost = itemMap["cost"] as? Double ?: 0.0
-
-                            val rowItem = TextView(context).apply {
-                                text = itemName
-                                setPadding(8, 8, 8, 8)
-                                gravity = Gravity.CENTER
-                            }
-                            tableRow.addView(rowItem)
-
-                            val rowCost = TextView(context).apply {
-                                text = "Ksh.${String.format(" %, .2f", itemCost)}"
-                                setPadding(8, 8, 8, 8)
-                                gravity = Gravity.CENTER
-                            }
-                            tableRow.addView(rowCost)
-                            tableLayout?.addView(tableRow)
+                            )
                         }
-
-
-
-
-
-//                        totals
-                        val tableRowForTotals = TableRow(context)
-                        tableRowForTotals.layoutParams = TableRow.LayoutParams(
-                            TableRow.LayoutParams.MATCH_PARENT,
-                            TableRow.LayoutParams.WRAP_CONTENT
-                        )// Apply bottom border
-
 
                         val rowItem = TextView(context).apply {
-                            text = "Total Cost"
+                            text = itemName
                             setPadding(8, 8, 8, 8)
                             gravity = Gravity.CENTER
-                            setTypeface(null, Typeface.BOLD)
                         }
-                        tableRowForTotals.addView(rowItem)
 
                         val rowCost = TextView(context).apply {
-                            text = "Ksh.${String.format(" % .2f", budgetCost)}"
+                            text = "${formatIncome(itemCost)}"
                             setPadding(8, 8, 8, 8)
-                            setTextColor(resources.getColor(android.R.color.holo_green_dark))
                             gravity = Gravity.CENTER
-                            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
-                        }
-                        tableRowForTotals.addView(rowCost)
-                        tableLayout?.addView(tableRowForTotals)
-
-                        if (budgetStatus == "Approved") {
-                            if (!isAdded || _binding == null) return@addOnSuccessListener
-                            binding.btnApproveBudget.visibility = View.GONE
-                            binding.btnDeclineBudget.visibility = View.GONE
-                            binding.btnBudgetApproved.visibility = View.VISIBLE
                         }
 
+                        tableRow.addView(rowItem)
+                        tableRow.addView(rowCost)
+                        tableLayout?.addView(tableRow)
+                    }
 
+                    // Add totals row
+                    val tableRowForTotals = TableRow(context).apply {
+                        layoutParams = TableRow.LayoutParams(
+                            TableRow.LayoutParams.MATCH_PARENT,
+                            TableRow.LayoutParams.WRAP_CONTENT
+                        )
+                    }
 
-                    } ?: Log.d("Firestore", "No items found in budget.")
+                    val totalLabel = TextView(context).apply {
+                        text = "Total Cost"
+                        setPadding(8, 8, 8, 8)
+                        gravity = Gravity.CENTER
+                        setTypeface(null, Typeface.BOLD)
+                    }
 
+                    val totalCost = TextView(context).apply {
+                        text = "${formatIncome(budgetCost ?: 0.0)}"
+                        setPadding(8, 8, 8, 8)
+                        setTextColor(resources.getColor(android.R.color.holo_green_dark))
+                        gravity = Gravity.CENTER
+                        setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+                    }
+
+                    tableRowForTotals.addView(totalLabel)
+                    tableRowForTotals.addView(totalCost)
+
+                    tableLayout?.addView(tableRowForTotals)
+
+                    checkUserRole(budgetStatus)
                 }
                 else {
                     Log.d("Firestore", "Budget does not exist.")
@@ -301,6 +350,51 @@ class ApprovalsFragment : Fragment() {
             }
         }.addOnFailureListener { exception ->
             Log.e("Firestore", "Error checking budget", exception)
+        }
+    }
+
+    private fun checkUserRole(budgetStatus: String?) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+
+        if (currentUser != null) {
+            val userId = currentUser.uid // Unique user ID
+            val userRef = FirebaseFirestore.getInstance().collection("users").document(userId)
+
+            userRef.get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        var rank = document.getString("userRank") ?: ""
+                        if (budgetStatus == "Approved") {
+                            binding.btnBudgetApproved.visibility = View.VISIBLE
+                        } else if (budgetStatus == "Declined") {
+                            binding.btnBudgetDeclined.visibility = View.VISIBLE
+                        } else if (budgetStatus == "Disbursed") {
+                            binding.btnBudgetDisbursed.visibility = View.VISIBLE
+                        } else if (budgetStatus == "Pending" && rank in arrayOf("Admin", "Systems, IT")) {
+                            binding.btnApproveBudget.visibility = View.VISIBLE
+                            binding.btnDeclineBudget.visibility = View.VISIBLE
+                        } else if (budgetStatus == "Pending" && rank in arrayOf("CEO")) {
+                            binding.btnBudgetPending.visibility = View.VISIBLE
+                        }
+
+                    } else {
+                        Log.e("UserInfo", "No user data found")
+                        activity?.runOnUiThread {
+                            Toast.makeText(requireContext(), "No user data found.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.e("UserInfo", "Error fetching user data: ${exception.message}")
+                    activity?.runOnUiThread {
+                        Toast.makeText(requireContext(), "Failed to fetch user data.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+        } else {
+            Log.e("UserInfo", "No user is logged in")
+            activity?.runOnUiThread {
+                Toast.makeText(requireContext(), "No user is logged in.", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -322,17 +416,16 @@ class ApprovalsFragment : Fragment() {
                 binding.hrProgressBar2.visibility = View.GONE
                 // Successfully updated 'budgetStatus'
                 checkIfHrBudgetExists()
-                Log.d("Firestore", "Budget status updated to Approved")
+                lifecycleScope.launch {
+                    val roles = listOf("Admin", "CEO", "Systems, IT", "HR")
+                    Utility.notifyAdmins("HR budget approved and awaits disbursement.", "Human Resource", roles)
+                }
             }
             .addOnFailureListener { e ->
                 if (!isAdded || _binding == null) return@addOnFailureListener
-                binding.btnApproveBudget.visibility = View.VISIBLE
-                binding.btnDeclineBudget.visibility = View.VISIBLE
-                binding.btnBudgetApproved.visibility = View.GONE
                 binding.hrProgressBar2.visibility = View.GONE
 
                 Toast.makeText(context, "Error approving budget", Toast.LENGTH_SHORT).show()
-                checkIfHrBudgetExists()
                 // Failed to update 'budgetStatus'
                 Log.w("Firestore", "Error updating budget status", e)
             }
@@ -353,31 +446,22 @@ class ApprovalsFragment : Fragment() {
             .addOnSuccessListener {
                 if (!isAdded || _binding == null) return@addOnSuccessListener
                 binding.hrProgressBar2.visibility = View.GONE
+                checkIfHrBudgetExists()
+                lifecycleScope.launch {
+                    val roles = listOf("Admin", "CEO", "Systems, IT", "HR")
+                    Utility.notifyAdmins("HR budget declined.", "Human Resource", roles)
+                }
                 // Successfully updated 'budgetStatus'
                 Log.d("Firestore", "Budget status updated to Approved")
             }
             .addOnFailureListener { e ->
                 if (!isAdded || _binding == null) return@addOnFailureListener
-                binding.btnApproveBudget.visibility = View.VISIBLE
-                binding.btnDeclineBudget.visibility = View.VISIBLE
-                binding.btnBudgetApproved.visibility = View.GONE
                 binding.hrProgressBar2.visibility = View.GONE
                 Toast.makeText(context, "Error declining budget", Toast.LENGTH_SHORT).show()
                 // Failed to update 'budgetStatus'
                 Log.w("Firestore", "Error updating budget status", e)
             }
 
-        // Delete the 'items' field from the 'budget' document
-        docRef.update("budget.items", FieldValue.delete())
-            .addOnSuccessListener {
-                // Successfully deleted 'items' field
-                checkIfHrBudgetExists()
-                Log.d("Firestore", "Budget items deleted")
-            }
-            .addOnFailureListener { e ->
-                // Failed to delete 'items' field
-                Log.w("Firestore", "Error deleting budget items", e)
-            }
     }
 
     override fun onDestroyView() {

@@ -1,0 +1,83 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- BML Initials (handwritten style) -->
+    <path
+        android:strokeWidth="4"
+        android:strokeColor="#FF000000"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M30,50 Q35,30 50,50 Q65,70 50,90 Q35,110 50,130 L50,150" />
+
+    <path
+        android:strokeWidth="4"
+        android:strokeColor="#FF000000"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M70,50 L70,150 M70,90 Q90,70 110,90 Q130,110 110,130" />
+
+    <path
+        android:strokeWidth="4"
+        android:strokeColor="#FF000000"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M130,50 L170,50 L150,150 L130,150" />
+
+    <!-- Tiny Motorbikes (simplified) -->
+    <!-- Bike 1 -->
+    <path
+        android:strokeWidth="2"
+        android:strokeColor="#FF555555"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M20,180 Q25,175 30,180 Q35,185 30,190 Q25,195 20,190 Z" />
+    <path
+        android:strokeWidth="2"
+        android:strokeColor="#FF555555"
+        android:pathData="M30,185 L50,185" />
+    <path
+        android:strokeWidth="2"
+        android:strokeColor="#FF555555"
+        android:pathData="M25,185 A3,3 0 1 1 25.01 185" />
+
+    <!-- Bike 2 -->
+    <path
+        android:strokeWidth="2"
+        android:strokeColor="#FF777777"
+        android:pathData="M100,30 Q105,25 110,30 Q115,35 110,40 Q105,45 100,40 Z" />
+    <path
+        android:strokeWidth="2"
+        android:strokeColor="#FF777777"
+        android:pathData="M110,35 L130,35" />
+    <path
+        android:strokeWidth="2"
+        android:strokeColor="#FF777777"
+        android:pathData="M105,35 A3,3 0 1 1 105.01 35" />
+
+    <!-- Bike 3 -->
+    <path
+        android:strokeWidth="2"
+        android:strokeColor="#FF999999"
+        android:pathData="M160,120 Q165,115 170,120 Q175,125 170,130 Q165,135 160,130 Z" />
+    <path
+        android:strokeWidth="2"
+        android:strokeColor="#FF999999"
+        android:pathData="M170,125 L190,125" />
+    <path
+        android:strokeWidth="2"
+        android:strokeColor="#FF999999"
+        android:pathData="M165,125 A3,3 0 1 1 165.01 125" />
+
+    <!-- Bike 4 -->
+    <path
+        android:strokeWidth="2"
+        android:strokeColor="#FFAAAAAA"
+        android:pathData="M40,100 Q45,95 50,100 Q55,105 50,110 Q45,115 40,110 Z" />
+    <path
+        android:strokeWidth="2"
+        android:strokeColor="#FFAAAAAA"
+        android:pathData="M50,105 L70,105" />
+    <path
+        android:strokeWidth="2"
+        android:strokeColor="#FFAAAAAA"
+        android:pathData="M45,105 A3,3 0 1 1 45.01 105" />
+</vector>

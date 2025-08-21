@@ -16,6 +16,7 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.widget.Button
+import com.google.firebase.Timestamp
 
 class IncidencesFragment : Fragment() {
 
@@ -47,8 +48,6 @@ class IncidencesFragment : Fragment() {
 
         // Fetch reports
         getReports()
-
-
 
         binding.btnClearReports.setOnClickListener {
             val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
@@ -99,18 +98,18 @@ class IncidencesFragment : Fragment() {
                     // Retrieve reports from Firestore document
                     val reportsList = document.get("reports") as? List<Map<String, Any>> ?: emptyList()
 
-                    // Reverse the list to show new reports first
-                    val reversedReports = reportsList.reversed()
+                    // Sort reports by reportTime in descending order (newest first)
+                    val sortedReports = reportsList.sortedByDescending { it["time"] as? Timestamp }
 
-                    // Update the adapter with the reversed reports
-                    if (reversedReports.isNotEmpty()) {
-                        reportsAdapter.setReports(reversedReports)
+                    if (sortedReports.isNotEmpty()) {
+                        reportsAdapter.setReports(sortedReports)
                     } else {
                         Toast.makeText(requireContext(), "No reports available", Toast.LENGTH_SHORT).show()
                         if (!isAdded || _binding == null) return@addOnSuccessListener
                         binding.btnClearReports.visibility = View.GONE
                         binding.text2.visibility = View.VISIBLE
                     }
+
                 }
             }
             .addOnFailureListener { exception ->

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--the fake mpesa title-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingHorizontal="8dp">
+
+    <ImageView
+        android:id="@+id/back_arrow"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/back_arrow"
+        android:contentDescription="@string/mpesa"
+        android:layout_marginEnd="8dp"
+        app:tint="?android:attr/textColorPrimary" />
+
+    <ImageView
+        android:id="@+id/profile_image"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:background="@drawable/circle_background"
+        android:padding="6dp"
+        android:src="@drawable/ic_profile_placeholder"
+        android:scaleType="centerInside"
+        android:layout_marginEnd="8dp"
+        android:contentDescription="@string/mpesa"
+        app:tint="@android:color/black" />
+
+    <TextView
+        android:id="@+id/actionbar_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/mpesa"
+        android:textSize="18sp"
+        android:textStyle="normal"
+        android:textColor="?android:attr/textColorPrimary"/>
+</LinearLayout>

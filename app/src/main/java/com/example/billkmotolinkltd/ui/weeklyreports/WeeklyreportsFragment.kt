@@ -1,20 +1,26 @@
 package com.example.billkmotolinkltd.ui.weeklyreports
 
+import android.icu.util.Calendar
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.billkmotolinkltd.R
 import com.example.billkmotolinkltd.databinding.FragmentWeeklyreportsBinding
 import com.example.billkmotolinkltd.ui.DevDayData
 import com.example.billkmotolinkltd.ui.DevUser
 import com.example.billkmotolinkltd.ui.DevWeek
 import com.example.billkmotolinkltd.ui.DevWeeksAdapter
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -26,73 +32,178 @@ class WeeklyreportsFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
-          container: ViewGroup?,
-          savedInstanceState: Bundle?
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View {
         _binding = FragmentWeeklyreportsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = DevWeeksAdapter(emptyList())
+        adapter = DevWeeksAdapter()
         binding.weeklyReportsRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = this@WeeklyreportsFragment.adapter
         }
-        fetchWeeksData()
+
+        loadWeekData()
     }
 
-    private fun fetchWeeksData() {
-        val db = FirebaseFirestore.getInstance()
-        db.collection("deviations").get()
-            .addOnSuccessListener { weeksSnapshot ->
-                val weekList = mutableListOf<DevWeek>()
+    private fun loadWeekData() {
+        if (!isAdded || _binding == null) return
 
-                for (weekDoc in weeksSnapshot.documents) {
-                    val weekName = weekDoc.id
-                    val usersList = mutableListOf<DevUser>()
+        val binding = _binding!!  // safe because we checked above
 
-                    val usersMap = weekDoc.data ?: continue
-                    for ((userName, userRawData) in usersMap) {
-                        val userDataMap = userRawData as? Map<String, Map<String, Any>> ?: continue
-                        val dayDataList = userDataMap.map { (dayName, fields) ->
-                            val dayData = DevDayData(
-                                dayName = dayName,
-                                netIncome = (fields["netIncome"] as? Number)?.toDouble() ?: 0.0,
-                                grossIncome = (fields["grossIncome"] as? Number)?.toDouble() ?: 0.0,
-                                netDeviation = (fields["netDeviation"] as? Number)?.toDouble() ?: 0.0,
-                                grossDeviation = (fields["grossDeviation"] as? Number)?.toDouble() ?: 0.0,
-                                netGrossDifference = (fields["netGrossDifference"] as? Number)?.toDouble() ?: 0.0
-                            )
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                binding.wRProgressBar.visibility = View.VISIBLE
+                binding.noWeeklyReports.visibility = View.GONE
 
-                            if (!isAdded || _binding == null) return@addOnSuccessListener
-                            binding.wRProgressBar.visibility = View.GONE
+                val weekList = fetchWeeksData()
+                updateUI(weekList)
+            } catch (e: Exception) {
+                Log.e("WeeklyReports", "Error loading data", e)
+                binding.noWeeklyReports.visibility = View.VISIBLE
+            } finally {
+                binding.wRProgressBar.visibility = View.GONE
+            }
+        }
+    }
 
-                            Log.d("DevDayData", "User: $userName, Day: $dayName, Data: $dayData")
 
-                            dayData
+    private suspend fun fetchWeeksData(): List<DevWeek> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val db = FirebaseFirestore.getInstance()
+                val weeksSnapshot = db.collection("deviations").get().await()
+
+                weeksSnapshot.documents.mapNotNull { weekDoc ->
+                    try {
+                        val weekName = weekDoc.id
+                        val usersMap = weekDoc.data ?: return@mapNotNull null
+
+                        val usersList = usersMap.mapNotNull { (userName, userRawData) ->
+                            try {
+                                val userDataMap = userRawData as? Map<String, Map<String, Any>>
+                                    ?: return@mapNotNull null
+
+                                val dayDataList = userDataMap.mapNotNull { (dayName, fields) ->
+                                    try {
+                                        DevDayData(
+                                            dayName = dayName,
+                                            netIncome = (fields["netIncome"] as? Number)?.toDouble() ?: 0.0,
+                                            grossIncome = (fields["grossIncome"] as? Number)?.toDouble() ?: 0.0,
+                                            grossDeviation = (fields["grossDeviation"] as? Number)?.toDouble() ?: 0.0,
+                                            netGrossDifference = (fields["netGrossDifference"] as? Number)?.toDouble() ?: 0.0
+                                        )
+                                    } catch (e: Exception) {
+                                        Log.e("DayDataParse", "Error parsing day data", e)
+                                        null
+                                    }
+                                }
+
+                                DevUser(userName, dayDataList)
+                            } catch (e: Exception) {
+                                Log.e("UserDataParse", "Error parsing user data", e)
+                                null
+                            }
                         }
-                        usersList.add(DevUser(userName, dayDataList))
-                    }
 
-                    // Extract start date from the week name and create DevWeek object
-                    val startDate = extractStartDateFromWeekName(weekName)
-                    weekList.add(DevWeek(weekName, usersList, startDate))
+                        val startDate = extractStartDateFromWeekName(weekName)
+                        DevWeek(weekName, usersList, startDate)
+                    } catch (e: Exception) {
+                        Log.e("WeekDataParse", "Error parsing week data", e)
+                        null
+                    }
+                }.sortedByDescending { it.startDate }
+            } catch (e: Exception) {
+                Log.e("Firestore", "Error fetching weeks data", e)
+                emptyList()
+            }
+        }
+    }
+
+    private fun updateUI(weekList: List<DevWeek>) {
+        if (!isAdded || _binding == null) return
+
+        if (weekList.isEmpty()) {
+            binding.noWeeklyReports.visibility = View.VISIBLE
+        } else {
+            binding.noWeeklyReports.visibility = View.GONE
+            adapter.submitList(weekList)
+        }
+    }
+    fun deletePreviousMonths() {
+        val db = FirebaseFirestore.getInstance()
+        val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH)
+        val calendar = Calendar.getInstance().apply {
+            add(Calendar.MONTH, -3)  // 3 months ago threshold
+        }
+        val thresholdDate = calendar.time
+
+        // Get all trace documents
+        db.collection("deviations")
+            .get()
+            .addOnSuccessListener { documents ->
+                val batch = db.batch()  // Use batch for bulk deletion
+                var deleteCount = 0
+
+                documents.forEach { document ->
+                    val weekName = document.id
+                    val regex = """\((\d{2} \w+ \d{4}) to (\d{2} \w+ \d{4})\)""".toRegex()
+
+                    regex.find(weekName)?.let { match ->
+                        try {
+                            val endDateStr = match.groupValues[2]
+                            val endDate = dateFormat.parse(endDateStr)
+
+                            if (endDate != null && endDate.before(thresholdDate)) {
+                                batch.delete(document.reference)
+                                deleteCount++
+                            }
+                        } catch (e: ParseException) {
+                            Log.e("ClockOutDeletion", "Error parsing date in $weekName", e)
+                        }
+                    } ?: run {
+                        Log.w("ClockOutDeletion", "Invalid week format: $weekName")
+                    }
                 }
 
-                // Sort the weeks by start date in descending order
-                weekList.sortByDescending { it.startDate }
-
-                // Submit the sorted list to the adapter
-                adapter.submitList(weekList)
+                if (deleteCount > 0) {
+                    batch.commit()
+                        .addOnSuccessListener {
+                            Toast.makeText(
+                                requireContext(),
+                                "Deleted $deleteCount old clockouts weeks",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(
+                                requireContext(),
+                                "Deletion failed: ${e.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        "No old clockouts to delete",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
-            .addOnFailureListener {
-                Log.e("Firestore", "Error loading data", it)
+            .addOnFailureListener { e ->
+                Toast.makeText(
+                    requireContext(),
+                    "Error fetching traces: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
     }
+
 
     // Helper function to extract the start date from the week name
     fun extractStartDateFromWeekName(weekName: String): Date? {

@@ -1,0 +1,108 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/roomName"
+        android:layout_width="match_parent"
+        android:textColor="@android:color/holo_orange_dark"
+        android:textStyle="bold"
+        android:fontFamily="cursive"
+        android:layout_height="wrap_content"
+        android:textSize="25sp"/>
+
+    <TextView
+        android:id="@+id/creatorText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"/>
+
+    <TextView
+        android:id="@+id/pendingRequests"
+        android:visibility="gone"
+        android:textSize="16sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""/>
+
+    <TextView
+        android:id="@+id/expiresText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/gray"
+        android:textSize="12sp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/joinButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:visibility="gone"
+            android:layout_margin="10dp"
+            android:backgroundTint="@android:color/holo_green_dark"
+            android:layout_height="wrap_content"
+            android:text="@string/join"/>
+        <Button
+            android:id="@+id/leaveButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:visibility="gone"
+            android:layout_margin="10dp"
+            android:backgroundTint="@android:color/holo_red_dark"
+            android:layout_height="wrap_content"
+            android:text="@string/leave"/>
+        <Button
+            android:id="@+id/cancelButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_margin="10dp"
+            android:backgroundTint="@android:color/holo_orange_dark"
+            android:text="@string/cancel_request"/>
+        <Button
+            android:id="@+id/destroyButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_margin="10dp"
+            android:backgroundTint="@android:color/holo_red_dark"
+            android:text="@string/destroy"/>
+        <Button
+            android:id="@+id/chatButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_margin="10dp"
+            android:backgroundTint="@color/brown4"
+            android:textColor="@color/brown1"
+            android:text="@string/chat"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/pendingApprovalsLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pending Approvals"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/pendingApprovalsList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+</LinearLayout>

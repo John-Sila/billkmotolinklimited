@@ -25,16 +25,16 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.example.billkmotolinkltd.databinding.FragmentUsersBinding
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.EmailAuthProvider
+import android.widget.TextView
+
 
 class UsersFragment : Fragment() {
 
     private var _binding: FragmentUsersBinding? = null
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
     private val db: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
-    private var previousUserId: String? = auth.currentUser?.uid
     private var previousUserEmail: String? = null
     private var previousUserPassword: String? = null
-    private var loadingDialog: AlertDialog? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -102,7 +102,8 @@ class UsersFragment : Fragment() {
             } else if (!isNumeric(idNumber) || !isNumeric(phoneNumber)) {
                 Toast.makeText(requireContext(), "Both ID number and phone number must be in digit form", Toast.LENGTH_SHORT).show()
             } else {
-                val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+
+                val alertDialog = AlertDialog.Builder(requireContext())
 
                 // Custom title with red color
                 val title = SpannableString("Create User")
@@ -117,6 +118,7 @@ class UsersFragment : Fragment() {
                 alertDialog.setIcon(R.drawable.success)
 
                 alertDialog.setPositiveButton("Yes") { _, _ ->
+
                     showPasswordModal(requireContext())
                 }
 
@@ -147,14 +149,17 @@ class UsersFragment : Fragment() {
             title.setSpan(ForegroundColorSpan(Color.RED), 0, title.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
 
             // Custom message with black color
-            val message = SpannableString("Engage this action.")
+            val message = if (selectedAction == "Activate") SpannableString("Engage this action.")
+            else if (selectedAction == "Deactivate") SpannableString("Deactivate User? This action is temporary.")
+            else SpannableString("Discontinue User? This action is permanent.")
+
             message.setSpan(ForegroundColorSpan(Color.GRAY), 0, message.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
 
             alertDialog.setTitle(title)
             alertDialog.setMessage(message)
             alertDialog.setIcon(R.drawable.warn)
 
-            alertDialog.setPositiveButton("Yes") { _, _ ->
+            alertDialog.setPositiveButton("Confirm") { _, _ ->
                 updateUserStatus(selectedUser, selectedAction)
             }
 
@@ -166,9 +171,8 @@ class UsersFragment : Fragment() {
             dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
 
             dialog.show()
-
-
         }
+
         loadUserNames()
     }
 
@@ -218,22 +222,63 @@ class UsersFragment : Fragment() {
             }
     }
 
-
     private fun loadUserNames() {
         val db = FirebaseFirestore.getInstance()
         val userRef = db.collection("users")
+        val disabledNames = listOf("John Sila")
 
         userRef.get()
             .addOnSuccessListener { documents ->
-                if (_binding == null) return@addOnSuccessListener  // Prevent crash
+                if (_binding == null || !isAdded) return@addOnSuccessListener  // Prevent crash
 
                 val userNames = mutableListOf<String>()
+                val disabledNames = mutableSetOf<String>()
+                val adminNames = mutableSetOf<String>()
+
                 for (document in documents) {
-                    document.getString("userName")?.let { userNames.add(it) }
+                    val isDeleted = document.getBoolean("isDeleted") == true
+                    val userRank = document.getString("userRank") ?: ""
+                    val userName = document.getString("userName") ?: continue
+
+                    if (!isDeleted && userRank != "CEO") {
+                        userNames.add(userName)
+
+                        if (userRank == "Admin") {
+                            adminNames.add(userName)
+                        }
+                        if (userRank == "Systems, IT") {
+                            disabledNames.add(userName)
+                        }
+                    }
+                }
+                userNames.sort()
+
+                val adapter = object : ArrayAdapter<String>(
+                    requireContext(),
+                    android.R.layout.simple_spinner_dropdown_item,
+                    userNames
+                ) {
+                    override fun isEnabled(position: Int): Boolean {
+                        return userNames[position] !in disabledNames
+                    }
+
+                    override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+                        val view = super.getDropDownView(position, convertView, parent)
+                        val textView = view as TextView
+                        val name = userNames[position]
+
+                        when (name) {
+                            in disabledNames -> textView.setTextColor(Color.GRAY)
+                            in adminNames -> textView.setTextColor(Color.GREEN) // Green
+                            //else -> textView.setTextColor(Color.BLACK)/**/
+                        }
+
+                        return view
+                    }
                 }
 
-                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, userNames)
-                _binding?.userToManage?.adapter = adapter  // Use safe access
+                _binding?.userToManage?.adapter = adapter
+
             }
             .addOnFailureListener { exception ->
                 if (_binding != null) {
@@ -244,7 +289,8 @@ class UsersFragment : Fragment() {
         val cRef = db.collection("general").document("general_variables")
         cRef.get().addOnSuccessListener { companyDoc ->
             val companyStatus = companyDoc.getString("companyState") ?: "Unknown"
-            if (!isAdded || view == null || _binding == null) return@addOnSuccessListener // Prevent crash
+            if (!isAdded || view == null || _binding == null) return@addOnSuccessListener
+
             if (companyStatus == "Paused") {
                 binding.btnOperationsPaused1.visibility = View.VISIBLE
                 binding.btnAddUser.visibility = View.GONE
@@ -361,15 +407,14 @@ class UsersFragment : Fragment() {
             "isVerified" to false,
             "isDeleted" to false,
             "isActive" to true,
-            "lastClockDate" to Timestamp.now(),
-            "netClockedLastly" to 0,
             "pendingAmount" to 0,
-            "unpushedAmount" to 0,
+            "lastClockDate" to Timestamp.now(),
             "currentInAppBalance" to 0,
             "dailyTarget" to 2200,
             "gender" to userGender,
             "sundayTarget" to 670,
-            "isWorkingOnSunday" to false
+            "isWorkingOnSunday" to false,
+            "hrsPerShift" to 8
         )
 
         db.collection("users").document(userId)
@@ -414,8 +459,6 @@ class UsersFragment : Fragment() {
             }
         }
     }
-
-
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -1,0 +1,572 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    android:id="@+id/swipeRefreshLayout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.corrections.CorrectionsFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.corrections.CorrectionsFragment">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:id="@+id/scrollView"
+            android:layout_height="match_parent">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="6dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="15dp"
+                        android:gravity="center">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/correct_a_faulty_clockout"
+                            android:textSize="18sp"
+                            android:layout_marginBottom="20dp"
+                            android:textColor="@android:color/holo_blue_dark"
+                            android:textStyle="bold"/>
+
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="8dp"
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="6dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:padding="15dp"
+                                android:layout_marginBottom="20dp"
+                                android:layout_marginTop="20dp"
+                                android:gravity="start">
+
+                                <TextView
+                                    android:id="@+id/variablesText"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Unlike a regular clockout, this clockout only:"
+                                    android:textSize="22sp"
+                                    android:textColor="@android:color/holo_orange_dark"
+                                    android:textStyle="bold"/>
+                                <TextView
+                                    android:id="@+id/variable1"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="1. Posts the actual clockout information."
+                                    android:textSize="18sp"/>
+                                <TextView
+                                    android:id="@+id/variable2"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="2. Increments your pending amount."
+                                    android:textSize="18sp"/>
+                                <TextView
+                                    android:id="@+id/variable3"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/_3_posts_data_to_weekly_deviation_reports_n"
+                                    android:textSize="18sp"/>
+                                <TextView
+                                    android:id="@+id/variable4"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="'Current in-app balance' remains the same."
+                                    android:textSize="18sp"/>
+                                <TextView
+                                    android:id="@+id/variable5"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="'Net Clocked Lastly' remains the same."
+                                    android:textSize="18sp"/>
+                                <TextView
+                                    android:id="@+id/variable6"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="'Last Clock Date' remains the same.\n"
+                                    android:textSize="18sp"/>
+                                <TextView
+                                    android:id="@+id/variable7"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/this_will_use_the_current_set_target"
+                                    android:textSize="18sp"/>
+                            </LinearLayout>
+                        </androidx.cardview.widget.CardView>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/clock_out_again"
+                            android:textSize="20sp"
+                            android:textColor="@android:color/holo_orange_dark"
+                            android:layout_marginBottom="10dp"
+                            android:layout_marginTop="20dp"
+                            android:textStyle="bold"/>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="10dp"
+                            android:gravity="center">
+
+                            <TextView
+                                android:id="@+id/text7"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/date"
+                                android:textSize="18sp"
+                                android:layout_marginEnd="15dp"
+                                android:textColor="@android:color/holo_blue_dark"
+                                android:textStyle="bold"/>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+                                <Spinner
+                                    android:id="@+id/dateToCorrect"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"/>
+                                <View
+                                    android:layout_width="match_parent"
+                                    android:layout_height=".1dp"
+                                    android:background="@android:color/holo_orange_dark" /> <!-- underline color -->
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginTop="20dp"
+                            android:gravity="center">
+
+                            <!--gross income-->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:gravity="center">
+
+                                <ImageView
+                                    android:layout_width="30dp"
+                                    android:layout_height="30dp"
+                                    android:contentDescription="@string/money_image"
+                                    android:src="@drawable/require"
+                                    android:layout_marginEnd="8dp"/>
+
+                                <TextView
+                                    android:id="@+id/text1"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/gross_income"
+                                    android:textSize="18sp"
+                                    android:layout_marginEnd="15dp"
+                                    android:textStyle="bold"/>
+
+                                <!-- Gross Income Input -->
+                                <EditText
+                                    android:id="@+id/inputGrossIncome"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:autofillHints=""
+                                    android:hint="@string/zero_amount"
+                                    android:inputType="numberDecimal"
+                                    android:padding="16dp"
+                                    android:textColor="@android:color/holo_blue_bright"
+                                    android:background="@drawable/rounded_inputs" />
+
+                            </LinearLayout>
+
+                            <!--commission-->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginTop="20dp"
+                                android:gravity="center">
+
+                                <ImageView
+                                    android:layout_width="30dp"
+                                    android:layout_height="30dp"
+                                    android:contentDescription="@string/money_image"
+                                    android:src="@drawable/require"
+                                    android:layout_marginEnd="8dp"/>
+
+                                <TextView
+                                    android:id="@+id/text2"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/enter_commission"
+                                    android:textSize="18sp"
+                                    android:layout_marginEnd="15dp"
+                                    android:textStyle="bold"/>
+
+                                <!-- Commission Input -->
+                                <EditText
+                                    android:id="@+id/inputCommission"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:autofillHints=""
+                                    android:hint="@string/zero_amount"
+                                    android:inputType="none"
+                                    android:focusable="false"
+                                    android:padding="16dp"
+                                    android:textColor="@android:color/holo_orange_dark"
+                                    android:background="@drawable/rounded_inputs" />
+
+                            </LinearLayout>
+
+                            <!--today's_ in _app-->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginTop="20dp"
+                                android:gravity="center">
+
+                                <ImageView
+                                    android:layout_width="30dp"
+                                    android:layout_height="30dp"
+                                    android:contentDescription="@string/money_image"
+                                    android:src="@drawable/require"
+                                    android:layout_marginEnd="8dp"/>
+
+                                <TextView
+                                    android:id="@+id/text3"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/in_app_balance_on_this_date"
+                                    android:textSize="18sp"
+                                    android:layout_marginEnd="15dp"
+                                    android:textStyle="bold"/>
+
+                                <!-- Todays In-App Input -->
+                                <EditText
+                                    android:id="@+id/todaysInAppBalance"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:autofillHints=""
+                                    android:hint="@string/zero_amount"
+                                    android:inputType="numberDecimal"
+                                    android:padding="16dp"
+                                    android:textColor="@android:color/holo_blue_bright"
+                                    android:background="@drawable/rounded_inputs" />
+
+                            </LinearLayout>
+
+                            <!--previous in_app-->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginTop="20dp"
+                                android:gravity="center">
+
+                                <ImageView
+                                    android:layout_width="30dp"
+                                    android:layout_height="30dp"
+                                    android:contentDescription="@string/money_image"
+                                    android:src="@drawable/require"
+                                    android:layout_marginEnd="8dp"/>
+
+                                <TextView
+                                    android:id="@+id/text4"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/in_app_balance_before_this_date"
+                                    android:textSize="18sp"
+                                    android:layout_marginEnd="15dp"
+                                    android:textStyle="bold"/>
+
+                                <!-- prev app Input -->
+                                <EditText
+                                    android:id="@+id/previousInAppBalance"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:autofillHints=""
+                                    android:hint="@string/zero_amount"
+                                    android:inputType="none"
+                                    android:focusable="false"
+                                    android:padding="16dp"
+                                    android:textColor="@android:color/holo_orange_dark"
+                                    android:background="@drawable/rounded_inputs" />
+
+                            </LinearLayout>
+
+                            <!--expenses-->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginTop="20dp"
+                                android:gravity="center">
+
+                                <ImageView
+                                    android:layout_width="30dp"
+                                    android:layout_height="30dp"
+                                    android:contentDescription="@string/money_image"
+                                    android:src="@drawable/require"
+                                    android:layout_marginEnd="8dp" />
+
+                                <TextView
+                                    android:id="@+id/text5"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/choose_expenses"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold"/>
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical"
+                                    android:padding="8dp">
+
+                                    <!--                battery swap expense-->
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="horizontal"
+                                        android:layout_marginTop="10dp"
+                                        android:gravity="start">
+
+                                        <CheckBox
+                                            android:id="@+id/checkBSExpense"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="@string/battery_swap" />
+
+                                        <EditText
+                                            android:id="@+id/inputBSExpense"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:autofillHints=""
+                                            android:hint="@string/zero_amount"
+                                            android:inputType="numberDecimal"
+                                            android:padding="16dp"
+                                            android:layout_marginStart="10dp"
+                                            android:textColor="@android:color/holo_blue_bright"
+                                            android:background="@drawable/rounded_inputs" />
+
+                                    </LinearLayout>
+
+                                    <!--                data bundles-->
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="horizontal"
+                                        android:layout_marginTop="10dp"
+                                        android:gravity="start">
+
+                                        <CheckBox
+                                            android:id="@+id/checkDBExpense"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="@string/data_bundles" />
+
+                                        <EditText
+                                            android:id="@+id/inputDBExpense"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:autofillHints=""
+                                            android:hint="@string/zero_amount"
+                                            android:inputType="numberDecimal"
+                                            android:padding="16dp"
+                                            android:layout_marginStart="10dp"
+                                            android:textColor="@android:color/holo_blue_bright"
+                                            android:background="@drawable/rounded_inputs" />
+
+                                    </LinearLayout>
+
+                                    <!--                lunch expense-->
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="horizontal"
+                                        android:layout_marginTop="10dp"
+                                        android:gravity="start">
+
+                                        <CheckBox
+                                            android:id="@+id/checkLunchExpense"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="@string/lunch" />
+
+                                        <EditText
+                                            android:id="@+id/inputLunchExpense"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:autofillHints=""
+                                            android:hint="@string/zero_amount"
+                                            android:inputType="numberDecimal"
+                                            android:padding="16dp"
+                                            android:textColor="@android:color/holo_blue_bright"
+                                            android:layout_marginStart="10dp"
+                                            android:background="@drawable/rounded_inputs" />
+
+                                    </LinearLayout>
+
+                                    <!--                police expense-->
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="horizontal"
+                                        android:layout_marginTop="10dp"
+                                        android:gravity="start">
+
+                                        <CheckBox
+                                            android:id="@+id/checkPoliceExpense"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="@string/police" />
+                                        <EditText
+                                            android:id="@+id/inputPoliceExpense"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:autofillHints=""
+                                            android:hint="@string/zero_amount"
+                                            android:inputType="numberDecimal"
+                                            android:padding="16dp"
+                                            android:layout_marginStart="10dp"
+                                            android:textColor="@android:color/holo_blue_bright"
+                                            android:background="@drawable/rounded_inputs" />
+
+                                    </LinearLayout>
+
+                                    <!--                other expense-->
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="horizontal"
+                                        android:layout_marginTop="10dp"
+                                        android:gravity="start">
+
+                                        <CheckBox
+                                            android:id="@+id/checkOtherExpense"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="@string/other" />
+                                        <EditText
+                                            android:id="@+id/inputOtherExpense"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:autofillHints=""
+                                            android:hint="@string/zero_amount"
+                                            android:inputType="numberDecimal"
+                                            android:padding="16dp"
+                                            android:layout_marginStart="10dp"
+                                            android:textColor="@android:color/holo_blue_bright"
+                                            android:background="@drawable/rounded_inputs" />
+                                    </LinearLayout>
+
+                                </LinearLayout>
+
+                            </LinearLayout>
+
+                            <EditText
+                                android:id="@+id/inputOtherExpenseDescription"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:autofillHints=""
+                                android:hint="@string/enter_other_expense"
+                                android:inputType="textCapWords"
+                                android:padding="12dp"
+                                android:visibility="gone" />
+
+
+                            <!--compiled net-->
+                            <TextView
+                                android:id="@+id/textNetIncome"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/zero_amount"
+                                android:textSize="20sp"
+                                android:textStyle="bold"
+                                android:textColor="@android:color/holo_blue_dark"
+                                android:gravity="end|bottom"
+                                android:layout_marginTop="15dp"/>
+
+
+                            <ProgressBar
+                                android:id="@+id/clockingOutProgressBar"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:visibility="gone"
+                                android:layout_marginTop="15dp"
+                                android:layout_gravity="center"/>
+
+                            <!-- Submit Button -->
+                            <Button
+                                android:id="@+id/btnClockOut"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/submit"
+                                android:backgroundTint="@color/brown1"
+                                android:textColor="@color/brown5"
+                                android:padding="12dp"
+                                android:visibility="gone"
+                                android:layout_marginTop="12dp"/>
+
+
+                            <!--company paused-->
+                            <Button
+                                android:id="@+id/btnCompanyPaused"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:visibility="gone"
+                                android:text="@string/company_operations_are_paused"
+                                android:backgroundTint="@color/brown5"
+                                android:textColor="@color/brown2"
+                                android:padding="12dp"
+                                android:layout_marginTop="12dp"/>
+
+                            <!--clock out first-->
+                            <Button
+                                android:id="@+id/btnClockOutFirst"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:visibility="gone"
+                                android:text="@string/clock_out_of_your_current_shift_first"
+                                android:backgroundTint="@color/brown6"
+                                android:textColor="@color/brown2"
+                                android:padding="12dp"
+                                android:layout_marginTop="12dp"/>
+
+
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+        </ScrollView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+

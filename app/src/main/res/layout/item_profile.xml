@@ -1,0 +1,635 @@
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="10dp"
+    android:layout_margin="8dp"
+    android:layout_height="wrap_content"
+    android:elevation="4dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tvUsername"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:textColor="@android:color/holo_green_dark"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:id="@+id/detailsLayout"
+            android:orientation="vertical"
+            android:paddingStart="15dp"
+            android:paddingEnd="0dp"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/shimmer_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:shimmer_auto_start="true"
+                app:shimmer_duration="5000"
+                app:shimmer_base_alpha="1.0"
+                app:shimmer_highlight_alpha="0.5">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:elevation="6dp"
+                    app:strokeColor="@color/transparent"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="6dp"
+                    android:foreground="?attr/selectableItemBackground"
+                    app:strokeWidth="2dp"
+                    app:rippleColor="?attr/colorControlHighlight">
+
+                    <!-- Your inner content here -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/profileRank"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textSize="18sp"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:id="@+id/profileEmail"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textSize="14sp"/>
+
+                        <TextView
+                            android:id="@+id/profilePhone"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textSize="14sp"/>
+
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </com.facebook.shimmer.ShimmerFrameLayout>
+
+
+            <!--uid-->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:gravity="center|start"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="BILLK ID:"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/holo_orange_dark"
+                    android:layout_marginEnd="15dp"
+                    android:layout_height="wrap_content"/>
+                <androidx.cardview.widget.CardView
+                    android:layout_width="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content"
+                    android:elevation="4dp">
+
+                    <TextView
+                        android:id="@+id/profileUID"
+                        android:textSize="16sp"
+                        android:padding="15dp"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:maxEms="15"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+            <!--gender-->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:gravity="center|start"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="Gender:"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/holo_orange_dark"
+                    android:layout_marginEnd="15dp"
+                    android:layout_height="wrap_content"/>
+                <androidx.cardview.widget.CardView
+                    android:layout_width="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content"
+                    android:elevation="4dp">
+                    <TextView
+                        android:id="@+id/profileGender"
+                        android:textSize="16sp"
+                        android:padding="15dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+            <!--DTB-->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:gravity="center|start"
+                android:id="@+id/dtbDiv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="DTB A/C No:"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/holo_orange_dark"
+                    android:layout_marginEnd="15dp"
+                    android:layout_height="wrap_content"/>
+                <androidx.cardview.widget.CardView
+                    android:layout_width="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content"
+                    android:elevation="4dp">
+
+                    <TextView
+                        android:id="@+id/profileDTBAcc"
+                        android:textSize="16sp"
+                        android:padding="15dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+            <!--date created-->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:gravity="center|start"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="Date Enrolled:"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/holo_orange_dark"
+                    android:layout_marginEnd="15dp"
+                    android:layout_height="wrap_content"/>
+                <androidx.cardview.widget.CardView
+                    android:layout_width="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content"
+                    android:elevation="4dp">
+
+                    <TextView
+                        android:id="@+id/profileDateCreated"
+                        android:textSize="16sp"
+                        android:padding="15dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+            <!--requirements-->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:id="@+id/reqDiv"
+                android:layout_width="match_parent"
+                android:gravity="center|start"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="Pending Requirements:"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/holo_orange_dark"
+                    android:layout_marginEnd="15dp"
+                    android:layout_height="wrap_content"/>
+                <androidx.cardview.widget.CardView
+                    android:layout_width="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content"
+                    android:elevation="4dp">
+
+                    <TextView
+                        android:id="@+id/profileRequirements"
+                        android:textSize="16sp"
+                        android:padding="15dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+            <!--current bike-->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:id="@+id/cbDiv"
+                android:layout_width="match_parent"
+                android:gravity="center|start"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="Current Bike:"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/holo_orange_dark"
+                    android:layout_marginEnd="15dp"
+                    android:layout_height="wrap_content"/>
+                <androidx.cardview.widget.CardView
+                    android:layout_width="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content"
+                    android:elevation="4dp">
+
+                    <TextView
+                        android:id="@+id/profileCurrentBike"
+                        android:textSize="16sp"
+                        android:padding="15dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+            <!--in app bal-->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:id="@+id/iabDiv"
+                android:gravity="center|start"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="In App Balance:"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/holo_orange_dark"
+                    android:layout_marginEnd="15dp"
+                    android:layout_height="wrap_content"/>
+                <androidx.cardview.widget.CardView
+                    android:layout_width="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content"
+                    android:elevation="4dp">
+
+                    <TextView
+                        android:id="@+id/profileInAppBalance"
+                        android:textSize="16sp"
+                        android:padding="15dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+            <!--daily target-->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:gravity="center|start"
+                android:id="@+id/dtDiv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="Set Target:"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/holo_orange_dark"
+                    android:layout_marginEnd="15dp"
+                    android:layout_height="wrap_content"/>
+                <androidx.cardview.widget.CardView
+                    android:layout_width="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content"
+                    android:elevation="4dp">
+
+                    <TextView
+                        android:id="@+id/profileSetTarget"
+                        android:textSize="16sp"
+                        android:padding="15dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+            <!--hrsPerShift-->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:gravity="center|start"
+                android:id="@+id/hpsDiv"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="Hours Per Shift:"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/holo_orange_dark"
+                    android:layout_marginEnd="15dp"
+                    android:layout_height="wrap_content"/>
+                <androidx.cardview.widget.CardView
+                    android:layout_width="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content"
+                    android:elevation="4dp">
+
+                    <TextView
+                        android:id="@+id/profileShiftHrs"
+                        android:textSize="16sp"
+                        android:padding="15dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+            <!--id-->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:gravity="center|start"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="National ID:"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/holo_orange_dark"
+                    android:layout_marginEnd="15dp"
+                    android:layout_height="wrap_content"/>
+                <androidx.cardview.widget.CardView
+                    android:layout_width="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content"
+                    android:elevation="4dp">
+
+                    <TextView
+                        android:id="@+id/profileNationalId"
+                        android:textSize="16sp"
+                        android:padding="15dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+            <!--active state-->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:gravity="center|start"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="Active Status:"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/holo_orange_dark"
+                    android:layout_marginEnd="15dp"
+                    android:layout_height="wrap_content"/>
+                <androidx.cardview.widget.CardView
+                    android:layout_width="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content"
+                    android:elevation="4dp">
+                    <TextView
+                        android:id="@+id/profileActive"
+                        android:textSize="16sp"
+                        android:padding="15dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+            <!--clocked in-->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:id="@+id/ciDiv"
+                android:gravity="center|start"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="Clocked In Status:"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/holo_orange_dark"
+                    android:layout_marginEnd="15dp"
+                    android:layout_height="wrap_content"/>
+                <androidx.cardview.widget.CardView
+                    android:layout_width="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content"
+                    android:elevation="4dp">
+
+                    <TextView
+                        android:id="@+id/profileClockedIn"
+                        android:textSize="16sp"
+                        android:padding="15dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+            <!--last clock in-->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:gravity="center|start"
+                android:id="@+id/lciDiv"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="Last Clock In:"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/holo_orange_dark"
+                    android:layout_marginEnd="15dp"
+                    android:layout_height="wrap_content"/>
+                <androidx.cardview.widget.CardView
+                    android:layout_width="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content"
+                    android:elevation="4dp">
+
+                    <TextView
+                        android:id="@+id/profileLastClockInDate"
+                        android:textSize="16sp"
+                        android:padding="15dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+            <!--last clock out date-->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:gravity="center|start"
+                android:id="@+id/lcoDiv"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="Date Clocked Out Lastly:"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/holo_orange_dark"
+                    android:layout_marginEnd="15dp"
+                    android:layout_height="wrap_content"/>
+                <androidx.cardview.widget.CardView
+                    android:layout_width="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content"
+                    android:elevation="4dp">
+
+                    <TextView
+                        android:id="@+id/profileLastClockDate"
+                        android:textSize="16sp"
+                        android:padding="15dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+            <!--net clocked lastly-->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:gravity="center|start"
+                android:id="@+id/nclDiv"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="Net Clocked Lastly:"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/holo_orange_dark"
+                    android:layout_marginEnd="15dp"
+                    android:layout_height="wrap_content"/>
+                <androidx.cardview.widget.CardView
+                    android:layout_width="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content"
+                    android:elevation="4dp">
+
+                    <TextView
+                        android:id="@+id/profileNetClockedLastly"
+                        android:textSize="16sp"
+                        android:padding="15dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+            <!--pending amount-->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:gravity="center|start"
+                android:id="@+id/paDiv"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="Amount Pending Approval:"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/holo_orange_dark"
+                    android:layout_marginEnd="15dp"
+                    android:layout_height="wrap_content"/>
+                <androidx.cardview.widget.CardView
+                    android:layout_width="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content"
+                    android:elevation="4dp">
+
+                    <TextView
+                        android:id="@+id/profilePendingAmount"
+                        android:textSize="16sp"
+                        android:padding="15dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+            <!--sunday target-->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:gravity="center|start"
+                android:id="@+id/stDiv"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="Sunday Target:"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/holo_orange_dark"
+                    android:layout_marginEnd="15dp"
+                    android:layout_height="wrap_content"/>
+                <androidx.cardview.widget.CardView
+                    android:layout_width="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content"
+                    android:elevation="4dp">
+
+                    <TextView
+                        android:id="@+id/profileSundayTarget"
+                        android:textSize="16sp"
+                        android:padding="15dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+            <!--fcm-->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:gravity="center|start"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="FCM Token:"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/holo_orange_dark"
+                    android:layout_marginEnd="15dp"
+                    android:layout_height="wrap_content"/>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content"
+                    android:elevation="4dp">
+                    <TextView
+                        android:id="@+id/profileFcm"
+                        android:textSize="16sp"
+                        android:padding="15dp"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:maxEms="12"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

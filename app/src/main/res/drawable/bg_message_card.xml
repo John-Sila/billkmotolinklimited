@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--this is used to display the mpesa messages-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/brown5" />
+    <corners android:radius="12dp"/>
+</shape>

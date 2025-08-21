@@ -15,34 +15,110 @@
         android:contentDescription="@string/app_logo"
         android:layout_marginBottom="24dp"/>
 
-    <EditText
-        android:id="@+id/editTextEmail"
+<!--    login-->
+    <LinearLayout
+        android:id="@+id/loginModal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:autofillHints=""
-        android:hint="@string/email"
-        android:inputType="textEmailAddress"/>
+        android:orientation="vertical"
+        android:visibility="visible"
+        android:gravity="center">
 
-    <EditText
-        android:id="@+id/editTextPassword"
+        <EditText
+            android:id="@+id/editTextEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints=""
+            android:hint="@string/email"
+            android:inputType="textEmailAddress"/>
+
+        <EditText
+            android:id="@+id/editTextPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints=""
+            android:hint="@string/password"
+            android:inputType="textPassword"/>
+
+        <Button
+            android:id="@+id/buttonLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/menu_login"
+            android:backgroundTint="@android:color/holo_green_dark"
+            android:layout_marginTop="16dp"/>
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginTop="15dp"
+            android:layout_gravity="center"/>
+
+    </LinearLayout>
+
+<!--    reset pwd-->
+    <LinearLayout
+        android:id="@+id/forgotPasswordModal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:autofillHints=""
-        android:hint="@string/password"
-        android:inputType="textPassword"/>
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:gravity="center">
 
-    <Button
-        android:id="@+id/buttonLogin"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/menu_login"
-        android:layout_marginTop="16dp"/>
+        <EditText
+            android:id="@+id/forgotPwdEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints=""
+            android:hint="@string/enter_your_email_here"
+            android:inputType="textEmailAddress"/>
 
-    <ProgressBar
-        android:id="@+id/progressBar"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/goBack"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:contentDescription="@string/money_image"
+                android:src="@drawable/back"
+                android:layout_gravity="center"
+                android:layout_marginEnd="8dp" />
+            <Button
+                android:id="@+id/buttonSendLink"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/send_reset_link"
+                android:backgroundTint="@android:color/holo_orange_dark"
+                android:layout_margin="16dp"/>
+
+            <ProgressBar
+                android:id="@+id/fpProgressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:padding="5dp"
+                android:layout_gravity="center"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/forgotPasswordLink"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:layout_gravity="center"/>
+        android:text="@string/forgot_password"
+        android:textSize="18sp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="5dp"
+        android:layout_gravity="end"
+        android:textStyle="bold"/>
 
 </LinearLayout>

@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.post_memo.PostMemoFragment">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:id="@+id/memoScrollView"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:id="@+id/timeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Select Time"
+                android:background="@drawable/rounded_light_gray"
+                android:padding="10dp"
+                android:textColor="@color/gray"
+                android:layout_margin="30dp"
+                android:textSize="16sp"/>
+
+            <DatePicker
+                android:id="@+id/memoDatePicker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="6dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:layout_height="wrap_content">
+
+                    <EditText
+                        android:id="@+id/memoHeading"
+                        android:layout_width="300dp"
+                        android:layout_height="wrap_content"
+                        android:autofillHints=""
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="20dp"
+                        android:hint="@string/title"
+                        android:inputType="textCapCharacters"
+                        android:padding="12dp"/>
+
+                    <!--description-->
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="6dp">
+
+                        <LinearLayout
+                            android:orientation="vertical"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <LinearLayout
+                                android:id="@+id/formattingToolbar"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:padding="20dp"
+                                android:gravity="end">
+
+                                <ImageButton
+                                    android:id="@+id/boldButton"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:src="@drawable/bold"
+                                    android:contentDescription="@string/bold"
+                                    android:background="?attr/selectableItemBackgroundBorderless" />
+
+                                <ImageButton
+                                    android:id="@+id/italicButton"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:src="@drawable/italic"
+                                    android:contentDescription="@string/italic"
+                                    android:background="?attr/selectableItemBackgroundBorderless" />
+
+                                <ImageButton
+                                    android:id="@+id/underlineButton"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:src="@drawable/underline"
+                                    android:contentDescription="@string/underline"
+                                    android:background="?attr/selectableItemBackgroundBorderless" />
+                            </LinearLayout>
+                            <EditText
+                                android:id="@+id/memoDescription"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:autofillHints=""
+                                android:minLines="2"
+                                android:layout_marginTop="10dp"
+                                android:padding="15dp"
+                                android:gravity="top|start"
+                                android:inputType="textMultiLine|textCapSentences"
+                                android:scrollbars="vertical"
+                                android:overScrollMode="always"
+                                android:hint="@string/type_your_memo_description" />
+
+                        </LinearLayout>
+
+                    </androidx.cardview.widget.CardView>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="6dp">
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/venue"
+                        android:background="@drawable/rounded_light_gray"
+                        android:padding="10dp"
+                        android:textColor="@color/gray"
+                        android:layout_margin="30dp"
+                        android:textSize="16sp"/>
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:gravity="center|start"
+                        android:layout_height="wrap_content">
+
+                        <!--main spinner-->
+                        <LinearLayout
+                            android:orientation="vertical"
+                            android:paddingStart="30dp"
+                            android:paddingEnd="10dp"
+                            android:paddingBottom="30dp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
+                            <Spinner
+                                android:id="@+id/memoModeSpinner"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:layout_marginBottom="8dp" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:orientation="vertical"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
+
+                            <!--online meeting options-->
+                            <LinearLayout
+                                android:id="@+id/onlineOptionsLayout"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:visibility="gone"
+                                android:layout_marginTop="8dp">
+
+                                <!-- Meet Option -->
+                                <LinearLayout
+                                    android:id="@+id/meetOptionLayout"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:clickable="true"
+                                    android:focusable="true"
+                                    android:gravity="center_vertical"
+                                    android:padding="8dp">
+
+                                    <CheckBox
+                                        android:id="@+id/checkboxMeet"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:buttonTint="@color/black"/>
+
+                                    <ImageView
+                                        android:layout_width="24dp"
+                                        android:layout_height="24dp"
+                                        android:layout_marginStart="8dp"
+                                        android:src="@drawable/ic_meet_logo" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Google Meet"
+                                        android:textSize="16sp"
+                                        android:layout_marginStart="8dp"/>
+                                </LinearLayout>
+
+                                <!-- Teams Option -->
+                                <LinearLayout
+                                    android:id="@+id/teamsOptionLayout"
+                                    android:layout_width="match_parent"
+                                    android:clickable="true"
+                                    android:focusable="true"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical"
+                                    android:padding="8dp">
+
+                                    <CheckBox
+                                        android:id="@+id/checkboxTeams"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:buttonTint="@color/black"/>
+
+                                    <ImageView
+                                        android:layout_width="24dp"
+                                        android:layout_height="24dp"
+                                        android:layout_marginStart="8dp"
+                                        android:src="@drawable/ic_teams_logo" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Microsoft Teams"
+                                        android:textSize="16sp"
+                                        android:layout_marginStart="8dp"/>
+                                </LinearLayout>
+
+                                <!-- Zoom Option -->
+                                <LinearLayout
+                                    android:id="@+id/zoomOptionLayout"
+                                    android:layout_width="match_parent"
+                                    android:clickable="true"
+                                    android:focusable="true"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical"
+                                    android:padding="8dp">
+
+                                    <CheckBox
+                                        android:id="@+id/checkboxZoom"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:buttonTint="@color/black"/>
+
+                                    <ImageView
+                                        android:layout_width="24dp"
+                                        android:layout_height="24dp"
+                                        android:layout_marginStart="8dp"
+                                        android:src="@drawable/ic_zoom_logo" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Zoom"
+                                        android:textSize="16sp"
+                                        android:layout_marginStart="8dp"/>
+                                </LinearLayout>
+
+                                <!-- WhatsApp Option -->
+                                <LinearLayout
+                                    android:id="@+id/whatsAppOptionLayout"
+                                    android:layout_width="match_parent"
+                                    android:clickable="true"
+                                    android:focusable="true"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical"
+                                    android:padding="8dp">
+
+                                    <CheckBox
+                                        android:id="@+id/checkboxWhatsApp"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:buttonTint="@color/black"/>
+
+                                    <ImageView
+                                        android:layout_width="24dp"
+                                        android:layout_height="24dp"
+                                        android:layout_marginStart="8dp"
+                                        android:src="@drawable/ic_whatsapp" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/whatsapp"
+                                        android:textSize="16sp"
+                                        android:layout_marginStart="8dp"/>
+                                </LinearLayout>
+
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <ProgressBar
+                android:id="@+id/memoProgressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginTop="15dp"
+                android:layout_gravity="center"/>
+            <Button
+                android:id="@+id/btnPostMemo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/post_memo"
+                android:textColor="@color/white"
+                android:padding="12dp"
+                android:layout_margin="15dp"
+                android:layout_marginTop="12dp"/>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

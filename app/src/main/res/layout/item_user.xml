@@ -13,10 +13,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@drawable/rounded_border"
         android:padding="16dp">
 
-<!--        username-->
+        <!--username-->
         <TextView
             android:id="@+id/textViewName"
             android:layout_width="wrap_content"
@@ -26,7 +25,7 @@
             android:textSize="18sp"
             android:textStyle="bold"/>
 
-<!--        active status-->
+        <!--active status-->
         <TextView
             android:id="@+id/textViewActiveStatus"
             android:layout_width="wrap_content"
@@ -34,7 +33,7 @@
             android:text="No"
             android:textSize="16sp"/>
 
-    <!--        sunday text-->
+        <!--sunday text-->
         <TextView
             android:id="@+id/textViewSundayText"
             android:layout_width="wrap_content"
@@ -42,8 +41,9 @@
             android:text=""
             android:textSize="16sp"/>
 
-<!--        pending amount-->
+        <!--pending amount-->
         <LinearLayout
+            android:id="@+id/pALine"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -69,8 +69,9 @@
                 android:textSize="18sp"/>
         </LinearLayout>
 
-<!--        daily target-->
+        <!--daily target-->
         <LinearLayout
+            android:id="@+id/dTLine"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -96,8 +97,9 @@
 
         </LinearLayout>
 
-<!--        current In-App bal-->
+        <!--current In-App bal-->
         <LinearLayout
+            android:id="@+id/cIALine"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -125,8 +127,9 @@
 
         </LinearLayout>
 
-<!--        sunday target-->
+        <!--sunday target-->
         <LinearLayout
+            android:id="@+id/sTLine"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -154,66 +157,155 @@
 
 
 
-
-
-
-
-
-
-
-
+        <EditText
+            android:id="@+id/inputPartialApproval"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints=""
+            android:hint="@string/zero_amount"
+            android:inputType="numberDecimal"
+            android:padding="16dp"
+            android:visibility="gone"
+            android:textColor="@android:color/holo_orange_dark"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/rounded_inputs" />
+        <ProgressBar
+            android:id="@+id/pApprovalProgressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginTop="12dp"
+            android:layout_gravity="center"/>
         <Button
             android:id="@+id/btnApprovePartial"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Approve Partial Income"
-            android:backgroundTint="@android:color/holo_blue_dark"
-            android:textColor="@android:color/white"
+            android:backgroundTint="@color/brown1"
             android:padding="12dp"
             android:layout_marginTop="12dp"/>
+
+
+
+        <ProgressBar
+            android:id="@+id/approvalProgressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginTop="12dp"
+            android:layout_gravity="center"/>
         <Button
             android:id="@+id/btnApproveAllIncome"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Approve All Pending Income"
-            android:backgroundTint="@android:color/holo_red_dark"
-            android:textColor="@android:color/white"
+            android:backgroundTint="@color/brown2"
             android:padding="12dp"
             android:layout_marginTop="12dp"/>
+
+
+        <EditText
+            android:id="@+id/inputDailyTarget"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints=""
+            android:hint="@string/zero_amount"
+            android:inputType="numberDecimal"
+            android:padding="16dp"
+            android:visibility="gone"
+            android:textColor="@android:color/holo_orange_dark"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/rounded_inputs" />
+        <ProgressBar
+            android:id="@+id/dTargetProgressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginTop="12dp"
+            android:layout_gravity="center"/>
         <Button
             android:id="@+id/btnChangeDailyTarget"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Change Daily Target"
-            android:backgroundTint="@android:color/holo_green_dark"
-            android:textColor="@android:color/white"
+            android:backgroundTint="@color/brown3"
             android:padding="12dp"
             android:layout_marginTop="12dp"/>
+
+
+        <EditText
+            android:id="@+id/inputSundayTarget"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints=""
+            android:hint="@string/zero_amount"
+            android:inputType="numberDecimal"
+            android:padding="16dp"
+            android:visibility="gone"
+            android:textColor="@android:color/holo_orange_dark"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/rounded_inputs" />
+        <ProgressBar
+            android:id="@+id/sTargetProgressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginTop="12dp"
+            android:layout_gravity="center"/>
         <Button
             android:id="@+id/btnChangeSundayTarget"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Change Sunday Target"
-            android:backgroundTint="@android:color/holo_orange_dark"
-            android:textColor="@android:color/white"
+            android:backgroundTint="@color/brown4"
             android:padding="12dp"
             android:layout_marginTop="12dp"/>
+
+
+        <EditText
+            android:id="@+id/inputInAppBal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints=""
+            android:hint="@string/zero_amount"
+            android:inputType="numberDecimal"
+            android:padding="16dp"
+            android:visibility="gone"
+            android:textColor="@android:color/holo_orange_dark"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/rounded_inputs" />
+        <ProgressBar
+            android:id="@+id/iABalProgressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginTop="12dp"
+            android:layout_gravity="center"/>
         <Button
             android:id="@+id/btnChangeInAppBalance"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Change In-App Balance"
-            android:backgroundTint="@android:color/holo_purple"
-            android:textColor="@android:color/white"
+            android:text="@string/change_in_app_balance"
+            android:textColor="@color/brown2"
+            android:backgroundTint="@color/brown5"
             android:padding="12dp"
             android:layout_marginTop="12dp"/>
+
+
+        <ProgressBar
+            android:id="@+id/sWStatusProgressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginTop="12dp"
+            android:layout_gravity="center"/>
         <Button
             android:id="@+id/btnChangeSundayWorkingStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/brown1"
+            android:backgroundTint="@color/brown6"
             android:text="Change Sunday Working Status"
-            android:backgroundTint="@android:color/holo_blue_dark"
-            android:textColor="@android:color/white"
             android:padding="12dp"
             android:layout_marginTop="12dp"/>
 

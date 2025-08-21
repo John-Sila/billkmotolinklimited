@@ -16,3 +16,15 @@ class LoadingActivity : Activity() {
     }
 }
 
+class LogoutLoadingActivity : Activity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.logout_load)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        finish() // This closes the loading screen when it receives an intent
+    }
+}
+

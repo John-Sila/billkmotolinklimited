@@ -18,7 +18,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Net Income"
+        android:text="@string/net_income_broken"
         android:textAlignment="center"
         android:textColor="@android:color/white"
         android:textStyle="bold"/>
@@ -27,7 +27,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Gross Income"
+        android:text="@string/gross_income_broken"
         android:textAlignment="center"
         android:textColor="@android:color/white"
         android:textStyle="bold"/>
@@ -36,7 +36,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Net Deviation"
+        android:text="@string/gross_deviation"
         android:textAlignment="center"
         android:textColor="@android:color/white"
         android:textStyle="bold"/>
@@ -45,16 +45,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Gross Deviation"
-        android:textAlignment="center"
-        android:textColor="@android:color/white"
-        android:textStyle="bold"/>
-
-    <TextView
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Net Gross Diff"
+        android:text="@string/net_gross_diff"
         android:textAlignment="center"
         android:textColor="@android:color/white"
         android:textStyle="bold"/>

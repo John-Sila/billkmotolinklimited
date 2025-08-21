@@ -9,81 +9,144 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="16dp">
+        android:padding="5dp">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
 
-
             <!--profile-->
-            <LinearLayout
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center">
+                android:layout_margin="8dp"
+                android:orientation="vertical"
+                android:layout_marginBottom="20dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="6dp">
 
-                <ImageView
-                    android:id="@+id/malePImage"
-                    android:layout_width="75dp"
-                    android:layout_height="75dp"
-                    android:contentDescription="@string/money_image"
-                    android:src="@drawable/male"
-                    android:visibility="gone"
-                    android:scaleType="centerCrop"
-                    android:background="@drawable/circle_bg"
-                    android:layout_marginEnd="8dp" />
-                <ImageView
-                    android:id="@+id/femalePImage"
-                    android:layout_width="75dp"
-                    android:layout_height="75dp"
-                    android:contentDescription="@string/money_image"
-                    android:src="@drawable/female"
-                    android:visibility="gone"
-                    android:scaleType="centerCrop"
-                    android:background="@drawable/circle_bg"
-                    android:layout_marginEnd="8dp" />
+                <com.facebook.shimmer.ShimmerFrameLayout
+                    android:id="@+id/shimmerLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:shimmer_auto_start="true"
+                    app:shimmer_duration="1200">
+
+                    <!-- This is your placeholder layout -->
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:padding="5dp">
+
+                        <View
+                            android:layout_width="75dp"
+                            android:layout_height="75dp"
+                            android:layout_marginBottom="8dp"
+                            android:background="@drawable/shimmer_circle_placeholder" />
+
+                        <LinearLayout
+                            android:orientation="vertical"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="16dp">
+
+                            <View
+                                android:layout_width="100dp"
+                                android:layout_height="20dp"
+                                android:background="@drawable/shimmer_placeholder" />
+
+                            <View
+                                android:layout_width="200dp"
+                                android:layout_height="20dp"
+                                android:layout_marginTop="8dp"
+                                android:background="@drawable/shimmer_placeholder" />
+
+                            <View
+                                android:layout_width="50dp"
+                                android:layout_height="20dp"
+                                android:layout_marginTop="8dp"
+                                android:background="@drawable/shimmer_placeholder" />
+
+                        </LinearLayout>
+
+
+                    </LinearLayout>
+                </com.facebook.shimmer.ShimmerFrameLayout>
+
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginStart="5dp"
-                    android:gravity="start">
-                    <TextView
-                        android:id="@+id/usernameTextView"
-                        android:layout_width="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="15dp"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:id="@+id/malePImage"
+                        android:layout_width="75dp"
+                        android:layout_height="75dp"
+                        android:contentDescription="@string/money_image"
+                        android:src="@drawable/male"
+                        android:visibility="gone"
+                        android:scaleType="centerCrop"
+                        android:background="@drawable/circle_bg"
+                        android:layout_marginEnd="8dp" />
+                    <ImageView
+                        android:id="@+id/femalePImage"
+                        android:layout_width="75dp"
+                        android:layout_height="75dp"
+                        android:contentDescription="@string/money_image"
+                        android:src="@drawable/female"
+                        android:visibility="gone"
+                        android:scaleType="centerCrop"
+                        android:background="@drawable/circle_bg"
+                        android:layout_marginEnd="8dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text=""
-                        android:textSize="18sp"
-                        android:textStyle="bold"/>
-                    <TextView
-                        android:id="@+id/emailTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=""
-                        android:textSize="18sp"
-                        android:layout_marginEnd="15dp"/>
-                    <TextView
-                        android:id="@+id/phoneTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=""
-                        android:textSize="18sp"
-                        android:layout_marginEnd="15dp"/>
-                    <TextView
-                        android:id="@+id/rankTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=""
-                        android:textColor="@android:color/holo_green_dark"
-                        android:textSize="18sp"
-                        android:textStyle="italic"
-                        android:layout_marginEnd="15dp"/>
+                        android:orientation="vertical"
+                        android:layout_marginStart="5dp"
+                        android:gravity="start">
+                        <TextView
+                            android:id="@+id/usernameTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textSize="18sp"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/emailTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textSize="18sp"
+                            android:layout_marginEnd="15dp"/>
+                        <TextView
+                            android:id="@+id/phoneTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textStyle="italic"
+                            android:textSize="18sp"
+                            android:layout_marginEnd="15dp"/>
+                        <TextView
+                            android:id="@+id/rankTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textColor="@android:color/holo_green_dark"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:layout_marginEnd="15dp"/>
+                    </LinearLayout>
+
                 </LinearLayout>
 
-            </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
             <!--actions-->
             <LinearLayout
@@ -114,7 +177,7 @@
                     android:textStyle="bold"/>
             </LinearLayout>
 
-<!--        username div-->
+            <!--username div-->
             <LinearLayout
                 android:id="@+id/newUserNameLayout"
                 android:layout_width="match_parent"
@@ -131,7 +194,6 @@
                     android:contentDescription="@string/money_image"
                     android:src="@drawable/address"
                     android:scaleType="centerCrop"
-                    android:background="@drawable/circle_bg"
                     android:layout_marginEnd="8dp" />
                 <EditText
                     android:id="@+id/inputNewUsername"
@@ -144,18 +206,22 @@
                     android:layout_marginStart="10dp"
                     android:textColor="@color/gray"
                     android:background="@drawable/rounded_inputs" />
-
-
             </LinearLayout>
 
+            <ProgressBar
+                android:id="@+id/changeUserNameProgressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginTop="15dp"
+                android:layout_gravity="center"/>
             <!-- change username -->
             <Button
                 android:id="@+id/btnChangeUsername"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/change_username"
-                android:backgroundTint="@android:color/holo_blue_dark"
-                android:textColor="@android:color/white"
+                android:backgroundTint="@color/brown1"
                 android:padding="12dp"
                 android:visibility="gone"
                 android:layout_marginTop="12dp"/>
@@ -186,7 +252,6 @@
                         android:contentDescription="@string/money_image"
                         android:src="@drawable/secure"
                         android:scaleType="centerCrop"
-                        android:background="@drawable/circle_bg"
                         android:layout_marginEnd="8dp" />
                     <EditText
                         android:id="@+id/oldPwInput"
@@ -217,7 +282,6 @@
                         android:contentDescription="@string/money_image"
                         android:src="@drawable/secure"
                         android:scaleType="centerCrop"
-                        android:background="@drawable/circle_bg"
                         android:layout_marginEnd="8dp" />
                     <EditText
                         android:id="@+id/newPwInput"
@@ -234,14 +298,20 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <ProgressBar
+                android:id="@+id/changePwdProgressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginTop="15dp"
+                android:layout_gravity="center"/>
             <!-- change password -->
             <Button
                 android:id="@+id/btnChangePassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/change_password"
-                android:backgroundTint="@android:color/holo_orange_dark"
-                android:textColor="@android:color/white"
+                android:backgroundTint="@color/brown2"
                 android:padding="12dp"
                 android:visibility="gone"
                 android:layout_marginTop="12dp"/>
@@ -253,116 +323,263 @@
                 android:layout_height="100dp"
                 android:layout_gravity="center"/>
 
-            <!--company income-->
-            <LinearLayout
-                android:id="@+id/companyIncomeLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="20dp"
-                android:visibility="gone"
-                android:gravity="start">
-
-    <!--            actual income text-->
-                <LinearLayout
-                    android:id="@+id/companyIncome"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="20dp"
-                    android:visibility="visible"
-                    android:gravity="center">
-
-                    <ImageView
-                        android:id="@+id/incomeImage"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:contentDescription="@string/money_image"
-                        android:src="@drawable/wallet"
-                        android:scaleType="centerCrop"
-                        android:background="@drawable/circle_bg"
-                        android:layout_marginEnd="8dp" />
-
-                    <TextView
-                        android:id="@+id/incomeText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/company_income"
-                        android:textSize="18sp"
-                        android:textStyle="bold"/>
-                    <TextView
-                        android:id="@+id/incomeValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/zero_amount"
-                        android:layout_marginStart="10dp"
-                        android:textSize="22sp"
-                        android:textStyle="bold"/>
-
-                </LinearLayout>
-
-<!--                variables for income-->
-                <LinearLayout
-                    android:id="@+id/companyIncomeVariables"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="20dp"
-                    android:gravity="start">
-
-                    <TextView
-                        android:id="@+id/variablesText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/variables_directly"
-                        android:textSize="22sp"
-                        android:textColor="@android:color/holo_orange_dark"
-                        android:textStyle="bold"/>
-                    <TextView
-                        android:id="@+id/variable1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/income_approved_from_riders"
-                        android:textSize="18sp"/>
-                    <TextView
-                        android:id="@+id/variable2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/human_resource_budgets"
-                        android:textSize="18sp"/>
-                    <TextView
-                        android:id="@+id/variable3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/ploughed_back"
-                        android:textSize="18sp"/>
-                    <TextView
-                        android:id="@+id/variable4"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/direct_withdrawals"
-                        android:textSize="18sp"/>
-
-                </LinearLayout>
 
 
-
-            </LinearLayout>
-
-
-
-<!--            ceo stuff-->
+            <!-- ceo stuff-->
             <LinearLayout
                 android:id="@+id/ceoDiv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:visibility="gone"
-                android:layout_marginTop="15dp"
                 android:gravity="center">
 
+                <!--incomes-->
+                <LinearLayout
+                    android:id="@+id/companyIncomeLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="20dp"
+                    android:gravity="start">
 
-<!--                // withdrawal-->
+                    <!--company income-->
+                    <LinearLayout
+                        android:id="@+id/companyIncome"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="30dp"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:id="@+id/incomeImage"
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
+                            android:contentDescription="@string/money_image"
+                            android:src="@drawable/wallet"
+                            android:scaleType="centerCrop"
+                            android:background="@drawable/circle_bg"
+                            android:layout_marginEnd="8dp" />
+
+                        <TextView
+                            android:id="@+id/incomeText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/company_income"
+                            android:textSize="18sp"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/incomeValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/zero_amount"
+                            android:layout_marginStart="10dp"
+                            android:textSize="22sp"
+                            android:textStyle="bold"/>
+
+                    </LinearLayout>
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:orientation="vertical"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="6dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:padding="15dp"
+                            android:gravity="center">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/this_week"
+                                android:textSize="18sp"
+                                android:textStyle="bold"/>
+                        </LinearLayout>
+
+
+                    </androidx.cardview.widget.CardView>
+
+                    <!--gross income-->
+                    <LinearLayout
+                        android:id="@+id/weeklyGross"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="20dp"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
+                            android:contentDescription="@string/money_image"
+                            android:src="@drawable/money1"
+                            android:scaleType="centerCrop"
+                            android:layout_marginEnd="8dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/gross_income_"
+                            android:textSize="18sp"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/totalGrossIncome"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/zero_amount"
+                            android:textColor="@android:color/holo_blue_dark"
+                            android:layout_marginStart="10dp"
+                            android:textSize="22sp"
+                            android:textStyle="bold"/>
+
+                    </LinearLayout>
+
+                    <!--net income-->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="20dp"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
+                            android:contentDescription="@string/money_image"
+                            android:src="@drawable/money2"
+                            android:scaleType="centerCrop"
+                            android:layout_marginEnd="8dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/net_income_"
+                            android:textSize="18sp"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/totalNetIncome"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/zero_amount"
+                            android:textColor="@android:color/holo_green_dark"
+                            android:layout_marginStart="10dp"
+                            android:textSize="22sp"
+                            android:textStyle="bold"/>
+
+                    </LinearLayout>
+
+                    <!--rider expenses-->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="20dp"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
+                            android:contentDescription="@string/money_image"
+                            android:src="@drawable/money3"
+                            android:scaleType="centerCrop"
+                            android:layout_marginEnd="8dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/total_rider_expenses"
+                            android:textSize="18sp"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/totalDifference"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/zero_amount"
+                            android:textColor="@android:color/holo_red_dark"
+                            android:layout_marginStart="10dp"
+                            android:textSize="22sp"
+                            android:textStyle="bold"/>
+
+                    </LinearLayout>
+
+                    <!-- variables for income-->
+                    <LinearLayout
+                        android:id="@+id/companyIncomeVariables"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="20dp"
+                        android:gravity="start">
+
+                        <TextView
+                            android:id="@+id/variablesText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/variables_directly"
+                            android:textSize="22sp"
+                            android:textColor="@android:color/holo_orange_dark"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/variable1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/income_approved_from_riders"
+                            android:textSize="18sp"/>
+                        <TextView
+                            android:id="@+id/variable2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/human_resource_budgets"
+                            android:textSize="18sp"/>
+                        <TextView
+                            android:id="@+id/variable3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ploughed_back"
+                            android:textSize="18sp"/>
+                        <TextView
+                            android:id="@+id/variable4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/direct_withdrawals"
+                            android:textSize="18sp"/>
+
+                    </LinearLayout>
+
+                    <!--commission constant-->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="20dp"
+                        android:gravity="start">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/current_commission_constant_is"
+                            android:textSize="18sp"/>
+
+                        <TextView
+                            android:id="@+id/cConstant"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/_0_percent"
+                            android:textSize="18sp"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!--// withdrawal-->
                 <LinearLayout
                     android:id="@+id/withdrawalLayout"
                     android:layout_width="match_parent"
@@ -406,8 +623,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/record_withdraw_from_company_to_personal"
-                    android:backgroundTint="@android:color/holo_orange_dark"
-                    android:textColor="@android:color/white"
+                    android:backgroundTint="@color/brown3"
                     android:padding="12dp"
                     android:layout_marginTop="12dp"/>
 
@@ -457,8 +673,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/add_to_company_account"
-                    android:backgroundTint="@android:color/holo_green_dark"
-                    android:textColor="@android:color/white"
+                    android:backgroundTint="@color/brown4"
                     android:padding="12dp"
                     android:layout_marginTop="12dp"/>
 
@@ -493,8 +708,6 @@
                         android:layout_marginStart="10dp"
                         android:textColor="@color/gray"
                         android:background="@drawable/rounded_inputs" />
-
-
                 </LinearLayout>
                 <ProgressBar
                     android:id="@+id/cProgressBar"
@@ -507,8 +720,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/change_commission_constant"
-                    android:backgroundTint="@android:color/holo_blue_dark"
-                    android:textColor="@android:color/white"
+                    android:textColor="@color/brown2"
+                    android:backgroundTint="@color/brown5"
                     android:padding="12dp"
                     android:layout_marginTop="12dp"/>
 
@@ -525,14 +738,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/pause_operations"
-                    android:backgroundTint="@android:color/holo_red_dark"
-                    android:textColor="@android:color/white"
+                    android:textColor="@color/brown1"
+                    android:backgroundTint="@color/brown6"
                     android:visibility="gone"
                     android:padding="12dp"
                     android:layout_marginTop="12dp"/>
 
 
-                <!--                continue operations-->
+                <!--continue operations-->
                 <Button
                     android:id="@+id/btnContinueOperations"
                     android:layout_width="match_parent"
@@ -540,6 +753,24 @@
                     android:text="@string/continue_operations"
                     android:backgroundTint="@android:color/holo_green_dark"
                     android:textColor="@android:color/white"
+                    android:visibility="gone"
+                    android:padding="12dp"
+                    android:layout_marginTop="12dp"/>
+
+                <!--Disburse budget-->
+                <ProgressBar
+                    android:id="@+id/progressBarDisburseBudget"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layout_gravity="center"/>
+                <Button
+                    android:id="@+id/btnDisburseBudget"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="@color/brown1"
+                    android:backgroundTint="@color/brown6"
                     android:visibility="gone"
                     android:padding="12dp"
                     android:layout_marginTop="12dp"/>

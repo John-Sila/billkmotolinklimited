@@ -18,27 +18,82 @@
         tools:layout="@layout/fragment_reports" />
 
     <fragment
+        android:id="@+id/nav_clockins"
+        android:name="com.example.billkmotolinkltd.ui.clockins.ClockInFragment"
+        android:label="Clock In"
+        tools:layout="@layout/fragment_clockins" />
+
+    <fragment
         android:id="@+id/nav_clockouts"
         android:name="com.example.billkmotolinkltd.ui.clockouts.ClockoutsFragment"
         android:label="@string/menu_clockouts"
         tools:layout="@layout/fragment_clockouts" />
 
     <fragment
+        android:id="@+id/nav_require"
+        android:name="com.example.billkmotolinkltd.ui.require_reclock.RequireReclockFragment"
+        android:label="Require"
+        tools:layout="@layout/fragment_require_reclock" />
+
+    <fragment
+        android:id="@+id/nav_corrections"
+        android:name="com.example.billkmotolinkltd.ui.corrections.CorrectionsFragment"
+        android:label="Corrections"
+        tools:layout="@layout/fragment_corrections" />
+
+    <fragment
+        android:id="@+id/nav_complain"
+        android:name="com.example.billkmotolinkltd.ui.complain.ComplainFragment"
+        android:label="Complain"
+        tools:layout="@layout/fragment_complain" />
+
+    <fragment
         android:id="@+id/nav_user"
         android:name="com.example.billkmotolinkltd.ui.users.UsersFragment"
         android:label="@string/menu_user"
-        tools:layout="@layout/fragment_bikes" />
+        tools:layout="@layout/fragment_users" />
+    <fragment
+        android:id="@+id/nav_post_memo"
+        android:name="com.example.billkmotolinkltd.ui.post_memo.PostMemoFragment"
+        android:label="@string/memo"
+        tools:layout="@layout/fragment_post_memo" />
 
     <fragment
-        android:id="@+id/nav_bike"
-        android:name="com.example.billkmotolinkltd.ui.bikes.BikesFragment"
+        android:id="@+id/nav_batteries"
+        android:name="com.example.billkmotolinkltd.ui.batteries.BatteriesFragment"
         android:label="@string/menu_bike"
-        tools:layout="@layout/fragment_bikes" />
+        tools:layout="@layout/fragment_batteries" />
+
+    <fragment
+        android:id="@+id/nav_manage_assets"
+        android:name="com.example.billkmotolinkltd.ui.assets.AssetsFragment"
+        android:label="@string/asset_management"
+        tools:layout="@layout/fragment_manage_assets" />
+    <fragment
+        android:id="@+id/nav_profiles"
+        android:name="com.example.billkmotolinkltd.ui.profiles.ProfilesFragment"
+        android:label="User Profiler"
+        tools:layout="@layout/fragment_profiles" />
     <fragment
         android:id="@+id/nav_approvals"
         android:name="com.example.billkmotolinkltd.ui.approvals.ApprovalsFragment"
         android:label="@string/menu_approvals"
         tools:layout="@layout/fragment_approvals" />
+    <fragment
+        android:id="@+id/nav_cashflows"
+        android:name="com.example.billkmotolinkltd.ui.cashflows.CashflowsFragment"
+        android:label="@string/cash_flows"
+        tools:layout="@layout/fragment_cashflows" />
+    <fragment
+        android:id="@+id/nav_tracer"
+        android:name="com.example.billkmotolinkltd.ui.tracer.TracerFragment"
+        android:label="Tracer"
+        tools:layout="@layout/fragment_tracer" />
+    <fragment
+        android:id="@+id/nav_restoration"
+        android:name="com.example.billkmotolinkltd.ui.restoration.RestorationFragment"
+        android:label="Restoration"
+        tools:layout="@layout/fragment_restoration" />
     <fragment
         android:id="@+id/nav_hr"
         android:name="com.example.billkmotolinkltd.ui.hr.HrFragment"
@@ -60,10 +115,15 @@
         android:label="@string/menu_weeklyreports"
         tools:layout="@layout/fragment_weeklyreports" />
     <fragment
-        android:id="@+id/nav_data"
-        android:name="com.example.billkmotolinkltd.ui.data.DataFragment"
-        android:label="@string/menu_data"
-        tools:layout="@layout/fragment_data" />
+        android:id="@+id/nav_chatrooms"
+        android:name="com.example.billkmotolinkltd.ui.chatrooms.ChatroomsFragment"
+        android:label="Chatrooms"
+        tools:layout="@layout/fragment_chatrooms" />
+    <fragment
+        android:id="@+id/nav_mpesa"
+        android:name="com.example.billkmotolinkltd.ui.mpesa.MpesaFragment"
+        android:label="Mpesa"
+        tools:layout="@layout/fragment_mpesa" />
     <fragment
         android:id="@+id/nav_settings"
         android:name="com.example.billkmotolinkltd.ui.settings.SettingsFragment"

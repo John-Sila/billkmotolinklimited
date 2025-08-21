@@ -7,16 +7,28 @@
     android:layout_height="match_parent"
     tools:context=".ui.home.HomeFragment">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:padding="0dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:layout_height="match_parent">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <ProgressBar
+                android:id="@+id/homeProgressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginTop="15dp"
+                android:layout_gravity="center"/>
+
+            <!--hellos-->
             <TextView
                 android:id="@+id/helloText"
                 android:layout_width="match_parent"
@@ -37,113 +49,809 @@
                 android:textSize="22sp"/>
 
             <!--weather-->
-            <TextView
-                android:id="@+id/weather"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/loading_weather"
-                android:textSize="18sp"
-                android:padding="16dp"
-                android:gravity="start"/>
-
-
-            <!--        amount pending approval-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="start"
-                android:padding="16dp">
+                android:gravity="center|start"
+                android:layout_gravity="center"
+                android:padding="8dp">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
                     android:contentDescription="@string/money_image"
-                    android:src="@drawable/view"
+                    android:src="@drawable/weather"
                     android:layout_marginEnd="8dp" />
 
                 <TextView
-                    android:id="@+id/pending_amount_text"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/weather"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/pending_amount"
+                    android:text="@string/loading_weather"
                     android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:fontFamily="sans-serif-black"
-                    android:layout_marginStart="16dp"/>
-                <!-- Bold Text -->
-                <TextView
-                    android:id="@+id/pendingAmountTextView"
-                    android:layout_width="wrap_content"
+                    android:padding="16dp"
+                    android:gravity="start"/>
+            </LinearLayout>
+
+            <!--memo-->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/memoLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginBottom="20dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="6dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/zero_amount"
-                    android:textSize="22sp"
-                    android:fontFamily="sans-serif-black"
-                    android:layout_marginStart="15dp"
-                    android:textStyle="bold"/>
+                    android:orientation="vertical">
+
+                    <!--notice board-->
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        app:cardCornerRadius="12dp"
+                        android:gravity="center"
+                        app:cardElevation="6dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="18sp"
+                            android:textColor="@android:color/holo_green_dark"
+                            android:gravity="center"
+                            android:text="@string/noticeboard"
+                            android:padding="10dp"/>
+                    </androidx.cardview.widget.CardView>
+
+                    <!--heading-->
+                    <TextView
+                        android:id="@+id/memoHeading"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="18sp"
+                        android:padding="10dp"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
+                        android:gravity="start"/>
+
+                    <!--description-->
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="6dp">
+
+                        <TextView
+                            android:id="@+id/memoDescription"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="18sp"
+                            android:padding="10dp"
+                            android:gravity="start"/>
+                    </androidx.cardview.widget.CardView>
+
+                    <!--time for posting-->
+                    <TextView
+                        android:id="@+id/memoTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="18sp"
+                        android:textColor="@android:color/darker_gray"
+                        android:padding="10dp"
+                        android:textStyle="bold"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
+                        android:gravity="start"/>
+
+                    <!-- Physical Image -->
+                    <LinearLayout
+                        android:id="@+id/physicalOptionLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:clickable="true"
+                        android:visibility="gone"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:padding="8dp">
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginStart="8dp"
+                            android:src="@drawable/ic_house" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Physical"
+                            android:textSize="16sp"
+                            android:layout_marginStart="8dp"/>
+                    </LinearLayout>
+
+                    <!-- Meet Image -->
+                    <LinearLayout
+                        android:id="@+id/meetOptionLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:clickable="true"
+                        android:visibility="gone"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:padding="8dp">
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginStart="8dp"
+                            android:src="@drawable/ic_meet_logo" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Google Meet"
+                            android:textSize="16sp"
+                            android:layout_marginStart="8dp"/>
+                    </LinearLayout>
+
+                    <!-- Teams Option -->
+                    <LinearLayout
+                        android:id="@+id/teamsOptionLayout"
+                        android:layout_width="match_parent"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:visibility="gone"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="8dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginStart="8dp"
+                            android:src="@drawable/ic_teams_logo" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Microsoft Teams"
+                            android:textSize="16sp"
+                            android:layout_marginStart="8dp"/>
+                    </LinearLayout>
+
+                    <!-- Zoom Option -->
+                    <LinearLayout
+                        android:id="@+id/zoomOptionLayout"
+                        android:layout_width="match_parent"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:visibility="gone"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="8dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginStart="8dp"
+                            android:src="@drawable/ic_zoom_logo" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Zoom"
+                            android:textSize="16sp"
+                            android:layout_marginStart="8dp"/>
+                    </LinearLayout>
+
+                    <!-- WhatsApp Option -->
+                    <LinearLayout
+                        android:id="@+id/whatsAppOptionLayout"
+                        android:layout_width="match_parent"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:visibility="gone"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="8dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginStart="8dp"
+                            android:src="@drawable/ic_whatsapp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/whatsapp"
+                            android:textSize="16sp"
+                            android:layout_marginStart="8dp"/>
+                    </LinearLayout>
+
+                    <!--time to meeting-->
+                    <LinearLayout
+                        android:id="@+id/meetingStillFuture"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end|center"
+                        android:gravity="end"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/actualMeetTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="18sp"
+                            android:gravity="end"
+                            android:textStyle="italic"
+                            android:padding="10dp"/>
+
+                        <ImageButton
+                            android:id="@+id/btnAddToCalendar"
+                            android:layout_width="35dp"
+                            android:layout_height="35dp"
+                            android:padding="4dp"
+                            android:visibility="gone"
+                            android:layout_marginEnd="20dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/add_to_calendar"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/ic_calendar" />
+
+
+                    </LinearLayout>
+                    <TextView
+                        android:id="@+id/memoTimeTo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="18sp"
+                        android:gravity="end"
+                        android:padding="20dp" />
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!--admins and riders-->
+            <LinearLayout
+                android:id="@+id/adminsAndRiders"
+                android:layout_width="match_parent"
+                android:visibility="gone"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!--amount pending approval-->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center|start"
+                    android:layout_gravity="center"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:layout_width="35dp"
+                        android:layout_height="35dp"
+                        android:contentDescription="@string/money_image"
+                        android:src="@drawable/send_money"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:id="@+id/pending_amount_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/pending_amount"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-black"
+                        android:layout_marginStart="16dp"/>
+                    <!-- Bold Text -->
+                    <TextView
+                        android:id="@+id/pendingAmountTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/zero_amount"
+                        android:textSize="22sp"
+                        android:fontFamily="sans-serif-black"
+                        android:layout_marginStart="15dp"
+                        android:textStyle="bold"/>
+
+                </LinearLayout>
+
+                <!--expected target-->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center|start"
+                    android:layout_gravity="center"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:contentDescription="@string/money_image"
+                        android:src="@drawable/target"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="7.5dp" />
+
+                    <TextView
+                        android:id="@+id/expected_target_amount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/daily_target"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-black"
+                        android:layout_marginStart="16dp"/>
+                    <!-- Bold Text -->
+                    <TextView
+                        android:id="@+id/expectedTargetTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/zero_amount"
+                        android:textSize="22sp"
+                        android:fontFamily="sans-serif-black"
+                        android:layout_marginStart="15dp"
+                        android:textStyle="bold"/>
+
+                </LinearLayout>
+
+                <!-- online hrs -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center|start"
+                    android:layout_gravity="center"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:id="@+id/onlineImage"
+                        android:layout_width="35dp"
+                        android:layout_height="35dp"
+                        android:contentDescription="@string/money_image"
+                        android:src="@drawable/clock"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:id="@+id/onlineHrsText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/online_period"
+                        android:textSize="18sp"
+                        android:visibility="gone"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/holo_green_dark"
+                        android:fontFamily="sans-serif-black"
+                        android:layout_marginStart="16dp"/>
+                    <!-- Bold Text -->
+                    <TextView
+                        android:id="@+id/onlineHrsTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textStyle="bold"
+                        android:textSize="18sp"
+                        android:layout_marginStart="15dp"/>
+
+                </LinearLayout>
+
+                <!-- requirements hrs -->
+                <LinearLayout
+                    android:id="@+id/requirementsDiv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:visibility="gone"
+                    android:gravity="center|start"
+                    android:layout_gravity="center"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:layout_width="35dp"
+                        android:layout_height="35dp"
+                        android:contentDescription="@string/money_image"
+                        android:src="@drawable/pen"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/required_reclocks"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/holo_green_dark"
+                        android:fontFamily="sans-serif-black"
+                        android:layout_marginStart="16dp"/>
+                    <TextView
+                        android:id="@+id/pendingRequirements"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textStyle="bold"
+                        android:textSize="18sp"
+                        android:layout_marginStart="15dp"/>
+
+                </LinearLayout>
+
+
+                <!-- bike -->
+                <LinearLayout
+                    android:id="@+id/bikeLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center|start"
+                    android:layout_gravity="center"
+                    android:visibility="gone"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:layout_width="35dp"
+                        android:layout_height="35dp"
+                        android:contentDescription="@string/money_image"
+                        android:src="@drawable/bike2"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:id="@+id/assignedBikeText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/assigned_bike"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/holo_green_dark"
+                        android:fontFamily="sans-serif-black"
+                        android:layout_marginStart="16dp"/>
+                    <!-- Bold Text -->
+                    <TextView
+                        android:id="@+id/assignedBikeTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textStyle="bold"
+                        android:textSize="18sp"
+                        android:layout_marginStart="15dp"/>
+
+                </LinearLayout>
+
+                <!-- sunday text -->
+                <TextView
+                    android:id="@+id/sundayStuff"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textSize="18sp"
+                    android:visibility="gone"
+                    android:padding="16dp"
+                    android:textStyle="bold"
+                    android:gravity="center"/>
+
+                <!-- no clockouts text text -->
+                <TextView
+                    android:id="@+id/noClockouts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_clock_out_information_was_found"
+                    android:textSize="18sp"
+                    android:padding="16dp"
+                    android:visibility="gone"
+                    android:textStyle="bold"
+                    android:gravity="start"/>
+
+                <!--found clockouts -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/clockoutsLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="6dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center|start"
+                        android:layout_gravity="center"
+                        android:padding="16dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center|start"
+                            android:layout_gravity="center"
+                            android:padding="16dp">
+
+                            <ImageView
+                                android:layout_width="35dp"
+                                android:layout_height="35dp"
+                                android:contentDescription="@string/money_image"
+                                android:src="@drawable/date"
+                                android:layout_marginEnd="8dp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/last_clocked_date"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-black"
+                                android:layout_marginStart="16dp"/>
+                            <TextView
+                                android:id="@+id/lastClockDate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textColor="@android:color/holo_orange_dark"
+                                android:textSize="18sp"
+                                android:fontFamily="sans-serif-black"
+                                android:layout_marginStart="15dp"
+                                android:textStyle="bold"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center|start"
+                            android:layout_gravity="center"
+                            android:padding="16dp">
+
+                            <ImageView
+                                android:layout_width="35dp"
+                                android:layout_height="35dp"
+                                android:contentDescription="@string/money_image"
+                                android:src="@drawable/send_money"
+                                android:layout_marginEnd="8dp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/amount_clocked"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-black"
+                                android:layout_marginStart="16dp"/>
+                            <TextView
+                                android:id="@+id/lastClockAmount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textSize="18sp"
+                                android:textColor="@android:color/holo_orange_dark"
+                                android:fontFamily="sans-serif-black"
+                                android:layout_marginStart="15dp"
+                                android:textStyle="bold"/>
+                        </LinearLayout>
+
+
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <com.github.mikephil.charting.charts.PieChart
+                    android:id="@+id/pieChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    android:layout_margin="16dp" />
+            </LinearLayout>
+
+            <!--CEOS-->
+            <LinearLayout
+                android:id="@+id/chiefExecutive"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:orientation="vertical">
+
+                <!--overview text -->
+                <LinearLayout
+                    android:id="@+id/actionsLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="30dp"
+                    android:paddingStart="30dp"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="120dp"
+                        android:layout_height="120dp"
+                        android:contentDescription="@string/money_image"
+                        android:src="@drawable/business_meeting"
+                        android:scaleType="centerCrop"
+                        android:layout_marginEnd="8dp" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/overview"
+                        android:textSize="22sp"
+                        android:textColor="@android:color/holo_blue_bright"
+                        android:padding="16dp"
+                        android:textStyle="bold"
+                        android:gravity="start"/>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/noUsers"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/you_do_not_have_any_riders_yet"
+                    android:textSize="18sp"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:padding="16dp"
+                    android:visibility="gone"
+                    android:textStyle="bold"
+                    android:gravity="center"/>
+
+
+                <!-- RecyclerView to show the user list -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="5dp"/>
 
             </LinearLayout>
 
-            <!--        expected target-->
+            <!--HRs-->
             <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="start"
-            android:padding="16dp">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="@string/money_image"
-                android:src="@drawable/view"
-                android:layout_marginEnd="8dp" />
-
-            <TextView
-                android:id="@+id/expected_target_amount"
-                android:layout_width="wrap_content"
+                android:id="@+id/humanResource"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/daily_target"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:fontFamily="sans-serif-black"
-                android:layout_marginStart="16dp"/>
-            <!-- Bold Text -->
-            <TextView
-                android:id="@+id/expectedTargetTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/zero_amount"
-                android:textSize="22sp"
-                android:fontFamily="sans-serif-black"
-                android:layout_marginStart="15dp"
-                android:textStyle="bold"/>
+                android:visibility="gone"
+                android:orientation="vertical">
+
+                <!--overview text -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="30dp"
+                    android:paddingStart="30dp"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="120dp"
+                        android:layout_height="120dp"
+                        android:contentDescription="@string/money_image"
+                        android:src="@drawable/business_meeting"
+                        android:scaleType="centerCrop"
+                        android:layout_marginEnd="8dp" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/overview"
+                        android:textSize="22sp"
+                        android:textColor="@android:color/holo_blue_bright"
+                        android:padding="16dp"
+                        android:textStyle="bold"
+                        android:gravity="start"/>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/noBudgets"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="You haven't posted any budgets lately."
+                    android:textSize="18sp"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:padding="16dp"
+                    android:visibility="gone"
+                    android:textStyle="bold"
+                    android:gravity="center"/>
+
+
+                <LinearLayout
+                    android:id="@+id/budgetExists"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/budgetHeadingHrHome"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="22sp"
+                        android:textColor="@android:color/holo_green_dark"
+                        android:padding="16dp"
+                        android:textStyle="bold"
+                        android:gravity="center"/>
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:layout_weight="1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="Items"
+                            android:textSize="18sp"
+                            android:textColor="@android:color/holo_orange_dark"
+                            android:padding="16dp"
+                            android:textStyle="bold"
+                            android:gravity="center"/>
+                        <TextView
+                            android:layout_weight="1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="Count"
+                            android:textSize="18sp"
+                            android:textColor="@android:color/holo_orange_dark"
+                            android:padding="16dp"
+                            android:textStyle="bold"
+                            android:gravity="center"/>
+                        <TextView
+                            android:layout_weight="1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="Status"
+                            android:textSize="18sp"
+                            android:textColor="@android:color/holo_orange_dark"
+                            android:padding="16dp"
+                            android:textStyle="bold"
+                            android:gravity="center"/>
+
+                        <TextView
+                            android:layout_weight="1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="Total Cost"
+                            android:textSize="18sp"
+                            android:textColor="@android:color/holo_orange_dark"
+                            android:padding="16dp"
+                            android:textStyle="bold"
+                            android:gravity="center"/>
+                        <TextView
+                            android:layout_weight="1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="Date"
+                            android:textSize="18sp"
+                            android:textColor="@android:color/holo_orange_dark"
+                            android:padding="16dp"
+                            android:textStyle="bold"
+                            android:gravity="center"/>
+                    </TableRow>
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@drawable/row_divider"/>
+
+                    <!-- RecyclerView to show the user list -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/budgetRecyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="5dp"/>
+                </LinearLayout>
+
+            </LinearLayout>
+
 
         </LinearLayout>
-
-            <TextView
-                android:id="@+id/sundayStuff"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/loading_weather"
-                android:textSize="18sp"
-                android:visibility="gone"
-                android:padding="16dp"
-                android:gravity="start"/>
-
-            <Button
-                android:id="@+id/btnAddUser"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/create_user"
-                android:backgroundTint="@android:color/holo_blue_dark"
-                android:textColor="@android:color/white"
-                android:padding="12dp"
-                android:layout_marginTop="12dp"/>
-
-
-
-
-    </LinearLayout>
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

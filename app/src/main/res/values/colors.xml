@@ -14,5 +14,18 @@
     <color name="color5">#e8d9c4</color>
     <color name="transparent">#00FFFFFF</color>
     <color name="gray">#717171</color>
+    <color name="very_light_gray">#f3f3f3</color>
     <color name="semiTransparent">#80000000</color> <!-- Semi-transparent black -->
+
+
+    <!--Browns-->
+    <color name="brown1">#E4AB35</color>
+    <color name="brown2">#CF821B</color>
+    <color name="brown3">#A96922</color>
+    <color name="brown4">#7D370D</color>
+    <color name="brown5">#282b28</color>
+    <color name="brown6">#34261D</color>
+
+    <!--topbar-->
+    <color name="chatroom_title_color">#77A0A9</color>
 </resources>

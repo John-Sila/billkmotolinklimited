@@ -1,15 +1,24 @@
 package com.example.billkmotolinkltd.ui.login
 
+import android.graphics.Color
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import com.example.billkmotolinkltd.R
 import com.example.billkmotolinkltd.databinding.FragmentLoginBinding
+import com.example.billkmotolinkltd.ui.Utility
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
 
 class LoginFragment : Fragment() {
 
@@ -21,7 +30,7 @@ class LoginFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        val loginViewModel = ViewModelProvider(this)[LoginViewModel::class.java]
+        ViewModelProvider(this)[LoginViewModel::class.java]
 
         _binding = FragmentLoginBinding.inflate(inflater, container, false)
         val root: View = binding.root
@@ -34,7 +43,90 @@ class LoginFragment : Fragment() {
             loginUser(email, password)
         }
 
+        binding.forgotPasswordLink.setOnClickListener {
+            binding.loginModal.visibility = View.GONE
+            binding.forgotPasswordModal.visibility = View.VISIBLE
+            binding.forgotPasswordLink.visibility = View.GONE
+        }
+
+        binding.goBack.setOnClickListener {
+            binding.loginModal.visibility = View.VISIBLE
+            binding.forgotPasswordModal.visibility = View.GONE
+            binding.forgotPasswordLink.visibility = View.VISIBLE
+        }
+
+        binding.buttonSendLink.setOnClickListener {
+            val email = binding.forgotPwdEmail.text.toString().trim()
+            if (email.isEmpty() || email.length < 4) {
+                Toast.makeText(requireContext(), "Email invalid.", Toast.LENGTH_SHORT).show()
+            } else {
+                val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+
+                // Custom title with red color
+                val title = SpannableString("Confirm")
+                title.setSpan(
+                    ForegroundColorSpan(Color.GREEN),
+                    0,
+                    title.length,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+
+                // Custom message with black color
+                val message =
+                    SpannableString("Reset your password")
+                message.setSpan(
+                    ForegroundColorSpan(Color.GRAY),
+                    0,
+                    message.length,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+
+                alertDialog.setTitle(title)
+                alertDialog.setMessage(message)
+                alertDialog.setIcon(R.drawable.success)
+
+                alertDialog.setPositiveButton("Send link") { _, _ ->
+                    resetPassword(email)
+                }
+
+                alertDialog.setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.dismiss() // Dismiss dialog if user cancels
+                }
+
+                val dialog = alertDialog.create()
+                dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+
+                dialog.show()
+            }
+        }
+
         return root
+    }
+
+    private fun resetPassword(email: String) {
+        if (!isAdded || view == null) return // Prevent crash
+        binding.fpProgressBar.visibility = View.VISIBLE
+        binding.buttonSendLink.visibility = View.GONE
+        auth.sendPasswordResetEmail(email)
+            .addOnSuccessListener {
+                Toast.makeText(requireContext(), "Check your Google® mail inbox.", Toast.LENGTH_LONG).show()
+                binding.loginModal.visibility = View.VISIBLE
+                binding.forgotPasswordModal.visibility = View.GONE
+                binding.forgotPasswordLink.visibility = View.VISIBLE
+
+                binding.fpProgressBar.visibility = View.GONE
+                binding.buttonSendLink.visibility = View.VISIBLE
+
+
+                lifecycleScope.launch {
+                    Utility.postTrace("$email is trying to reset account password.")
+                }
+            }
+            .addOnFailureListener {
+                binding.fpProgressBar.visibility = View.GONE
+                binding.buttonSendLink.visibility = View.VISIBLE
+                Toast.makeText(requireContext(), "Failed to send reset email", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun loginUser(email: String, password: String) {
@@ -44,7 +136,7 @@ class LoginFragment : Fragment() {
         }
 
         binding.progressBar.visibility = View.VISIBLE
-        binding.buttonLogin.isEnabled = false
+        binding.buttonLogin.visibility = View.GONE
 
         val firestore = FirebaseFirestore.getInstance()
 
@@ -61,7 +153,7 @@ class LoginFragment : Fragment() {
                 .addOnSuccessListener { userDocs ->
                     if (userDocs.isEmpty) {
                         binding.progressBar.visibility = View.GONE
-                        binding.buttonLogin.isEnabled = true
+                        binding.buttonLogin.visibility = View.VISIBLE
                         Toast.makeText(requireContext(), "User not found.", Toast.LENGTH_SHORT).show()
                         return@addOnSuccessListener
                     }
@@ -70,25 +162,26 @@ class LoginFragment : Fragment() {
                     val isDeleted = userDoc.getBoolean("isDeleted") == true
                     val isActive = userDoc.getBoolean("isActive") == true
                     val thisUserRank = userDoc.getString("userRank") ?: "Regular"
+                    val thisUserName = userDoc.getString("userName") ?: "An unidentified user"
 
                     // prevent login if company is paused. only ceo to login
                     if (companyStatus == "Paused" && thisUserRank != "CEO") {
                         binding.progressBar.visibility = View.GONE
-                        binding.buttonLogin.isEnabled = true
+                        binding.buttonLogin.visibility = View.VISIBLE
                         Toast.makeText(requireContext(), "Company is currently paused. Login not allowed.", Toast.LENGTH_LONG).show()
                         return@addOnSuccessListener
                     }
 
                     if (isDeleted) {
                         binding.progressBar.visibility = View.GONE
-                        binding.buttonLogin.isEnabled = true
+                        binding.buttonLogin.visibility = View.VISIBLE
                         Toast.makeText(requireContext(), "Account has been deleted.", Toast.LENGTH_LONG).show()
                         return@addOnSuccessListener
                     }
 
                     if (!isActive) {
                         binding.progressBar.visibility = View.GONE
-                        binding.buttonLogin.isEnabled = true
+                        binding.buttonLogin.visibility = View.VISIBLE
                         Toast.makeText(requireContext(), "Account is not active. Contact admin.", Toast.LENGTH_LONG).show()
                         return@addOnSuccessListener
                     }
@@ -97,27 +190,36 @@ class LoginFragment : Fragment() {
                     auth.signInWithEmailAndPassword(email, password)
                         .addOnCompleteListener(requireActivity()) { task ->
                             if (task.isSuccessful) {
-                                Toast.makeText(requireContext(), "Login Successful", Toast.LENGTH_SHORT).show()
-                                // Navigate to Home or Dashboard
+                                val currentUser = FirebaseAuth.getInstance().currentUser
+                                if (currentUser != null) {
+
+                                    lifecycleScope.launch {
+                                        Utility.postTrace("Logged in.")
+                                        val roles = listOf("Admin", "CEO", "Systems, IT")
+                                        Utility.notifyAdmins("$thisUserName just logged in.", "BML Authenticator", roles)
+                                    }
+                                    Toast.makeText(requireContext(), "Login Successful", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Log.e("AuthState", "User is still not available!")
+                                }
                             } else {
                                 binding.progressBar.visibility = View.GONE
-                                binding.buttonLogin.isEnabled = true
+                                binding.buttonLogin.visibility = View.VISIBLE
                                 Toast.makeText(requireContext(), "Login Failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                             }
                         }
                 }
                 .addOnFailureListener { e ->
                     binding.progressBar.visibility = View.GONE
-                    binding.buttonLogin.isEnabled = true
+                    binding.buttonLogin.visibility = View.VISIBLE
                     Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
         }.addOnFailureListener { e ->
             binding.progressBar.visibility = View.GONE
-            binding.buttonLogin.isEnabled = true
+            binding.buttonLogin.visibility = View.VISIBLE
             Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

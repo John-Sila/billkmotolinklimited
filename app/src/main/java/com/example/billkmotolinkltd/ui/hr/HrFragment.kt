@@ -1,5 +1,6 @@
 package com.example.billkmotolinkltd.ui.hr
 
+import android.app.AlertDialog
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
@@ -18,11 +19,18 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.billkmotolinkltd.R
 import com.example.billkmotolinkltd.databinding.FragmentHrBinding
+import com.example.billkmotolinkltd.ui.Utility
 import com.google.firebase.Firebase
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 class HrFragment : Fragment() {
 
@@ -33,6 +41,9 @@ class HrFragment : Fragment() {
     private lateinit var btnAddExpense: Button
     private lateinit var btnRemoveExpense: Button
     private lateinit var textTotalCost: TextView
+
+    private lateinit var cStatus: String
+    private lateinit var bStatus: String
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -54,136 +65,208 @@ class HrFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val userRef = FirebaseFirestore.getInstance()
-            .collection("general")
-            .document("general_variables")
-        userRef.get()
-            .addOnSuccessListener { document ->
-                val budget = document.get("budget") as? Map<*, *>  // Retrieve `budget` as a Map
-                val budgetStatus = budget?.get("budgetStatus") as? String  // Access `budgetStatus`
-                val companyStatus = document.get("companyState") as? String
-
-                checkCompanyStatus(companyStatus.toString(), budgetStatus.toString())
-            }
         if (!isAdded || _binding == null) return
-        binding.btnSubmit.setOnClickListener{
-            val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
 
-            // Custom title with red color
-            val title = SpannableString("Submit Budget")
-            title.setSpan(ForegroundColorSpan(Color.GREEN), 0, title.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        // Initialize click listener first for immediate responsiveness
+        binding.btnSubmit.setOnClickListener {
+            showBudgetConfirmationDialog()
+        }
 
-            // Custom message with black color
-            val message = SpannableString("Confirm submission of a new budget.")
-            message.setSpan(ForegroundColorSpan(Color.GRAY), 0, message.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        // Load data in background
+        lifecycleScope.launch {
+            try {
+                val document = withContext(Dispatchers.IO) {
+                    FirebaseFirestore.getInstance()
+                        .collection("general")
+                        .document("general_variables")
+                        .get()
+                        .await()
+                }
 
-            alertDialog.setTitle(title)
-            alertDialog.setMessage(message)
-            alertDialog.setIcon(R.drawable.success)
+                // Process data on background thread
+                val budget = document.get("budget") as? Map<*, *>
+                val budgetStatus = budget?.get("budgetStatus") as? String ?: ""
+                val companyStatus = document.get("companyState") as? String ?: ""
 
-            alertDialog.setPositiveButton("Confirm") { _, _ ->
-                submitBudget()
+                // Update UI on main thread
+                withContext(Dispatchers.Main) {
+                    if (isAdded && _binding != null) {
+                        checkCompanyStatus(companyStatus, budgetStatus)
+                    }
+                }
+            } catch (e: Exception) {
+                // Handle error silently or log it
+                Log.e("BudgetFragment", "Error loading budget data", e)
             }
-
-            alertDialog.setNegativeButton("Cancel") { dialog, _ ->
-                dialog.dismiss() // Dismiss dialog if user cancels
-            }
-
-            val dialog = alertDialog.create()
-            dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
-
-            dialog.show()
         }
     }
 
+    private fun showBudgetConfirmationDialog() {
+        val alertDialog = AlertDialog.Builder(requireContext()).apply {
+            // Custom title with green color
+            val title = SpannableString("Submit Budget").apply {
+                setSpan(ForegroundColorSpan(Color.GREEN), 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+
+            // Custom message with gray color
+            val message = SpannableString("Confirm submission of a new budget.").apply {
+                setSpan(ForegroundColorSpan(Color.GRAY), 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+
+            setTitle(title)
+            setMessage(message)
+            setIcon(R.drawable.success)
+
+            setPositiveButton("Confirm") { _, _ ->
+                lifecycleScope.launch {
+                    submitBudget()
+                }
+            }
+
+            setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+        }
+
+        alertDialog.create().apply {
+            window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+            show()
+        }
+    }
+
+
+
+
+
+    /*Checking budget status starts here*/
     private fun checkCompanyStatus(state: String, budget: String) {
-        if (state == "Paused") {
-            if (!isAdded || _binding == null) return
-            binding.btnOperationsPaused.visibility = View.VISIBLE
-            Toast.makeText(requireContext(), "Company is paused", Toast.LENGTH_SHORT).show()
-            return
-        } else if (state == "Continuing") {
-            if (!isAdded || _binding == null) return // Prevent crash
-            binding.btnOperationsPaused.visibility = View.GONE
-            if (budget == "Pending") {
+        if (!isAdded || _binding == null) return
+
+        // Execute UI updates in a single batch
+        lifecycleScope.launch(Dispatchers.Main) {
+            when {
+                state == "Paused" -> handlePausedState()
+                state == "Continuing" -> handleContinuingState(budget)
+                else -> handleDefaultState()
+            }
+        }
+    }
+
+    private fun handlePausedState() {
+        binding.btnOperationsPaused.visibility = View.VISIBLE
+        Toast.makeText(requireContext(), "Company is on hold.", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun handleContinuingState(budget: String) {
+        binding.btnOperationsPaused.visibility = View.GONE
+
+        // Reset all views first to avoid state conflicts
+        resetAllBudgetViews()
+
+        when (budget) {
+            "Pending" -> {
                 binding.btnCantSubmit.visibility = View.VISIBLE
-                binding.btnSubmit.visibility = View.GONE
-                binding.approvedUnDisbursed.visibility = View.GONE
-
-                binding.budgetDeclined.visibility = View.GONE
-
                 binding.contactAdmin.visibility = View.VISIBLE
             }
-            else if (budget == "Approved") {
+            "Approved" -> {
                 binding.approvedUnDisbursed.visibility = View.VISIBLE
-                binding.btnSubmit.visibility = View.GONE
-                binding.btnCantSubmit.visibility = View.GONE
-
-                binding.budgetDeclined.visibility = View.GONE
-
                 binding.contactAccounts.visibility = View.VISIBLE
             }
-            else if (budget == "Declined") {
-                binding.approvedUnDisbursed.visibility = View.GONE
+            "Declined" -> {
                 binding.btnSubmit.visibility = View.VISIBLE
-                binding.btnCantSubmit.visibility = View.GONE
-
-
                 binding.budgetDeclined.visibility = View.VISIBLE
             }
-            else if (budget == "Disbursed") {
-                binding.approvedUnDisbursed.visibility = View.GONE
+            "Disbursed" -> {
                 binding.btnSubmit.visibility = View.VISIBLE
-                binding.btnCantSubmit.visibility = View.GONE
-
-
-                binding.budgetDeclined.visibility = View.GONE
             }
-            else {
-                binding.approvedUnDisbursed.visibility = View.GONE
+            else -> {
                 binding.btnSubmit.visibility = View.VISIBLE
-                binding.btnCantSubmit.visibility = View.GONE
-
-
-                binding.budgetDeclined.visibility = View.GONE
             }
         }
     }
 
+    private fun handleDefaultState() {
+        resetAllBudgetViews()
+        binding.btnSubmit.visibility = View.VISIBLE
+    }
+
+    private fun resetAllBudgetViews() {
+        // Group all view resets in one place
+        binding.apply {
+            btnSubmit.visibility = View.GONE
+            btnCantSubmit.visibility = View.GONE
+            approvedUnDisbursed.visibility = View.GONE
+            budgetDeclined.visibility = View.GONE
+            contactAdmin.visibility = View.GONE
+            contactAccounts.visibility = View.GONE
+        }
+    }
+
+    /*Checking budget status ends here*/
+
+
+
+
+    /*Submitting budget starts here*/
     private fun submitBudget() {
         if (!isAdded || _binding == null) return
+
+        // Show loading state immediately
         binding.hrProgressBar.visibility = View.VISIBLE
         binding.btnSubmit.visibility = View.GONE
 
-        val container = binding.expenseContainer
+        lifecycleScope.launch {
+            try {
+                // Process form data on background thread
+                val (budgetList, totalCost) = withContext(Dispatchers.Default) {
+                    processBudgetItems()
+                }
+
+                // Validate results on main thread
+                withContext(Dispatchers.Main) {
+                    if (!isAdded || _binding == null) return@withContext
+
+                    validateBudgetData(budgetList, totalCost) ?: return@withContext
+                    val budgetHeading = binding.budgetHeading.text.toString().trim()
+
+                    if (budgetHeading.length <= 5) {
+                        showErrorState("You need a better heading for your budget.")
+                        return@withContext
+                    }
+
+                    // Proceed with Firestore update
+                    updateBudgetInFirestore(budgetList, totalCost, budgetHeading)
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    showErrorState("Error: ${e.message ?: "Unknown error"}")
+                }
+            }
+        }
+    }
+
+    private fun processBudgetItems(): Pair<List<Map<String, Any>>, Double> {
         val budgetList = mutableListOf<Map<String, Any>>()
         var totalCost = 0.0
 
-        for (i in 0 until expenseContainer.childCount) {
-            val itemView = expenseContainer.getChildAt(i)
+        for (i in 0 until binding.expenseContainer.childCount) {
+            val itemView = binding.expenseContainer.getChildAt(i)
 
-            // Ensure the view is a LinearLayout and contains exactly 2 EditTexts (name and cost)
             if (itemView is LinearLayout && itemView.childCount == 2) {
                 val nameInput = itemView.getChildAt(0) as? EditText
                 val costInput = itemView.getChildAt(1) as? EditText
 
-                if (nameInput == null || costInput == null) continue // Skip if not both are EditTexts
+                if (nameInput == null || costInput == null) continue
 
                 val nameText = nameInput.text.toString().trim()
                 val costText = costInput.text.toString().trim()
 
-                Log.d("BudgetSubmission", "Item: $nameText, Cost: $costText")
-
                 if (nameText.isEmpty() || costText.isEmpty()) {
-                    Toast.makeText(requireContext(), "Please fill or delete empty inputs", Toast.LENGTH_SHORT).show()
-                    return
+                    throw Exception("Please fill or delete empty inputs")
                 }
 
                 val cost = costText.toDoubleOrNull()
-                if (cost == null) {
-                    Toast.makeText(requireContext(), "Invalid cost entered", Toast.LENGTH_SHORT).show()
-                    return
-                }
+                    ?: throw Exception("Invalid cost entered")
 
                 budgetList.add(mapOf("name" to nameText, "cost" to cost))
                 totalCost += cost
@@ -191,49 +274,93 @@ class HrFragment : Fragment() {
         }
 
         if (totalCost.toInt() == 0) {
-            Toast.makeText(requireContext(), "Your budget has a 0 total cost!", Toast.LENGTH_SHORT).show()
-            return
+            throw Exception("Your budget has a 0 total cost!")
         }
 
+        return Pair(budgetList, totalCost)
+    }
 
-        // Now you can submit budgetList to Firestore
+    private fun validateBudgetData(
+        budgetList: List<Map<String, Any>>,
+        totalCost: Double
+    ): Boolean {
+        if (budgetList.isEmpty()) {
+            showErrorState("Please add at least one budget item")
+            return false
+        }
+
+        if (totalCost <= 0) {
+            showErrorState("Total cost must be greater than 0")
+            return false
+        }
+
+        return true
+    }
+
+    private fun updateBudgetInFirestore(
+        budgetList: List<Map<String, Any>>,
+        totalCost: Double,
+        budgetHeading: String
+    ) {
         val db = FirebaseFirestore.getInstance()
         val budgetRef = db.collection("general").document("general_variables")
 
-        val budgetData = mapOf("items" to budgetList)
+        val updates = mapOf(
+            "budget.items" to budgetList,
+            "budget.budgetStatus" to "Pending",
+            "budget.budgetHeading" to budgetHeading,
+            "budget.budgetCost" to totalCost,
+            "budget.postedAt" to Timestamp.now()
+        )
 
-        budgetRef.update("budget.items", budgetList)
+        budgetRef.update(updates)
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "Budget submitted successfully!", Toast.LENGTH_SHORT).show()
                 binding.hrProgressBar.visibility = View.GONE
-                binding.btnSubmit.visibility = View.GONE
-                binding.hrProgressBar.visibility = View.GONE
-                binding.btnCantSubmit.visibility = View.VISIBLE
-                binding.approvedUnDisbursed.visibility = View.GONE
 
-                binding.budgetDeclined.visibility = View.GONE
+                // Load updated status
+                loadCompanyStatus()
+
+                // Notify admins
+                lifecycleScope.launch {
+                    val roles = listOf("Admin", "CEO", "Systems, IT")
+                    Utility.notifyAdmins("A new budget was posted", "Human Resource", roles)
+                }
             }
             .addOnFailureListener { e ->
-
-                binding.contactAdmin.visibility = View.VISIBLE
-                Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                showErrorState("Error: ${e.message ?: "Unknown error"}", showContactAdmin = true)
             }
-        budgetRef.update("budget.budgetStatus", "Pending")
-            .addOnSuccessListener {
-//                Toast.makeText(requireContext(), "Budget submitted successfully!", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener { e ->
-//                Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-        budgetRef.update("budget.budgetCost", totalCost)
-            .addOnSuccessListener {
-//                Toast.makeText(requireContext(), "Budget submitted successfully!", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener { e ->
-//                Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-
     }
+
+    private fun loadCompanyStatus() {
+        FirebaseFirestore.getInstance()
+            .collection("general")
+            .document("general_variables")
+            .get()
+            .addOnSuccessListener { document ->
+                val budget = document.get("budget") as? Map<*, *>
+                val budgetStatus = budget?.get("budgetStatus") as? String ?: ""
+                val companyStatus = document.get("companyState") as? String ?: ""
+
+                checkCompanyStatus(companyStatus, budgetStatus)
+            }
+    }
+
+    private fun showErrorState(message: String, showContactAdmin: Boolean = false) {
+        if (!isAdded || _binding == null) return
+
+        binding.hrProgressBar.visibility = View.GONE
+        binding.btnSubmit.visibility = View.VISIBLE
+        binding.contactAdmin.visibility = if (showContactAdmin) View.VISIBLE else View.GONE
+
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    /*Submitting budget ends here*/
+
+
+
+
 
     private fun addExpenseSection() {
         val context = requireContext()
@@ -289,8 +416,12 @@ class HrFragment : Fragment() {
             val cost = inputCost?.text.toString().toIntOrNull() ?: 0
             totalCost += cost
         }
-        textTotalCost.text = "Total: Ksh $totalCost"
+
+        // Format the number with commas and two decimal places
+        val formattedTotal = String.format("%,.2f", totalCost.toDouble())
+        textTotalCost.text = "Total: Ksh $formattedTotal"
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

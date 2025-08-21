@@ -1,5 +1,5 @@
 [versions]
-agp = "8.9.1"
+agp = "8.12.0"
 kotlin = "2.0.21"
 coreKtx = "1.15.0"
 junit = "4.13.2"
@@ -12,6 +12,8 @@ lifecycleLivedataKtx = "2.8.7"
 lifecycleViewmodelKtx = "2.8.7"
 navigationFragmentKtx = "2.8.9"
 navigationUiKtx = "2.8.9"
+media3CommonKtx = "1.8.0"
+uiText = "1.8.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -28,6 +30,8 @@ androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation
 
 firebase-bom = { module = "com.google.firebase:firebase-bom", version = "33.11.0" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+androidx-media3-common-ktx = { group = "androidx.media3", name = "media3-common-ktx", version.ref = "media3CommonKtx" }
+androidx-ui-text = { group = "androidx.compose.ui", name = "ui-text", version.ref = "uiText" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

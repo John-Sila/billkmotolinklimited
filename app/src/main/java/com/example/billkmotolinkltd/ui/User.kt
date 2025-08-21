@@ -7,6 +7,7 @@ data class User(
     val isWorkingOnSunday: Boolean = true,
     val dailyTarget: Double = 0.0,
     val isActive: Boolean? = null,
+    val isDeleted: Boolean? = null,
     val userRank: String = "",
     val currentInAppBalance: Double = 0.0,
     val sundayTarget: Double = 0.0,

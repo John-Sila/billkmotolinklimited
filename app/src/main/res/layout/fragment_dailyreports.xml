@@ -6,17 +6,42 @@
     android:layout_height="match_parent"
     tools:context=".ui.dailyreports.DailyreportsFragment">
 
-    <TextView
-        android:id="@+id/text_dailyreports"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ProgressBar
+                android:id="@+id/dRProgressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="30dp"
+                android:layout_gravity="center"/>
+
+            <TextView
+                android:id="@+id/noDailyReports"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/no_weekly_reports_yet"
+                android:textSize="18sp"
+                android:textColor="@android:color/holo_red_light"
+                android:padding="16dp"
+                android:visibility="gone"
+                android:gravity="center"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewClockouts"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="16dp"
+                android:paddingTop="8dp"/>
+        </LinearLayout>
+    </ScrollView>
+
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

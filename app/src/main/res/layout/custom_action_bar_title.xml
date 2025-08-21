@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--this is the chatroom title-->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/actionBarTitle"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textSize="25sp"
+    android:textColor="@color/chatroom_title_color"
+    android:fontFamily="cursive"
+    android:textStyle="italic|bold"
+    android:maxLines="1"
+    android:ellipsize="end"
+    android:gravity="center"
+    android:text="" />

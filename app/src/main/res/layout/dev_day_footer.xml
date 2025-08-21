@@ -11,7 +11,7 @@
         android:padding="12dp">
 
         <TextView
-            android:id="@+id/dayText"
+            android:id="@+id/dayTextFooter"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -19,7 +19,7 @@
             android:textAlignment="center"/>
 
         <TextView
-            android:id="@+id/netIncome"
+            android:id="@+id/netIncomeFooter"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -27,7 +27,7 @@
             android:textAlignment="center"/>
 
         <TextView
-            android:id="@+id/grossIncome"
+            android:id="@+id/grossIncomeFooter"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -35,7 +35,7 @@
             android:textAlignment="center"/>
 
         <TextView
-            android:id="@+id/netDeviation"
+            android:id="@+id/grossDeviationFooter"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -43,15 +43,7 @@
             android:textAlignment="center"/>
 
         <TextView
-            android:id="@+id/grossDeviation"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textStyle="bold"
-            android:textAlignment="center"/>
-
-        <TextView
-            android:id="@+id/netGrossDifference"
+            android:id="@+id/netGrossDifferenceFooter"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
