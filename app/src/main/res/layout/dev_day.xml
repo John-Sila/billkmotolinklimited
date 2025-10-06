@@ -18,6 +18,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textAlignment="center"
+            android:textColor="@android:color/holo_orange_dark"
             android:textStyle="bold"/>
 
         <!-- Net Income -->

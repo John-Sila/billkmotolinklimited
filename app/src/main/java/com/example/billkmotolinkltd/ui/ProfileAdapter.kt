@@ -9,9 +9,11 @@ import android.os.Vibrator
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -21,6 +23,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import androidx.core.view.isVisible
+import com.bumptech.glide.Glide
 
 class ProfileAdapter(
     private val context: Context
@@ -57,9 +60,9 @@ class ProfileAdapter(
         holder.lastClockOut.text = formatDate(user.lastClockDate)
         holder.currentBike.text = user.currentBike
         holder.dtbAcc.text = user.bankAcc
-        holder.inAppBal.text = user.inAppBalance.toString()
-        holder.dTarget.text = user.dailyTarget.toString()
-        holder.sTarget.text = user.sundayTarget.toString()
+        holder.inAppBal.text = formatIncome(user.inAppBalance)
+        holder.dTarget.text = formatIncome(user.dailyTarget)
+        holder.sTarget.text = formatIncome(user.sundayTarget)
         holder.dateEnrolled.text = formatDate(user.dateCreated)
         holder.userEmail.text = user.email
         holder.fcm.text = user.fcmToken
@@ -68,9 +71,9 @@ class ProfileAdapter(
         holder.hrsPerShift.text = user.hrsPerShift.toString()
         holder.nID.text = user.idNumber
         holder.activeState.text = if (user.isActive) "Active" else "Inactive"
-        holder.netClockedLastly.text = user.netClockedLastly.toString()
+        holder.netClockedLastly.text = formatIncome(user.netClockedLastly)
         holder.clockedInState.text = if (user.isClockedIn) "Clocked In" else "Clocked Out"
-        holder.profilePendingAmount.text = user.amountPendingApproval.toString()
+        holder.profilePendingAmount.text = formatIncome(user.amountPendingApproval)
         holder.phone.text = user.phoneNumber
         holder.requirements.text = user.requirements.toString()
         holder.rank.text = user.userRank
@@ -81,6 +84,32 @@ class ProfileAdapter(
             holder.detailsLayout?.let { layout ->
                 val isVisible = layout.isVisible
                 layout.visibility = if (isVisible) View.GONE else View.VISIBLE
+            }
+        }
+
+        if (user.pfpUrl.isNotEmpty()) {
+            holder.pfp.let { imageView ->
+                Glide.with(context)
+                    .load(user.pfpUrl)
+                    .placeholder(R.drawable.male)
+                    .circleCrop()
+                    .into(imageView)
+            }
+        } else {
+            if (user.gender == "Male") {
+                holder.pfp.let { imageView ->
+                    Glide.with(context)
+                        .load(R.drawable.male)
+                        .circleCrop()
+                        .into(imageView)
+                }
+            } else if (user.gender == "Female") {
+                holder.pfp.let { imageView ->
+                    Glide.with(context)
+                        .load(R.drawable.female)
+                        .circleCrop()
+                        .into(imageView)
+                }
             }
         }
 
@@ -96,6 +125,7 @@ class ProfileAdapter(
             holder.paDiv.visibility = View.GONE
             holder.stDiv.visibility = View.GONE
         }
+
     }
 
     override fun getItemCount(): Int = differ.currentList.size
@@ -105,7 +135,7 @@ class ProfileAdapter(
     }
 
     inner class UserViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val username: TextView? = view.findViewById(R.id.tvUsername)
+        val username: TextView? = view.findViewById(R.id.pUsername)
         val detailsLayout: LinearLayout? = view.findViewById(R.id.detailsLayout)
         val lastClockIn: TextView = view.findViewById(R.id.profileLastClockInDate)
         val lastClockOut: TextView = view.findViewById(R.id.profileLastClockDate)
@@ -128,6 +158,7 @@ class ProfileAdapter(
         val phone: TextView = view.findViewById(R.id.profilePhone)
         val requirements: TextView = view.findViewById(R.id.profileRequirements)
         val rank: TextView = view.findViewById(R.id.profileRank)
+        val pfp: ImageView = view.findViewById(R.id.profilesPfp)
         val reqDiv: LinearLayout = view.findViewById(R.id.reqDiv)
         val cbDiv: LinearLayout = view.findViewById(R.id.cbDiv)
         val iabDiv: LinearLayout = view.findViewById(R.id.iabDiv)

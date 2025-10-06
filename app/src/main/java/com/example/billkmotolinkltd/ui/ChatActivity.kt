@@ -5,10 +5,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
+import android.graphics.drawable.PictureDrawable
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.ImageSpan
 import android.view.MotionEvent
 import android.widget.TextView
 import android.view.View
@@ -30,6 +34,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import kotlin.properties.Delegates
 import android.view.inputmethod.InputMethodManager
 import androidx.core.view.isVisible
+import com.caverock.androidsvg.SVG
 
 
 /*this is the actual chatroom UI*/
@@ -45,22 +50,6 @@ class ChatActivity : AppCompatActivity() {
     private var chatroomExpiry by Delegates.notNull<Long>()
     private lateinit var currentUserId: String
     private lateinit var currentUserName: String
-    /*deal with emojis*/
-    lateinit var emojiAdapter: EmojiAdapter
-    val emojiList = listOf(
-        "\uD83D\uDE00", // 😀
-        "\uD83D\uDE02", // 😂
-        "\uD83D\uDE0D", // 😍
-        "\uD83D\uDE22", // 😢
-        "\uD83D\uDE21", // 😡
-        "\uD83D\uDE0A", // 😊
-        "\uD83D\uDE09", // 😉
-        "\uD83D\uDE4C", // 🙌
-        "\uD83C\uDF89", // 🎉
-        "\uD83D\uDC4D", // 👍
-        // add more Unicode emoji strings as needed
-    )
-
     private val messages = mutableListOf<ChatMessage>()
 
     private val dbRef by lazy { FirebaseDatabase.getInstance().getReference("chatrooms") }
@@ -118,16 +107,12 @@ class ChatActivity : AppCompatActivity() {
                 finish()
             }
 
-        setRandomChatBackground()
-
-        setupEmojiPicker()
-        binding.emojiButton.setOnClickListener { toggleEmojiPanel() }
+        // setRandomChatBackground()
 
         // If user taps the EditText, hide emoji panel and show keyboard
         @SuppressLint("ClickableViewAccessibility")
         binding.messageInput.setOnTouchListener { v, event ->
             if (binding.emojiPanel.isVisible) {
-                hideEmojiPanel()
                 showKeyboard(binding.messageInput)
                 v.performClick() // Important for accessibility
                 true
@@ -135,49 +120,6 @@ class ChatActivity : AppCompatActivity() {
                 false
             }
         }
-
-
-
-
-    }
-
-    private fun setupEmojiPicker() {
-        emojiAdapter = EmojiAdapter(emojiList) { emoji ->
-            insertEmojiAtCursor(emoji)
-        }
-        binding.emojiPanel.apply {
-            layoutManager = GridLayoutManager(this@ChatActivity, 6)
-            adapter = emojiAdapter
-            setHasFixedSize(true)
-        }
-    }
-
-    private fun toggleEmojiPanel() {
-        if (binding.emojiPanel.visibility == View.VISIBLE) {
-            hideEmojiPanel()
-            showKeyboard(binding.messageInput)
-        } else {
-            hideKeyboard()
-            showEmojiPanel()
-        }
-    }
-
-    private fun showEmojiPanel() {
-        binding.emojiPanel.visibility = View.VISIBLE
-        // scroll messages to bottom so latest messages still visible
-        binding.recyclerViewMessages.post {
-            if (messages.isNotEmpty()) binding.recyclerViewMessages.scrollToPosition(messages.size - 1)
-        }
-    }
-
-    private fun hideEmojiPanel() {
-        binding.emojiPanel.visibility = View.GONE
-    }
-
-    private fun hideKeyboard() {
-        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(binding.messageInput.windowToken, 0)
-        binding.messageInput.clearFocus()
     }
 
     private fun showKeyboard(editText: EditText) {
@@ -185,19 +127,6 @@ class ChatActivity : AppCompatActivity() {
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
     }
-
-    // insert the emoji text into EditText at current cursor position
-    private fun insertEmojiAtCursor(emoji: String) {
-        val edit = binding.messageInput
-        val start = edit.selectionStart.coerceAtLeast(0)
-        val end = edit.selectionEnd.coerceAtLeast(0)
-        val min = minOf(start, end)
-        val max = maxOf(start, end)
-        edit.text.replace(min, max, emoji)
-        val newPos = min + emoji.length
-        edit.setSelection(newPos.coerceAtMost(edit.text.length))
-    }
-
 
     private fun setupStatusBar() {
         supportActionBar?.title = chatroomName
@@ -208,46 +137,28 @@ class ChatActivity : AppCompatActivity() {
 
         window.statusBarColor = ContextCompat.getColor(this, R.color.brown4)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val decorView = window.decorView
-            if (isDarkTheme) {
-                // Dark mode → light icons
-                decorView.systemUiVisibility = 0
-            } else {
-                // Light mode → dark icons (black)
-                decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-            }
+        val decorView = window.decorView
+        if (isDarkTheme) {
+            // Dark mode → light icons
+            decorView.systemUiVisibility = 0
+        } else {
+            // Light mode → dark icons (black)
+            decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
         }
-
     }
 
-    private fun setRandomChatBackground() {
-        val backgrounds = listOf(
-            R.drawable.chat_bg_1,
-            R.drawable.chat_bg_2,
-            R.drawable.chat_bg_3,
-            R.drawable.chat_bg_4,
-            R.drawable.chat_bg_5,
-            R.drawable.chat_bg_6,
-            R.drawable.chat_bg_7,
-            R.drawable.chat_bg_8,
-            R.drawable.chat_bg_9,
-            R.drawable.chat_bg_10,
-            R.drawable.chat_bg_11,
-            R.drawable.chat_bg_12,
-            R.drawable.chat_bg_13,
-            R.drawable.chat_bg_14,
-            R.drawable.chat_bg_15,
-            R.drawable.chat_bg_16,
-        )
-
-        val randomBg = backgrounds.random()
-        binding.chatRoot.background = ContextCompat.getDrawable(this, randomBg)
-    }
+//    private fun setRandomChatBackground() {
+//        val svg = SVG.getFromResource(this, R.raw.chat_bg) // put chat_bg.svg in res/raw
+//        val drawable = PictureDrawable(svg.renderToPicture())
+//        binding.chatRoot.background = drawable
+//    }
 
     private fun setupRecyclerView() {
-        chatAdapter = ChatMessageAdapter(messages,
-            currentUserId, currentUserName)
+        chatAdapter = ChatMessageAdapter(
+            messages,
+            currentUserId,
+            currentUserName,
+        )
         binding.recyclerViewMessages.apply {
             layoutManager = LinearLayoutManager(this@ChatActivity).apply {
                 stackFromEnd = true
@@ -255,6 +166,7 @@ class ChatActivity : AppCompatActivity() {
             adapter = chatAdapter
         }
     }
+
 
     private fun setupListeners() {
         binding.sendButton.setOnClickListener {

@@ -57,7 +57,16 @@
         android:name="com.example.billkmotolinkltd.ui.post_memo.PostMemoFragment"
         android:label="@string/memo"
         tools:layout="@layout/fragment_post_memo" />
-
+    <fragment
+        android:id="@+id/nav_create_poll"
+        android:name="com.example.billkmotolinkltd.ui.create_poll.CreatePollFragment"
+        android:label="@string/create_a_poll"
+        tools:layout="@layout/fragment_create_poll" />
+    <fragment
+        android:id="@+id/nav_polls"
+        android:name="com.example.billkmotolinkltd.ui.polls.PollsFragment"
+        android:label="Polls"
+        tools:layout="@layout/fragment_polls" />
     <fragment
         android:id="@+id/nav_batteries"
         android:name="com.example.billkmotolinkltd.ui.batteries.BatteriesFragment"
@@ -69,6 +78,12 @@
         android:name="com.example.billkmotolinkltd.ui.assets.AssetsFragment"
         android:label="@string/asset_management"
         tools:layout="@layout/fragment_manage_assets" />
+
+    <fragment
+        android:id="@+id/nav_complaints"
+        android:name="com.example.billkmotolinkltd.ui.complaints.ComplaintsFragment"
+        android:label="@string/complaints"
+        tools:layout="@layout/fragment_complaints" />
     <fragment
         android:id="@+id/nav_profiles"
         android:name="com.example.billkmotolinkltd.ui.profiles.ProfilesFragment"

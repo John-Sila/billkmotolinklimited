@@ -96,6 +96,7 @@ class DailyreportsFragment : Fragment() {
 
             chunk.mapNotNull { userDoc ->
                 try {
+                    val userId = userDoc.id  // <-- Firestore doc id as unique userId
                     val userName = userDoc.getString("userName") ?: "Unknown"
                     val clockoutsMap = userDoc.get("clockouts") as? Map<String, Map<String, Any>>
                         ?: return@mapNotNull null
@@ -105,15 +106,15 @@ class DailyreportsFragment : Fragment() {
                             ClockoutEntry(
                                 userName = userName,
                                 date = date,
-                                netIncome = data["netIncome"] as? Double ?: 0.0,
-                                grossIncome = data["grossIncome"] as? Double ?: 0.0,
-                                inAppBal = data["todaysInAppBalance"] as? Double ?: 0.0,
-                                inAppDiff = data["inAppDifference"] as? Double ?: 0.0,
-                                clockinMileage = data["clockinMileage"] as? Double ?: 0.0,
-                                clockoutMileage = data["clockoutMileage"] as? Double ?: 0.0,
-                                mileageDifference = data["mileageDifference"] as? Double ?: 0.0,
+                                netIncome = (data["netIncome"] as? Number)?.toDouble() ?: 0.0,
+                                grossIncome = (data["grossIncome"] as? Number)?.toDouble() ?: 0.0,
+                                todaysInAppBalance = (data["todaysInAppBalance"] as? Number)?.toDouble() ?: 0.0,
+                                inAppDifference = (data["inAppDifference"] as? Number)?.toDouble() ?: 0.0,
+                                clockinMileage = (data["clockinMileage"] as? Number)?.toDouble() ?: 0.0,
+                                clockoutMileage = (data["clockoutMileage"] as? Number)?.toDouble() ?: 0.0,
+                                mileageDifference = (data["mileageDifference"] as? Number)?.toDouble() ?: 0.0,
+                                expenses = (data["expenses"] as? Map<String, Number>)?.mapValues { it.value.toDouble() } ?: emptyMap(),
                                 elapsedTime = data["timeElapsed"] as? String ?: "Unknown",
-                                expenses = data["expenses"] as? Map<String, Double> ?: emptyMap(),
                                 postedAt = data["posted_at"] as? com.google.firebase.Timestamp
                             )
                         } catch (e: Exception) {
@@ -122,7 +123,7 @@ class DailyreportsFragment : Fragment() {
                         }
                     }
 
-                    if (entries.isEmpty()) null else ClockoutGroup(userName, entries)
+                    if (entries.isEmpty()) null else ClockoutGroup(userId, userName, entries)
                 } catch (e: Exception) {
                     Log.e("UserDataParse", "Failed to parse user data", e)
                     null
@@ -132,13 +133,15 @@ class DailyreportsFragment : Fragment() {
 
         // Merge by userName so each user only appears once
         tempResult
-            .groupBy { it.userName }
-            .map { (userName, groups) ->
+            .groupBy { it.userId }   // <-- group by unique id
+            .map { (userId, groups) ->
                 ClockoutGroup(
-                    userName = userName,
+                    userId = userId,
+                    userName = groups.first().userName, // pick the name from one of the entries
                     entries = groups.flatMap { it.entries }
                 )
             }
+
     }
 
     private fun updateUI(groups: List<ClockoutGroup>) {

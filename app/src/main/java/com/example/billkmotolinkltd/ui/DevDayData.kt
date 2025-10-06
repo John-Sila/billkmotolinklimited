@@ -3,24 +3,20 @@ package com.example.billkmotolinkltd.ui
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.os.Build
 import android.util.Log
-import android.widget.Toast
-import androidx.annotation.RequiresApi
-import androidx.core.content.ContentProviderCompat.requireContext
-import androidx.core.content.ContextCompat
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
-import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.Dispatchers
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import kotlinx.coroutines.tasks.await
-import java.util.UUID
+import kotlinx.coroutines.withContext
 
 data class DevDayData(
     val dayName: String,
@@ -29,6 +25,35 @@ data class DevDayData(
     // val netDeviation: Double,
     val grossDeviation: Double,
     val netGrossDifference: Double
+)
+
+data class User(
+    val userName: String = "",
+    val email: String = "",
+    val pendingAmount: Double = 0.0,
+    val isWorkingOnSunday: Boolean = true,
+    val dailyTarget: Double = 0.0,
+    val isActive: Boolean? = null,
+    val isDeleted: Boolean? = null,
+    val userRank: String = "",
+    val currentInAppBalance: Double = 0.0,
+    val sundayTarget: Double = 0.0,
+    val location: LocationData? = null,
+    val requirements: Map<String, RequirementData> = emptyMap()
+)
+
+
+data class RequirementData(
+    val appBalance: Double = 0.0,
+    val date: String = "",
+    val dayOfWeek: String = "",
+    val weekRange: String = ""
+)
+
+data class LocationData(
+    val latitude: Double = 0.0,
+    val longitude: Double = 0.0,
+    val timestamp: Long = 0L
 )
 
 data class DevUser(
@@ -43,24 +68,27 @@ data class DevWeek(
 )
 
 data class ClockoutGroup(
+    val userId: String,
     val userName: String,
     val entries: List<ClockoutEntry>
 )
 
 data class ClockoutEntry(
-    val userName: String,
-    val date: String,
-    val netIncome: Double,
-    val grossIncome: Double,
-    val inAppBal: Double,
-    val inAppDiff: Double,
-    val clockinMileage: Double,
-    val clockoutMileage: Double,
-    val mileageDifference: Double,
-    val elapsedTime: String,
-    val expenses: Map<String, Double>,
-    val postedAt: Timestamp?
+    val userName: String = "",
+    val date: String = "",
+    val netIncome: Double = 0.0,
+    val grossIncome: Double = 0.0,
+    val todaysInAppBalance: Double = 0.0,
+    val previousInAppBalance: Double = 0.0,
+    val inAppDifference: Double = 0.0,
+    val clockinMileage: Double = 0.0,
+    val clockoutMileage: Double = 0.0,
+    val mileageDifference: Double = 0.0,
+    val elapsedTime: String = "",
+    val expenses: Map<String, Double> = emptyMap(),
+    val postedAt: Timestamp? = null
 )
+
 
 data class ProfileUser(
     val lastSeenClockInTime: Timestamp,
@@ -84,7 +112,8 @@ data class ProfileUser(
     val sundayTarget: Double,
     val userName: String,
     val userRank: String,
-    val uid: String
+    val uid: String,
+    val pfpUrl: String
 )
 
 data class Battery(
@@ -93,6 +122,23 @@ data class Battery(
     val assignedBike: String = "",
     val assignedRider: String = "",
     val offTime: Timestamp? = null
+)
+
+data class Option(
+    val name: String = "",
+    val votes: Int = 0
+)
+
+data class Poll(
+    val id: String = "",
+    val title: String = "",
+    val description: String = "",
+    val options: List<Option> = emptyList(),
+    val createdAt: Timestamp? = null,
+    val expiresAt: Timestamp? = null,
+    val votedUIDs: List<String> = emptyList(),
+    val allowedVoters: List<String> = emptyList(),
+    val votedUserNames: List<String> = emptyList(),
 )
 
 data class ExecutiveUser(
@@ -113,21 +159,22 @@ data class BudgetItemRow(
     val postedAt: Any
 )
 
-
-
 data class TraceWeek(
     val weekName: String,
     var users: List<TraceUser> = listOf(),
     val startDate: Date?,
 )
+
 data class TraceUser(
     val userName: String,
     var days: List<TraceDay> = listOf()
 )
+
 data class TraceDay(
     val day: String = "",
     val messages: List<TraceMessage> = emptyList()
 )
+
 data class TraceMessage(
     val message: String = "",
     val timestamp: Timestamp? = null
@@ -144,8 +191,8 @@ data class Chatroom(
     val pendingApprovals: List<String> = emptyList(), // UIDs waiting for approval
     val approvedParticipants: List<String> = emptyList() // Approved user UIDs
 )
-data class UserEntry(val uid: String, val userName: String)
 
+data class UserEntry(val uid: String, val userName: String)
 
 data class ChatMessage(
     val messageId: String = "",
@@ -154,8 +201,6 @@ data class ChatMessage(
     val message: String = "",
     val timestamp: Long = System.currentTimeMillis()
 )
-
-
 
 data class CashFlow(
     val id: String,
@@ -182,7 +227,7 @@ object Utility {
             calendar.firstDayOfWeek = Calendar.MONDAY
             calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
             val startOfWeek = calendar.time
-            val dateFormat = SimpleDateFormat("dd-MMM-yyyy", Locale.getDefault())
+            val dateFormat = SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH)
             val startOfWeekFormatted = dateFormat.format(startOfWeek)
             calendar.add(Calendar.DAY_OF_WEEK, 6)
             val endOfWeekFormatted = dateFormat.format(calendar.time)
@@ -247,7 +292,6 @@ object Utility {
             return "BML-$randomPart"
         }
 
-
         val transactionId = generateRandomId(7)
 
         val newEntry = mapOf(
@@ -293,10 +337,13 @@ object Utility {
         )
 
         try {
-            firestore.collection("notifications")
-                .document("latest")
-                .set(notification)
-                .await()
+            // Ensure the Firestore operation runs on the IO dispatcher
+            withContext(Dispatchers.IO) {
+                firestore.collection("notifications")
+                    .document("latest")
+                    .set(notification)
+                    .await()
+            }
             Log.d("Notify", "Notification posted (overwritten).")
         } catch (e: Exception) {
             Log.e("Notify", "Failed to post notification: ${e.message}", e)

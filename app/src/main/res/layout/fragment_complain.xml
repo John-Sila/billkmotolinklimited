@@ -28,6 +28,40 @@
                 android:padding="10dp"
                 android:gravity="center"/>
 
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                app:cardBackgroundColor="?attr/cardBackgroundColor"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="6dp">
+
+                <EditText
+                    android:id="@+id/complainDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autofillHints=""
+                    android:minLines="2"
+                    android:layout_marginTop="10dp"
+                    android:padding="15dp"
+                    android:gravity="top|start"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:scrollbars="vertical"
+                    android:overScrollMode="always"
+                    android:hint="@string/write_complain" />
+
+            </androidx.cardview.widget.CardView>
+
+            <Button
+                android:id="@+id/btnPostComplain"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/post_complain"
+                android:backgroundTint="@android:color/holo_blue_bright"
+                android:padding="12dp"
+                android:layout_margin="15dp"
+                android:layout_marginTop="12dp"/>
+
         </LinearLayout>
 
     </ScrollView>

@@ -58,8 +58,6 @@ import android.os.Build
 import android.provider.CalendarContract
 import android.text.Spanned
 import android.text.style.TypefaceSpan
-
-
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.text.HtmlCompat
@@ -67,9 +65,13 @@ import androidx.lifecycle.lifecycleScope
 import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import org.json.JSONException
 import java.io.IOException
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Date
 
 class HomeFragment : Fragment() {
@@ -80,22 +82,21 @@ class HomeFragment : Fragment() {
     private lateinit var textViewWeather: TextView // Declare the TextView
     private lateinit var textViewUserName: TextView
     private lateinit var textViewSunday: TextView
+    // private lateinit var mapView: MapView
+
+    // private var maplibreMap: MapLibreMap? = null
 
     private lateinit var executiveUserAdapter: ExecutiveUserAdapter
     private lateinit var recyclerView: RecyclerView
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        val homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val homeViewModel = ViewModelProvider(this)[HomeViewModel::class.java]
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         handler.post(fetchRunnable)
         requestLocation()
 
-        recyclerView = binding.recyclerView
+        recyclerView = binding.homeAllUsersRecycler
         return binding.root
     }
 
@@ -111,10 +112,18 @@ class HomeFragment : Fragment() {
         getUserData()
         askNotificationPermission()
         getMemo()
+        /*loadMap(savedInstanceState)
+        setupScrollViewListener()*/
+        setUpScrolling()
+    }
+
+    private fun setUpScrolling() {
+        if (!isAdded || _binding == null) return
+        binding.homeAllUsersRecycler.isNestedScrollingEnabled = false
+        binding.budgetRecyclerView.isNestedScrollingEnabled = false
     }
 
     /*Deal with memos*/
-
     private fun getMemo() {
         if (!isAdded || _binding == null) return
 
@@ -131,14 +140,12 @@ class HomeFragment : Fragment() {
                 showError("Failed to load memo: ${e.message}")
             }
     }
-
     private fun handleDocument(document: DocumentSnapshot) {
         if (!document.exists()) {
             binding.memoLayout.visibility = View.GONE
-            showError("No memos found.")
+            // showError("No memos found.")
             return
         }
-
         // Extract all data first
         val heading = document.getString("heading").orEmpty()
         val htmlDescription = document.getString("description").orEmpty()
@@ -160,7 +167,6 @@ class HomeFragment : Fragment() {
 
         binding.memoLayout.visibility = View.VISIBLE
     }
-
     private fun processPostedTime(timestamp: Timestamp) {
         val calendar = Calendar.getInstance().apply { time = timestamp.toDate() }
         val day = calendar.get(Calendar.DAY_OF_MONTH)
@@ -175,20 +181,49 @@ class HomeFragment : Fragment() {
 
         binding.memoTime.text = spannable
     }
-
     private fun processTimestamp(timestamp: Timestamp, heading: String, venue: String, description: String) {
         val now = Timestamp.now()
         val millisDiff = timestamp.toDate().time - now.toDate().time
 
         if (millisDiff < 0) {
-            // Past event
-            val spannable = SpannableString("~ expired")
+            // Calculate how many days since expiry
+            val daysExpired = (now.toDate().time - timestamp.toDate().time) / (1000 * 60 * 60 * 24)
+            val hrsExpired = (now.toDate().time - timestamp.toDate().time) / (1000 * 60 * 60)
+
+            if (daysExpired >= 3) {
+                // Delete from Firestore if more than 3 days expired
+                FirebaseFirestore.getInstance()
+                    .collection("memos")
+                    .document("latest")
+                    .delete()
+                    .addOnSuccessListener {
+                        binding.memoLayout.visibility = View.GONE
+                        showError("Memo deleted as it was expired for more than 3 days.")
+                    }
+                    .addOnFailureListener { e ->
+                        showError("Failed to delete expired memo: ${e.message}")
+                    }
+                return
+            }
+            if (hrsExpired < 1) {
+                // Ongoing
+                val spannable = SpannableString("~ Ongoing")
+                spannable.setSpan(ForegroundColorSpan(Color.YELLOW), 0, spannable.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                spannable.setSpan(TypefaceSpan("serif"), 0, spannable.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+                binding.memoTimeTo.text = spannable
+                binding.meetingStillFuture.visibility = View.GONE
+                return
+            }
+
+
+
+            // Past event but within 3 days → show expired
+            val spannable = SpannableString("~ Void")
             spannable.setSpan(ForegroundColorSpan(Color.RED), 0, spannable.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             spannable.setSpan(TypefaceSpan("serif"), 0, spannable.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
 
             binding.memoTimeTo.text = spannable
-
-            //binding.memoTimeTo.text = HtmlCompat.fromHtml(expiredText, HtmlCompat.FROM_HTML_MODE_LEGACY)
             binding.meetingStillFuture.visibility = View.GONE
             return
         }
@@ -207,7 +242,6 @@ class HomeFragment : Fragment() {
         spannable.setSpan(ForegroundColorSpan(Color.MAGENTA), 0, spannable.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         spannable.setSpan(TypefaceSpan("serif"), 0, spannable.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
 
-        binding.memoTime.text = spannable
         binding.actualMeetTime.text = spannable
 
         binding.btnAddToCalendar.apply {
@@ -217,7 +251,6 @@ class HomeFragment : Fragment() {
             }
         }
     }
-
     private fun calculateRemainingTime(millisDiff: Long): String {
         val diffSeconds = millisDiff / 1000
         val diffMinutes = diffSeconds / 60
@@ -237,7 +270,6 @@ class HomeFragment : Fragment() {
             else -> "Less than a minute remaining"
         }
     }
-
     private fun updateVenueVisibility(venue: String) {
         binding.apply {
             physicalOptionLayout.visibility = if (venue == "Physical") View.VISIBLE else View.GONE
@@ -247,7 +279,6 @@ class HomeFragment : Fragment() {
             whatsAppOptionLayout.visibility = if (venue == "WhatsApp") View.VISIBLE else View.GONE
         }
     }
-
     private fun setMemoContent(heading: String, htmlDescription: String) {
         val formattedHeader = "<font color='#FFA500'><b>$heading</b></font>"
         binding.memoHeading.text = HtmlCompat.fromHtml(formattedHeader, HtmlCompat.FROM_HTML_MODE_LEGACY)
@@ -255,20 +286,17 @@ class HomeFragment : Fragment() {
         try {
             val safeHtml = htmlDescription.replace(Regex("<script.*?>.*?</script>", RegexOption.DOT_MATCHES_ALL), "")
             binding.memoDescription.text = HtmlCompat.fromHtml(safeHtml, HtmlCompat.FROM_HTML_MODE_LEGACY)
-        } catch (e: Exception) {
+        }
+        catch (e: Exception) {
             Log.e("Memo", "Error parsing HTML", e)
             binding.memoDescription.text = "Memo content could not be loaded."
         }
     }
-
     private fun showError(message: String) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
-
-    /*Memos end here*/
-
-
     private fun loadCalendarButton(timeParam: Long, heading: String, memoVenue: String, htmlDescription: String) {
+
         val endMillis = timeParam + (60 * 60 * 1000) // 1 hour later
 
         val intent = Intent(Intent.ACTION_INSERT).apply {
@@ -290,7 +318,12 @@ class HomeFragment : Fragment() {
             Toast.makeText(requireContext(), "No calendar app found.", Toast.LENGTH_SHORT).show()
         }
     }
+    /*Memos end here*/
 
+
+
+
+    /*permissions*/
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
@@ -319,6 +352,9 @@ class HomeFragment : Fragment() {
 
     }
 
+
+
+    /*globals*/
     private fun formatCustomTimestamp(timestamp: Timestamp?, context: Context): SpannableString {
         if (timestamp == null) return SpannableString("N/A")
 
@@ -393,8 +429,7 @@ class HomeFragment : Fragment() {
 
 
 
-    /*Getting this user's data*/
-
+    /*Getting THIS user's data*/
     private fun getUserData() {
         if (!isAdded || _binding == null) return
 
@@ -420,6 +455,25 @@ class HomeFragment : Fragment() {
             }
     }
 
+    private data class UserData(
+        val username: String,
+        val pendingAmount: Double,
+        val targetAmount: Double,
+        val sundayTarget: Double,
+        val userRank: String,
+        val idNumber: String,
+        val userEmail: String,
+        val createdAt: Timestamp,
+        val isWorkingOnSunday: Boolean,
+        val assignedBike: String,
+        val netIncomesMap: Map<*, *>?,
+        val requirements: Map<*, *>?,
+        val lastClockDate: Timestamp?,
+        val netClockedLastly: Double,
+        val clockInTime: Timestamp?,
+        val isActive: Boolean
+    )
+
     private fun handleUserDocument(document: DocumentSnapshot) {
         // Extract all data at once
         val userData = UserData(
@@ -428,6 +482,9 @@ class HomeFragment : Fragment() {
             targetAmount = document.getDouble("dailyTarget") ?: 0.0,
             sundayTarget = document.getDouble("sundayTarget") ?: 0.0,
             userRank = document.getString("userRank") ?: "Rider",
+            idNumber = document.getString("idNumber") ?: "00000000",
+            userEmail = document.getString("email") ?: "_billkmotolink_",
+            createdAt = document.getTimestamp("createdAt") ?: Timestamp.now(),
             isWorkingOnSunday = document.getBoolean("isWorkingOnSunday") == true,
             assignedBike = document.getString("currentBike") ?: "None",
             netIncomesMap = document.get("netIncomes") as? Map<*, *>,
@@ -444,32 +501,123 @@ class HomeFragment : Fragment() {
             return
         }
 
+        loadCard(userData)
+
         // Update UI based on user data
         updateUserProfileUI(userData)
         handleRequirements(userData.requirements)
         handleRankSpecificViews(userData)
         handleClockData(userData)
         handleBikeAssignment(userData)
-
+        lifecycleScope.launch {
+            if (hasEligibleUnvotedPolls(userData.username, userData.userRank)) {
+                _binding?.awaitingPoll?.visibility = View.VISIBLE
+            }
+        }
         binding.homeProgressBar.visibility = View.GONE
     }
 
-    private data class UserData(
-        val username: String,
-        val pendingAmount: Double,
-        val targetAmount: Double,
-        val sundayTarget: Double,
-        val userRank: String,
-        val isWorkingOnSunday: Boolean,
-        val assignedBike: String,
-        val netIncomesMap: Map<*, *>?,
-        val requirements: Map<*, *>?,
-        val lastClockDate: Timestamp?,
-        val netClockedLastly: Double,
-        val clockInTime: Timestamp?,
-        val isActive: Boolean
-    )
+    /*check if we have unvoted for polls*/
+    private suspend fun hasEligibleUnvotedPolls(
+        userName: String,
+        userRank: String
+    ): Boolean = withContext(Dispatchers.IO) {
+        val pollsRef = FirebaseFirestore.getInstance()
+            .collection("polls")
+            .document("billk_polls")
 
+        try {
+            val snapshot = pollsRef.get().await()
+            if (!snapshot.exists()) return@withContext false
+            val currentUser = FirebaseAuth.getInstance().currentUser
+            val  uid = currentUser?.uid
+            val pollsMap = snapshot.data ?: return@withContext false
+
+            val now = Timestamp.now()
+
+            for ((_, data) in pollsMap) {
+                val poll = data as? Map<*, *> ?: continue
+
+                val expiresAt = poll["expiresAt"] as? com.google.firebase.Timestamp ?: continue
+                val votedUIDs = poll["votedUIDs"] as? List<String> ?: emptyList()
+                val allowedVoters = poll["allowedVoters"] as? List<String> ?: emptyList()
+
+                val notExpired = expiresAt.toDate().after(now.toDate())
+                val notVoted = !votedUIDs.contains(uid)
+                val allowed = allowedVoters.contains(userRank)
+
+                if (notExpired && notVoted && allowed) {
+                    return@withContext true // Found at least one eligible poll
+                }
+            }
+
+            return@withContext false
+        } catch (e: Exception) {
+            Log.e("PollCheck", "Error checking polls: ${e.message}", e)
+            return@withContext false
+        }
+    }
+
+
+    private fun loadCard(userData: UserData) {
+        if (_binding == null || !isAdded) return
+        _binding?.apply {
+            cardID.text = userData.idNumber
+            cardEmail.text = userData.userEmail
+
+            val username = userData.username.uppercase(Locale.ROOT)
+            val rank = when (userData.userRank) {
+                "HR" -> {"Human Resource"}
+                "Admin" -> {"Manager"}
+                else -> userData.userRank
+            }
+
+            val fullText = "$username, $rank"
+            val spannable = SpannableString(fullText)
+
+            // Find the start index of the rank part
+            val start = fullText.indexOf(rank)
+            val end = start + rank.length
+
+            // Apply color to rank
+            val rankColor = ContextCompat.getColor(requireContext(), R.color.teal_700)
+            spannable.setSpan(
+                ForegroundColorSpan(rankColor),
+                start,
+                end,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+
+            cardNameAndRank.text = spannable
+            billkCard.visibility = View.VISIBLE
+
+            if (userData.userRank in listOf("CEO")) {
+                cardExpiry.text = "Going Concern"
+            } else cardExpiry.text = formatTimestampOneYearLater(userData.createdAt)
+
+        }
+
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun formatTimestampOneYearLater(timestamp: Timestamp): String {
+        val localDate = Instant.ofEpochSecond(timestamp.seconds, timestamp.nanoseconds.toLong())
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
+            .plusYears(1)
+
+        val day = localDate.dayOfMonth
+        val suffix = when {
+            day in 11..13 -> "th"
+            day % 10 == 1 -> "st"
+            day % 10 == 2 -> "nd"
+            day % 10 == 3 -> "rd"
+            else -> "th"
+        }
+
+        val formatter = DateTimeFormatter.ofPattern("MMM yyyy", Locale.ENGLISH)
+        return "${day}$suffix, ${localDate.format(formatter)}"
+    }
     private fun handleInactiveAccount() {
         FirebaseAuth.getInstance().signOut()
         showToast("You were logged out because this account has been flagged.")
@@ -481,8 +629,6 @@ class HomeFragment : Fragment() {
             visibility = View.VISIBLE
             text = "Hello $firstName,"
         }
-        binding.helloText.visibility = View.GONE
-
         updateAmountViews(data.pendingAmount, data.targetAmount)
         updateSundayStatus(data.isWorkingOnSunday, data.sundayTarget)
     }
@@ -560,31 +706,50 @@ class HomeFragment : Fragment() {
 
         when (data.userRank) {
             "Admin", "Rider" -> {
-                binding.adminsAndRiders.visibility = View.VISIBLE
+                binding.apply { adminsAndRiders.visibility = View.VISIBLE }
                 setupPieChart(data.netIncomesMap)
 
                 if (data.userRank == "Admin") {
-                    binding.chiefExecutive.visibility = View.VISIBLE
+                    binding.apply { chiefExecutive.visibility = View.VISIBLE }
                     getExecutiveInformation()
                 }
             }
-            "CEO" -> {
-                binding.chiefExecutive.visibility = View.VISIBLE
-                getExecutiveInformation()
-            }
-            "HR" -> {
-                binding.humanResource.visibility = View.VISIBLE
-                getHumanResource()
-            }
-            "Systems, IT" -> {
+            /*"CEO" -> {
                 binding.apply {
                     chiefExecutive.visibility = View.VISIBLE
+                    humanResource.visibility = View.VISIBLE
+                }
+                getExecutiveInformation()
+                getHumanResource()
+            }*/
+            "HR" -> {
+                binding.apply { humanResource.visibility = View.VISIBLE }
+                getHumanResource()
+            }
+            "Systems, IT", "CEO"-> {
+                binding.apply {
                     adminsAndRiders.visibility = View.VISIBLE
+                    chiefExecutive.visibility = View.VISIBLE
                     humanResource.visibility = View.VISIBLE
                 }
                 getExecutiveInformation()
                 getHumanResource()
                 setupPieChart(data.netIncomesMap)
+
+                if (data.userRank == "CEO") {
+                    binding.apply {
+                        pendingAmountLayout.visibility = View.GONE
+                        expectedTargetLayout.visibility = View.GONE
+                        onlineHrsLayout.visibility = View.GONE
+                        requirementsDiv.visibility = View.GONE
+                        bikeLayout.visibility = View.GONE
+                        sundayStuff.visibility = View.GONE
+                        noClockouts.visibility = View.GONE
+                        clockoutsDiv.visibility = View.GONE
+
+                        pieChart.visibility = View.GONE
+                    }
+                }
             }
         }
     }
@@ -593,7 +758,8 @@ class HomeFragment : Fragment() {
         if (data.netIncomesMap == null) {
             binding.noClockouts.visibility = View.VISIBLE
             binding.clockoutsLayout.visibility = View.GONE
-        } else {
+        }
+        else {
             binding.noClockouts.visibility = View.GONE
             binding.clockoutsLayout.visibility = View.VISIBLE
             binding.lastClockDate.text = formatCustomTimestamp(data.lastClockDate, requireContext())
@@ -670,7 +836,6 @@ class HomeFragment : Fragment() {
 
         pieChart.invalidate()
     }
-
     /*User data ends here*/
 
 
@@ -689,6 +854,8 @@ class HomeFragment : Fragment() {
 
 
 
+
+
     /*Getting information for Admins and CEOs*/
 
     private fun getExecutiveInformation() {
@@ -696,6 +863,7 @@ class HomeFragment : Fragment() {
             .get()
             .addOnSuccessListener { querySnapshot ->
                 handleExecutiveUsers(querySnapshot.documents)
+                // Toast.makeText(requireContext(), "Executive users fetched: ${querySnapshot.size()}", Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener { e ->
                 showExecutiveError(e)
@@ -703,14 +871,17 @@ class HomeFragment : Fragment() {
     }
 
     private fun handleExecutiveUsers(documents: List<DocumentSnapshot>) {
-        val users = documents.mapNotNull { document ->
-            parseExecutiveUser(document)?.takeIf { isValidExecutiveUser(it) }
-        }
+        _binding?.let { binding ->
+            val users = documents.mapNotNull { document ->
+                parseExecutiveUser(document)?.takeIf { isValidExecutiveUser(it) }
+            }
+            if (users.isEmpty()) {
+                showNoUsers()
+            } else {
+                displayExecutiveUsers(users)
+                // Toast.makeText(requireContext(), "Executive users fetched: ${users.size}", Toast.LENGTH_SHORT).show()
 
-        if (users.isEmpty()) {
-            showNoUsers()
-        } else {
-            displayExecutiveUsers(users)
+            }
         }
     }
 
@@ -770,7 +941,6 @@ class HomeFragment : Fragment() {
 
 
     // Human Resource starts here
-
     private fun getHumanResource() {
         setupRecyclerView()
         fetchBudgetData()
@@ -802,6 +972,29 @@ class HomeFragment : Fragment() {
             return
         }
 
+        // Extract postedAt as a Timestamp
+        val postedAt = budget["postedAt"] as? Timestamp
+        if (postedAt != null) {
+            val now = Timestamp.now()
+            val diffMillis = now.toDate().time - postedAt.toDate().time
+            val diffDays = TimeUnit.MILLISECONDS.toDays(diffMillis)
+
+            if (diffDays > 14) {
+                // Budget is older than 2 weeks → delete it
+                FirebaseFirestore.getInstance()
+                    .collection("general")
+                    .document("general_variables")
+                    .update("budget", null)
+                    .addOnSuccessListener {
+                        showNoBudget()
+                    }
+                    .addOnFailureListener { e ->
+                        handleBudgetError(e)
+                    }
+                return
+            }
+        }
+
         val items = budget["items"] as? List<Map<String, Any>> ?: run {
             showNoBudget()
             return
@@ -811,6 +1004,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun displayBudgetData(budget: Map<*, *>, items: List<Map<String, Any>>) {
+        if (!isAdded || _binding == null) return
         binding.apply {
             budgetExists.visibility = View.VISIBLE
             noBudgets.visibility = View.GONE
@@ -863,6 +1057,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun showNoBudget() {
+        if (!isAdded || _binding == null) return
         binding.apply {
             budgetExists.visibility = View.GONE
             noBudgets.visibility = View.VISIBLE
@@ -870,6 +1065,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun handleBudgetError(e: Exception) {
+        if (!isAdded || _binding == null) return
         Log.e("BudgetError", "Failed to load budget", e)
         Toast.makeText(
             requireContext(),
@@ -880,6 +1076,8 @@ class HomeFragment : Fragment() {
     }
 
     /*HR ends here*/
+
+
 
 
 
@@ -1013,11 +1211,40 @@ class HomeFragment : Fragment() {
 
 
 
+    // Forward lifecycle events to MapView
+    override fun onStart() {
+        super.onStart()
+        // if (::mapView.isInitialized) mapView.onStart()
+    }
 
+    override fun onResume() {
+        super.onResume()
+        // if (::mapView.isInitialized) mapView.onResume()
+    }
 
+    override fun onPause() {
+        super.onPause()
+        // if (::mapView.isInitialized) mapView.onPause()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // if (::mapView.isInitialized) mapView.onStop()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        // if (::mapView.isInitialized) mapView.onLowMemory()
+    }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        // if (::mapView.isInitialized) mapView.onSaveInstanceState(outState)
+
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        // if (::mapView.isInitialized) mapView.onDestroy()
         handler.removeCallbacks(fetchRunnable)
         _binding = null
     }

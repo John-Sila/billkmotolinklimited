@@ -29,11 +29,11 @@ import java.util.Locale
 class MpesaActivity: AppCompatActivity() {
     private lateinit var binding: ActivityMpesaBinding
     private val predefinedMessages = arrayOf(
-        "HD07OS1A0 Confirmed. Ksh30.00 sent to ALBINA  NAKOCHE 0705957581 on 13/8/25 at 6:22 PM. New M-PESA balance is Ksh93.80. Transaction cost, Ksh0.00.  Amount you can transact within the day is 499,847.00. Earn interest daily on Ziidi MMF,Dial *334#",
-        "HD67WCF8C Confirmed. Ksh60.00 sent to FELISTERS  NYANGAU on 13/8/25 at 6:52 PM. New M-PESA balance is Ksh33.80. Transaction cost, Ksh0.00. Amount you can transact within the day is 499,787.00. Sign up for Lipa Na M-PESA Till online https://m-pesaforbusiness.co.ke\n",
-        "HE6AOKBVK Confirmed.Ksh150.00 transferred from M-Shwari account on 14/8/25 at 11:33 AM. M-Shwari balance is Ksh15,827.92 .M-PESA balance is Ksh183.80 .Transaction cost Ksh.0.00",
-        "HE0AOP3EY Confirmed. Ksh130.00 sent to Regina  Musyimi 0791700260 on 14/8/25 at 11:33 AM. New M-PESA balance is Ksh46.80. Transaction cost, Ksh7.00.  Amount you can transact within the day is 499,870.00. Earn interest daily on Ziidi MMF,Dial *334#\n",
-        "HE8BATEXG confirmed.You bought Ksh10.00 of airtime on 14/8/25 at 1:46 PM.New M-PESA balance is Ksh36.80. Transaction cost, Ksh0.00. Amount you can transact within the day is 499,860.00. Start Investing today with Ziidi MMF & earn daily. Dial *334#."
+        "D07OS1A0 Confirmed. Ksh30.00 sent to ALBINA  NAKOCHE 0705957581 on 13/8/25 at 6:22 PM. New M-PESA balance is Ksh93.80. Transaction cost, Ksh0.00.  Amount you can transact within the day is 499,847.00. Earn interest daily on Ziidi MMF,Dial *334#",
+        "D67WCF8C Confirmed. Ksh60.00 sent to FELISTERS  NYANGAU on 13/8/25 at 6:52 PM. New M-PESA balance is Ksh33.80. Transaction cost, Ksh0.00. Amount you can transact within the day is 499,787.00. Sign up for Lipa Na M-PESA Till online https://m-pesaforbusiness.co.ke\n",
+        "E6AOKBVK Confirmed.Ksh150.00 transferred from M-Shwari account on 14/8/25 at 11:33 AM. M-Shwari balance is Ksh15,827.92 .M-PESA balance is Ksh183.80 .Transaction cost Ksh.0.00",
+        "E0AOP3EY Confirmed. Ksh130.00 sent to Regina  Musyimi 0791700260 on 14/8/25 at 11:33 AM. New M-PESA balance is Ksh46.80. Transaction cost, Ksh7.00.  Amount you can transact within the day is 499,870.00. Earn interest daily on Ziidi MMF,Dial *334#\n",
+        "E8BATEXG confirmed.You bought Ksh10.00 of airtime on 14/8/25 at 1:46 PM.New M-PESA balance is Ksh36.80. Transaction cost, Ksh0.00. Amount you can transact within the day is 499,860.00. Start Investing today with Ziidi MMF & earn daily. Dial *334#."
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -155,8 +155,12 @@ class MpesaActivity: AppCompatActivity() {
         // 6th message depending on option
         val sixthMessage = if (option.equals("Pochi", ignoreCase = true)) {
             "${startLetter}HC91AM7BN Confirmed. Ksh${amount}.00 sent to $name on ${getDate()} at ${getTime()}. New M-PESA balance is Ksh16.80. Transaction cost, Ksh${transactionCost(amount)}.00. Amount you can transact within the day is 499,905.00. Sign up for Lipa Na M-PESA Till online https://m-pesaforbusiness.co.ke"
-        } else {
+        } else if (option.equals("Send", ignoreCase = true)) {
             "${startLetter}HE0AOP3EY Confirmed. Ksh${amount}.00 sent to $name $phoneNumber on ${getDate()} at ${getTime()}. New M-PESA balance is Ksh46.80. Transaction cost, Ksh${transactionCost(amount)}.00. Amount you can transact within the day is 497,870.00. Earn interest daily on Ziidi MMF,Dial *334#\n"
+        } else if (option.equals("Till", ignoreCase = true)) {
+            "${startLetter}HL2CVO37K Confirmed. Ksh${amount}.00 paid to $name. on ${getDate()} at ${getTime()}.New M-PESA balance is Ksh15.00. Transaction cost, Ksh0.00. Amount you can transact within the day is 498,750.00. Save frequent Tills for quick payment on M-PESA app https://bit.ly/mpesalnk"
+        } else {
+            ""
         }
 
         container.addView(createMessageCard(underlineSpecialParts(sixthMessage)))

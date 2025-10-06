@@ -1,5 +1,6 @@
 package com.example.billkmotolinkltd.ui.approvals
 
+import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
@@ -17,6 +18,7 @@ import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.example.billkmotolinkltd.R
 import com.example.billkmotolinkltd.databinding.FragmentApprovalsBinding
@@ -31,6 +33,9 @@ import com.example.billkmotolinkltd.ui.formatIncome
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Query
 import androidx.lifecycle.lifecycleScope
+import com.example.billkmotolinkltd.ui.LocationData
+import com.example.billkmotolinkltd.ui.RequirementData
+import com.example.billkmotolinkltd.ui.UsersAdapter.UserViewHolder.TransactionResult
 import kotlinx.coroutines.launch
 
 class ApprovalsFragment : Fragment() {
@@ -79,10 +84,14 @@ class ApprovalsFragment : Fragment() {
                 dialog.dismiss() // Dismiss dialog if user cancels
             }
 
-            val dialog = alertDialog.create()
-            dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+            alertDialog.create().apply {
+                window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                show()
 
-            dialog.show()
+                // Change button text colors after showing
+                getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+            }
         }
         binding.btnDeclineBudget.setOnClickListener {
             val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
@@ -107,10 +116,17 @@ class ApprovalsFragment : Fragment() {
                 dialog.dismiss() // Dismiss dialog if user cancels
             }
 
-            val dialog = alertDialog.create()
-            dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+            alertDialog.create().apply {
+                window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                show()
 
-            dialog.show()
+                // Change button text colors after showing
+                getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+            }
+        }
+        binding.btnApproveAllUsersIncome.setOnClickListener {
+            approveAllUsersIncome(binding.approveAllUsersIncomeProgressBar, requireContext())
         }
 
         // Initialize Firestore
@@ -131,6 +147,8 @@ class ApprovalsFragment : Fragment() {
         if (!isAdded || view == null) return
         binding.approvalsProgressBar.visibility = View.VISIBLE
 
+        usersAdapter.submitList(emptyList())
+
         val db = FirebaseFirestore.getInstance()
         val usersRef = db.collection("users")
         val query = usersRef
@@ -147,6 +165,11 @@ class ApprovalsFragment : Fragment() {
                     val currentUserEmail = auth.currentUser?.email ?: return@addOnSuccessListener
                     if (isDeleted || userRank == "CEO" || userRank == "Systems, IT" || thisEmail == currentUserEmail) return@mapNotNull null
 
+                    val locationData = document.get("location") as? Map<*, *>
+                    val latitude = (locationData?.get("latitude") as? Double) ?: 0.0
+                    val longitude = (locationData?.get("longitude") as? Double) ?: 0.0
+                    val locationTimestamp = (locationData?.get("timestamp") as? Long) ?: 0L
+
                     User(
                         userName = document.getString("userName") ?: "",
                         email = document.getString("email") ?: "",
@@ -157,7 +180,9 @@ class ApprovalsFragment : Fragment() {
                         isDeleted = false,
                         userRank = document.getString("userRank") ?: "",
                         currentInAppBalance = document.getDouble("currentInAppBalance") ?: 0.0,
-                        sundayTarget = document.getDouble("sundayTarget") ?: 0.0
+                        sundayTarget = document.getDouble("sundayTarget") ?: 0.0,
+                        location = LocationData(latitude, longitude, locationTimestamp),
+                        requirements = document.get("requirements") as? Map<String, RequirementData> ?: emptyMap()
                     )
                 }
 
@@ -171,6 +196,7 @@ class ApprovalsFragment : Fragment() {
                     binding.noUsers.visibility = View.GONE
                 }
                 usersAdapter.submitList(usersList)
+                binding.btnApproveAllUsersIncome.visibility = View.VISIBLE
 
             }
             .addOnFailureListener { exception ->
@@ -204,6 +230,119 @@ class ApprovalsFragment : Fragment() {
             .start()
     }
 
+    /*absolute approval*/
+    private fun approveAllUsersIncome(progressbar: View, context: Context) {
+        val alertDialog = AlertDialog.Builder(context)
+
+        val title = SpannableString("Complete Global Approval").apply {
+            setSpan(ForegroundColorSpan(Color.GREEN), 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+
+        val message = SpannableString("Approve all pending income from all users.")
+        message.setSpan(ForegroundColorSpan(Color.GRAY), 0, message.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        alertDialog.setTitle(title)
+        alertDialog.setMessage(message)
+        alertDialog.setIcon(R.drawable.warn)
+
+        alertDialog.setPositiveButton("Approve All") { _, _ ->
+            progressbar.visibility = View.VISIBLE
+
+            val db = FirebaseFirestore.getInstance()
+            val usersRef = db.collection("users")
+            val generalRef = db.collection("general").document("general_variables")
+
+            usersRef
+                .get()
+                .addOnSuccessListener { querySnapshot ->
+                    if (querySnapshot.isEmpty) {
+                        Toast.makeText(context, "No users found.", Toast.LENGTH_SHORT).show()
+                        progressbar.visibility = View.GONE
+                        return@addOnSuccessListener
+                    }
+
+                    val userDocs = querySnapshot.documents
+                    val usersWithPending = userDocs.filter {
+                        (it.getDouble("pendingAmount") ?: 0.0) > 0.0
+                    }
+
+                    if (usersWithPending.isEmpty()) {
+                        Toast.makeText(context, "No pending income to approve.", Toast.LENGTH_SHORT).show()
+                        progressbar.visibility = View.GONE
+                        return@addOnSuccessListener
+                    }
+
+                    db.runTransaction { transaction ->
+                        var totalApproved = 0.0
+                        val approvedUsers = mutableListOf<String>()
+
+                        // Read general variables first
+                        val generalSnapshot = transaction.get(generalRef)
+                        val currentCompanyIncome = generalSnapshot.getDouble("companyIncome") ?: 0.0
+
+                        // Loop over each user
+                        for (userDoc in usersWithPending) {
+                            val ref = userDoc.reference
+                            val pending = userDoc.getDouble("pendingAmount") ?: 0.0
+                            val userName = userDoc.getString("userName") ?: "Unnamed"
+
+                            totalApproved += pending
+                            approvedUsers.add(userName)
+
+                            transaction.update(ref, "pendingAmount", 0.0)
+                        }
+
+                        // Update company income
+                        transaction.update(generalRef, "companyIncome", currentCompanyIncome + totalApproved)
+
+                        // Return the result
+                        TransactionResult(
+                            totalApproved,
+                            approvedUsers.joinToString(", "),
+                            currentCompanyIncome,
+                            "Batch approval"
+                        )
+                    }.addOnSuccessListener { result ->
+                        progressbar.visibility = View.GONE
+
+                        val total = formatIncome(result.currentPending)
+                        val newBalance = formatIncome(result.currentIncome + result.currentPending)
+                        val msg = buildString {
+                            append("Approved all pending income for all users.\n")
+                            append("Total Approved: $total\n")
+                            append("Company Balance: $newBalance\n")
+                            append("Users included: ${result.username}")
+                        }
+
+                        Utility.postCashFlow(msg, true)
+                        Toast.makeText(context, "All income approved successfully.", Toast.LENGTH_SHORT).show()
+                        fetchUsersData()
+
+                    }.addOnFailureListener { e ->
+                        progressbar.visibility = View.GONE
+                        Log.e("GlobalApproval", "Transaction failed", e)
+                        Toast.makeText(context, "Approval failed: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+                .addOnFailureListener { e ->
+                    progressbar.visibility = View.GONE
+                    Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+        }
+
+        alertDialog.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        alertDialog.create().apply {
+            window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+            show()
+            getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)
+            getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)
+        }
+    }
+
+
     private fun checkIfHrBudgetExists() {
         val db = FirebaseFirestore.getInstance()
         val docRef = db.collection("general").document("general_variables")
@@ -211,142 +350,146 @@ class ApprovalsFragment : Fragment() {
         if (!isAdded || _binding == null) return
 
         docRef.get().addOnSuccessListener { document ->
+            if (!isAdded || _binding == null) return@addOnSuccessListener // Guard again here
             if (document.exists()) {
 
-                val budgetRaw = document.get("budget")
-                val budget = budgetRaw as? Map<*, *> ?: return@addOnSuccessListener
-                val budgetItems = budget["items"] as? List<*> ?: return@addOnSuccessListener
+                val budgetRaw = document.get("budget") as? Map<*, *>
 
-                if (true) {
-                    if (!isAdded || _binding == null) return@addOnSuccessListener
-                    // Log.d("Firestore", "Budget exists: $budget")
-
-                    val budgetStatus = budget["budgetStatus"] as? String
-                    val budgetCost = budget["budgetCost"] as? Double
-                    val budgetHeading = budget["budgetHeading"] as? String ?: "No Heading Available"
-                    binding.budgetHeading.text = budgetHeading
-
-                    binding.budgetToggleLayout.setOnClickListener {
-                        if (!isTableVisible) {
-                            slideDown(binding.tableLayout)
-                        } else {
-                            slideUp(binding.tableLayout)
-                        }
-
-                        isTableVisible = !isTableVisible
-
-                        val arrowRes = if (isTableVisible) {
-                            R.drawable.ic_arrow_up
-                        } else {
-                            R.drawable.ic_arrow_down
-                        }
-                        binding.arrowIcon.setImageResource(arrowRes)
-                    }
-
-                    val tableLayout = view?.findViewById<TableLayout>(R.id.tableLayout)
-                    tableLayout?.removeAllViews()
-
-                    val headerRow = TableRow(context).apply {
-                        layoutParams = TableRow.LayoutParams(
-                            TableRow.LayoutParams.MATCH_PARENT,
-                            TableRow.LayoutParams.WRAP_CONTENT
-                        )
-                    }
-
-                    val headerItem = TextView(context).apply {
-                        text = "Item"
-                        setPadding(8, 8, 8, 8)
-                        setTypeface(null, Typeface.BOLD)
-                        setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
-                        setTextColor("#FFFF8800".toColorInt())
-                        gravity = Gravity.CENTER
-                    }
-                    headerRow.addView(headerItem)
-
-                    val headerCost = TextView(context).apply {
-                        text = "Cost"
-                        setPadding(8, 8, 8, 8)
-                        setTypeface(null, Typeface.BOLD)
-                        setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
-                        setTextColor("#FFFF8800".toColorInt())
-                        gravity = Gravity.CENTER
-                    }
-                    headerRow.addView(headerCost)
-
-                    tableLayout?.addView(headerRow)
-
-                    // Add item rows
-                    budgetItems.forEach { item ->
-                        val itemMap = item as? Map<*, *> ?: return@forEach
-
-                        val itemName = itemMap["name"] as? String ?: "Unknown Item"
-                        val itemCost = when (val cost = itemMap["cost"]) {
-                            is Number -> cost.toDouble()  // handles Long, Int, Double etc.
-                            else -> 0.0
-                        }
-                        val tableRow = TableRow(context).apply {
-                            layoutParams = TableRow.LayoutParams(
-                                TableRow.LayoutParams.MATCH_PARENT,
-                                TableRow.LayoutParams.WRAP_CONTENT
-                            )
-                        }
-
-                        val rowItem = TextView(context).apply {
-                            text = itemName
-                            setPadding(8, 8, 8, 8)
-                            gravity = Gravity.CENTER
-                        }
-
-                        val rowCost = TextView(context).apply {
-                            text = "${formatIncome(itemCost)}"
-                            setPadding(8, 8, 8, 8)
-                            gravity = Gravity.CENTER
-                        }
-
-                        tableRow.addView(rowItem)
-                        tableRow.addView(rowCost)
-                        tableLayout?.addView(tableRow)
-                    }
-
-                    // Add totals row
-                    val tableRowForTotals = TableRow(context).apply {
-                        layoutParams = TableRow.LayoutParams(
-                            TableRow.LayoutParams.MATCH_PARENT,
-                            TableRow.LayoutParams.WRAP_CONTENT
-                        )
-                    }
-
-                    val totalLabel = TextView(context).apply {
-                        text = "Total Cost"
-                        setPadding(8, 8, 8, 8)
-                        gravity = Gravity.CENTER
-                        setTypeface(null, Typeface.BOLD)
-                    }
-
-                    val totalCost = TextView(context).apply {
-                        text = "${formatIncome(budgetCost ?: 0.0)}"
-                        setPadding(8, 8, 8, 8)
-                        setTextColor(resources.getColor(android.R.color.holo_green_dark))
-                        gravity = Gravity.CENTER
-                        setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
-                    }
-
-                    tableRowForTotals.addView(totalLabel)
-                    tableRowForTotals.addView(totalCost)
-
-                    tableLayout?.addView(tableRowForTotals)
-
-                    checkUserRole(budgetStatus)
-                }
-                else {
-                    Log.d("Firestore", "Budget does not exist.")
-                    if (!isAdded || _binding == null) return@addOnSuccessListener
+                if (budgetRaw == null || budgetRaw.isEmpty()) {
+                    // Handle missing or empty budget data
+                    Toast.makeText(requireContext(), "No budget data available.", Toast.LENGTH_SHORT).show()
                     binding.budgetExists.visibility = View.GONE
-                    binding.textHrUnavailable.visibility = View.VISIBLE
+                    return@addOnSuccessListener
                 }
-            } else {
+                binding.budgetExists.visibility = View.VISIBLE
+
+                val budgetItems = budgetRaw["items"] as? List<*> ?: emptyList<Any>()
+                if (!isAdded || _binding == null) return@addOnSuccessListener
+                // Log.d("Firestore", "Budget exists: $budget")
+
+                val budgetStatus = budgetRaw["budgetStatus"] as? String
+                val budgetCost = budgetRaw["budgetCost"] as? Double
+                val budgetHeading = budgetRaw["budgetHeading"] as? String ?: "No Heading Available"
+                binding.budgetHeading.text = budgetHeading
+
+                binding.budgetToggleLayout.setOnClickListener {
+                    if (!isTableVisible) {
+                        slideDown(binding.tableLayout)
+                    } else {
+                        slideUp(binding.tableLayout)
+                    }
+
+                    isTableVisible = !isTableVisible
+
+                    val arrowRes = if (isTableVisible) {
+                        R.drawable.ic_arrow_up
+                    } else {
+                        R.drawable.ic_arrow_down
+                    }
+                    binding.arrowIcon.setImageResource(arrowRes)
+                }
+
+                val tableLayout = view?.findViewById<TableLayout>(R.id.tableLayout)
+                tableLayout?.removeAllViews()
+
+                val headerRow = TableRow(context).apply {
+                    layoutParams = TableRow.LayoutParams(
+                        TableRow.LayoutParams.MATCH_PARENT,
+                        TableRow.LayoutParams.WRAP_CONTENT
+                    )
+                }
+
+                val headerItem = TextView(context).apply {
+                    text = "Item"
+                    setPadding(8, 8, 8, 8)
+                    setTypeface(null, Typeface.BOLD)
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+                    setTextColor("#FFFF8800".toColorInt())
+                    gravity = Gravity.CENTER
+                }
+                headerRow.addView(headerItem)
+
+                val headerCost = TextView(context).apply {
+                    text = "Cost"
+                    setPadding(8, 8, 8, 8)
+                    setTypeface(null, Typeface.BOLD)
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+                    setTextColor("#FFFF8800".toColorInt())
+                    gravity = Gravity.CENTER
+                }
+                headerRow.addView(headerCost)
+
+                tableLayout?.addView(headerRow)
+
+                // Add item rows
+                budgetItems.forEach { item ->
+                    val itemMap = item as? Map<*, *> ?: return@forEach
+
+                    val itemName = itemMap["name"] as? String ?: "Unknown Item"
+                    val itemCost = when (val cost = itemMap["cost"]) {
+                        is Number -> cost.toDouble()  // handles Long, Int, Double etc.
+                        else -> 0.0
+                    }
+                    val tableRow = TableRow(context).apply {
+                        layoutParams = TableRow.LayoutParams(
+                            TableRow.LayoutParams.MATCH_PARENT,
+                            TableRow.LayoutParams.WRAP_CONTENT
+                        )
+                    }
+
+                    val rowItem = TextView(context).apply {
+                        text = itemName
+                        setPadding(8, 8, 8, 8)
+                        gravity = Gravity.CENTER
+                    }
+
+                    val rowCost = TextView(context).apply {
+                        text = "${formatIncome(itemCost)}"
+                        setPadding(8, 8, 8, 8)
+                        gravity = Gravity.CENTER
+                    }
+
+                    tableRow.addView(rowItem)
+                    tableRow.addView(rowCost)
+                    tableLayout?.addView(tableRow)
+                }
+
+                // Add totals row
+                val tableRowForTotals = TableRow(context).apply {
+                    layoutParams = TableRow.LayoutParams(
+                        TableRow.LayoutParams.MATCH_PARENT,
+                        TableRow.LayoutParams.WRAP_CONTENT
+                    )
+                }
+
+                val totalLabel = TextView(context).apply {
+                    text = "Total Cost"
+                    setPadding(8, 8, 8, 8)
+                    gravity = Gravity.CENTER
+                    setTypeface(null, Typeface.BOLD)
+                }
+
+                val totalCost = TextView(context).apply {
+                    text = "${formatIncome(budgetCost ?: 0.0)}"
+                    setPadding(8, 8, 8, 8)
+                    setTextColor(resources.getColor(android.R.color.holo_green_dark))
+                    gravity = Gravity.CENTER
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+                }
+
+                tableRowForTotals.addView(totalLabel)
+                tableRowForTotals.addView(totalCost)
+
+                tableLayout?.addView(tableRowForTotals)
+
+                checkUserRole(budgetStatus)
+            }
+            else {
                 Log.d("Firestore", "Document does not exist.")
                 // Handle case when document does not exist
+                _binding.apply {
+                    binding.budgetCard.visibility = View.GONE
+                }
             }
         }.addOnFailureListener { exception ->
             Log.e("Firestore", "Error checking budget", exception)

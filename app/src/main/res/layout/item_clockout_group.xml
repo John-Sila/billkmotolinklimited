@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -9,10 +10,10 @@
         android:id="@+id/textUserName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="User Name"
-        android:textColor="@android:color/holo_orange_light"
+        android:text=""
+        android:textColor="@color/d1"
         android:textStyle="bold"
-        android:background="@color/teal_700"
+        android:background="@drawable/progress_bg"
         android:textSize="18sp"
         android:padding="15dp" />
 
@@ -21,4 +22,5 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:nestedScrollingEnabled="false" />
+
 </LinearLayout>

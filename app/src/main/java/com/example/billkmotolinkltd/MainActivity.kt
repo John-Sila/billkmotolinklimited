@@ -9,6 +9,10 @@ import android.app.PendingIntent
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.view.Menu
 import android.view.View
 import android.widget.Toast
@@ -36,12 +40,6 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import com.example.billkmotolinkltd.ui.Utility
-import com.example.billkmotolinkltd.ui.approvals.ApprovalsFragment
-import com.example.billkmotolinkltd.ui.clockins.ClockInFragment
-import com.example.billkmotolinkltd.ui.clockouts.ClockoutsFragment
-import com.example.billkmotolinkltd.ui.home.HomeFragment
-import com.example.billkmotolinkltd.ui.settings.SettingsFragment
-import com.example.billkmotolinkltd.ui.weeklyreports.WeeklyreportsFragment
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.messaging.FirebaseMessaging
@@ -52,6 +50,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import android.widget.TextView
+import com.example.billkmotolinkltd.ui.LocationService
+import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseUser
+// import org.maplibre.android.maps.MapView
+// import org.maplibre.android.maps.Style
+
 
 
 class MainActivity : AppCompatActivity() {
@@ -62,24 +67,52 @@ class MainActivity : AppCompatActivity() {
     private lateinit var authStateListener: FirebaseAuth.AuthStateListener
     private val sharedPrefs by lazy { getSharedPreferences("AppPrefs", Context.MODE_PRIVATE) }
     private var lastDestinationId: Int? = null
+    // private lateinit var mapView: MapView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        initializeWindow()
+        initializeViews()
+        initializeFirebase()
+        initializeNavigation()
+        setupNavigationListeners()
+        setupAuthStateListener()
+        setupLogoutListener()
+        setupFabClickListener()
+        loadInitialData()
+        checkAndRequestPermissions()
+    }
 
+    private fun lockLocationService() {
+        val serviceIntent = Intent(this, LocationService::class.java)
+        ContextCompat.startForegroundService(this, serviceIntent)
+    }
+
+    private fun initializeWindow() {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+    }
+
+    private fun initializeViews() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        auth = FirebaseAuth.getInstance()
-        navController = findNavController(R.id.nav_host_fragment_content_main)
-
         setSupportActionBar(binding.appBarMain.toolbar)
+        window.statusBarColor = ContextCompat.getColor(this, R.color.d3)
 
-        val drawerLayout: DrawerLayout = binding.drawerLayout
-        val navMainView: NavigationView = findViewById(R.id.nav_view_main)
-        val navFooterView: NavigationView = findViewById(R.id.nav_view_footer)
+    }
 
+    private fun initializeFirebase() {
+        auth = FirebaseAuth.getInstance()
+    }
+
+    private fun initializeNavigation() {
+        navController = findNavController(R.id.nav_host_fragment_content_main)
+        setupAppBarConfiguration()
+        setupNavigationViews()
+        loadLastOpenedPage()
+    }
+
+    private fun setupAppBarConfiguration() {
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.nav_home,
@@ -91,8 +124,11 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_require,
                 R.id.nav_user,
                 R.id.nav_post_memo,
+                R.id.nav_create_poll,
+                R.id.nav_polls,
                 R.id.nav_batteries,
                 R.id.nav_manage_assets,
+                R.id.nav_complaints,
                 R.id.nav_profiles,
                 R.id.nav_approvals,
                 R.id.nav_cashflows,
@@ -106,129 +142,146 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_mpesa,
                 R.id.nav_settings,
                 R.id.nav_logout
-
-            ), drawerLayout
+            ), binding.drawerLayout
         )
-        requestNotificationPermission()
-
-        storeFcmToken()
-
         setupActionBarWithNavController(navController, appBarConfiguration)
-        binding.navDrawerContainer.navViewMain.setupWithNavController(navController)
+    }
 
-        // Load the last opened page
+    private fun setupNavigationViews() {
+        binding.navDrawerContainer.navViewMain.setupWithNavController(navController)
+    }
+
+    private fun loadLastOpenedPage() {
         val lastSelectedPage = sharedPrefs.getInt("lastSelectedPage", R.id.nav_home)
-        // Check if the destination exists
         val destinationExists = try {
             navController.graph.findNode(lastSelectedPage) != null
         } catch (e: Exception) {
             false
         }
-        // Navigate safely
+
         if (destinationExists) {
             navController.navigate(lastSelectedPage)
         } else {
             navController.navigate(R.id.nav_home)
         }
+    }
 
-        // Save last clicked menu item
+    private fun setupNavigationListeners() {
+        setupMainNavigationListener()
+        setupFooterNavigationListener()
+        setupDestinationChangedListener()
+    }
+
+    private fun setupMainNavigationListener() {
+        val navMainView: NavigationView = findViewById(R.id.nav_view_main)
         navMainView.setNavigationItemSelectedListener { menuItem ->
-            // if (menuItem.toString() == "") return
-            sharedPrefs.edit().putInt("lastSelectedPage", menuItem.itemId).apply()
-            navController.navigate(menuItem.itemId)
-            drawerLayout.closeDrawer(GravityCompat.START) // Close drawer after selection
+            saveLastSelectedPage(menuItem.itemId)
+            navigateToDestination(menuItem.itemId)
+            closeDrawer()
             true
         }
-        navFooterView.setNavigationItemSelectedListener { menuItem ->
-            sharedPrefs.edit().putInt("lastSelectedPage", menuItem.itemId).apply()
-            navController.navigate(menuItem.itemId)
-            drawerLayout.closeDrawer(GravityCompat.START) // Close drawer after selection
-            true
-        }
+    }
 
-        // Capture the last visited destination
+    private fun setupFooterNavigationListener() {
+        val navFooterView: NavigationView = findViewById(R.id.nav_view_footer)
+        navFooterView.setNavigationItemSelectedListener { menuItem ->
+            saveLastSelectedPage(menuItem.itemId)
+            navigateToDestination(menuItem.itemId)
+            closeDrawer()
+            true
+        }
+    }
+
+    private fun setupDestinationChangedListener() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             lastDestinationId = destination.id
         }
+    }
 
-        // Firebase Auth State Listener
+    private fun saveLastSelectedPage(itemId: Int) {
+        sharedPrefs.edit().putInt("lastSelectedPage", itemId).apply()
+    }
+
+    private fun navigateToDestination(destinationId: Int) {
+        navController.navigate(destinationId)
+    }
+
+    private fun closeDrawer() {
+        binding.drawerLayout.closeDrawer(GravityCompat.START)
+    }
+
+    private fun setupAuthStateListener() {
         authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
-            val user = firebaseAuth.currentUser
-            try {
-                if (user == null) {
-                    lockNavigationUI()
-                    navController.navigate(R.id.nav_login)
-                } else {
-                    unlockNavigationUI()
-                    loadUserPermissions(user.uid)
-                    // Navigate to home only if coming from login
-                    if (lastDestinationId == R.id.nav_login) {
-                        navController.navigate(R.id.nav_home)
-                    }
-                }
-            } finally {
-            }
+            handleAuthStateChange(firebaseAuth.currentUser)
         }
+        auth.addAuthStateListener(authStateListener)
+    }
 
-        updateActiveMenuItem()
+    private fun handleAuthStateChange(user: FirebaseUser?) {
+        if (user == null) {
+            handleUnauthenticatedUser()
+        } else {
+            handleAuthenticatedUser(user)
+        }
+    }
 
-        fetchAndUploadFcmToken(FirebaseAuth.getInstance().currentUser?.uid.toString())
+    private fun handleUnauthenticatedUser() {
+        lockNavigationUI()
+        navController.navigate(R.id.nav_login)
+    }
 
-        // Set logout click listener
+    private fun handleAuthenticatedUser(user: FirebaseUser) {
+        unlockNavigationUI()
+        loadUserPermissions(user.uid)
+        navigateToHomeIfComingFromLogin()
+    }
+
+    private fun navigateToHomeIfComingFromLogin() {
+        if (lastDestinationId == R.id.nav_login) {
+            navController.navigate(R.id.nav_home)
+        }
+    }
+
+    private fun setupLogoutListener() {
+        val navFooterView: NavigationView = findViewById(R.id.nav_view_footer)
         navFooterView.menu.findItem(R.id.nav_logout)?.setOnMenuItemClickListener {
-            showLogoutLoadingDialog(this@MainActivity)
-
-            lifecycleScope.launch {
-                delay(1000) // Wait 1 second before signing out
-                FirebaseAuth.getInstance().signOut()
-                Utility.postTrace("Logged out.")
-                delay(3000) // Optional delay before dismissing
-                dismissLogoutLoadingDialog(this@MainActivity)
-            }
-
+            handleLogout()
             true
         }
+    }
 
+    private fun handleLogout() {
+        showLogoutLoadingDialog(this@MainActivity)
+        lifecycleScope.launch {
+            delay(1000)
+            FirebaseAuth.getInstance().signOut()
+            Utility.postTrace("Logged out.")
+            delay(3000)
+            dismissLogoutLoadingDialog(this@MainActivity)
+        }
+    }
 
+    private fun setupFabClickListener() {
         val fab = findViewById<FloatingActionButton>(R.id.fab)
         fab.setOnClickListener {
             lifecycleScope.launch {
-                try {
-                    handleFabClick()
-                } catch (e: Exception) {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(
-                            this@MainActivity,  // Fixed reference
-                            "Error: ${e.message ?: "Unknown error"}",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
+                handleFabClickWithErrorHandling()
             }
         }
-
     }
 
-    private fun showLoadingDialog(context: Context) {
-        val intent = Intent(context, LoadingActivity::class.java)
-        context.startActivity(intent)
-    }
-
-    private fun dismissLoadingDialog(context: Context) {
-        val intent = Intent(context, LoadingActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-        context.startActivity(intent)
-    }
-
-    private fun showLogoutLoadingDialog(context: Context) {
-        val intent = Intent(context, LogoutLoadingActivity::class.java)
-        context.startActivity(intent)
-    }
-
-    private fun dismissLogoutLoadingDialog(context: Context) {
-        val intent = Intent(context, LogoutLoadingActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-        context.startActivity(intent)
+    private suspend fun handleFabClickWithErrorHandling() {
+        try {
+            handleFabClick()
+        } catch (e: Exception) {
+            withContext(Dispatchers.Main) {
+                Toast.makeText(
+                    this@MainActivity,
+                    "Error: ${e.message ?: "Unknown error"}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 
     private suspend fun handleFabClick() {
@@ -271,9 +324,103 @@ class MainActivity : AppCompatActivity() {
                 userRank == "Rider" && !isClockedIn -> navController.navigate(R.id.nav_clockins)
                 else -> navController.navigate(R.id.nav_home)
             }
-
         }
+    }
 
+    private fun loadInitialData() {
+        storeFcmToken()
+        updateActiveMenuItem()
+        fetchAndUploadFcmToken(FirebaseAuth.getInstance().currentUser?.uid.toString())
+        loadVName()
+        // createSnackBar()
+    }
+    private fun createSnackBar(string: String) {
+        Snackbar.make(
+            findViewById(android.R.id.content),
+            string,
+            Snackbar.LENGTH_LONG
+        ).setAction("") {
+            // Handle undo action
+        }.show()
+    }
+
+    private fun loadVName() {
+        // Local info
+        val versionName = packageManager.getPackageInfo(packageName, 0).versionName
+        val appName = applicationInfo.loadLabel(packageManager).toString()
+
+        val versionText = findViewById<TextView>(R.id.version_text)
+        val outdatedText = findViewById<TextView>(R.id.outdated_text)
+        versionText.text = "$appName v$versionName"
+
+        // Fetch Firestore latest version async
+        lifecycleScope.launch {
+            try {
+                val latestVersion = withContext(Dispatchers.IO) {
+                    val docRef = FirebaseFirestore.getInstance()
+                        .collection("general")
+                        .document("general_variables")
+                        .get()
+                        .await()
+
+                    docRef.getString("latest_version") // returns String? (nullable)
+                }
+
+                latestVersion?.let {
+                    if (it != versionName) {
+                        withContext(Dispatchers.Main) {
+                            // versionText.append("\nUpdate available: $it")
+                            val spannable = SpannableString("OUTDATED")
+                            spannable.setSpan(ForegroundColorSpan(Color.RED), 0, spannable.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                            // spannable.setSpan(TypefaceSpan("serif"), 0, spannable.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+                            outdatedText.text = spannable
+                            // Or show dialog/Toast/Snackbar to notify update
+                        }
+                    } else withContext(Dispatchers.Main) {
+                        outdatedText.visibility = View.GONE
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // You may want to log or show a subtle error indicator
+            }
+        }
+    }
+
+    /*Initialization ends here*/
+
+
+
+
+
+
+
+
+
+
+
+
+    private fun showLoadingDialog(context: Context) {
+        val intent = Intent(context, LoadingActivity::class.java)
+        context.startActivity(intent)
+    }
+
+    private fun dismissLoadingDialog(context: Context) {
+        val intent = Intent(context, LoadingActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        context.startActivity(intent)
+    }
+
+    private fun showLogoutLoadingDialog(context: Context) {
+        val intent = Intent(context, LogoutLoadingActivity::class.java)
+        context.startActivity(intent)
+    }
+
+    private fun dismissLogoutLoadingDialog(context: Context) {
+        val intent = Intent(context, LogoutLoadingActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        context.startActivity(intent)
     }
 
     private fun storeFcmToken() {
@@ -288,64 +435,58 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkAndRequestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            when {
-                ContextCompat.checkSelfPermission(
-                    this,
-                    android.Manifest.permission.POST_NOTIFICATIONS
-                ) == PackageManager.PERMISSION_GRANTED -> {
-                    // Permission already granted
-                }
-                shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS) -> {
-                    showPermissionRationaleDialog()
-                }
-                else -> {
-                    requestNotificationPermission()
-                }
-            }
-        }
-    }
 
-    private fun showPermissionRationaleDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("Notification Permission Needed")
-            .setMessage("This app needs notification permissions to alert you about important events")
-            .setPositiveButton("Continue") { _, _ ->
-                requestNotificationPermission()
-            }
-            .setNegativeButton("Cancel", null)
-            .create()
-            .show()
-    }
-
-    private fun requestNotificationPermission() {
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
-            NOTIFICATION_PERMISSION_CODE
+    private val PERMISSION_REQUEST_CODE = 1001
+    private fun checkAndRequestPermissions() {
+        val locationPermissions = arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
         )
-    }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == NOTIFICATION_PERMISSION_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted
-            } else {
-                // Permission denied
-                Toast.makeText(this, "Notifications disabled", Toast.LENGTH_SHORT).show()
-            }
+        if (!hasPermissions(locationPermissions)) {
+            ActivityCompat.requestPermissions(this, locationPermissions, PERMISSION_REQUEST_CODE)
+            return
         }
+
+        // For background location (must be separate on Android 10+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                PERMISSION_REQUEST_CODE
+            )
+            return
+        }
+
+        // POST_NOTIFICATIONS for Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+            != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                PERMISSION_REQUEST_CODE
+            )
+            return
+        }
+
+        // If we got here → all needed runtime perms are granted
+        // createSnackBar("All permissions were accepted.")
+        lockLocationService()
     }
 
-    companion object {
-        private const val NOTIFICATION_PERMISSION_CODE = 1001
-    }
+    private fun hasPermissions(perms: Array<String>) =
+        perms.all { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }
+
+
+    /*locations end here*/
+
+
+
 
     override fun onStart() {
         super.onStart()
@@ -390,8 +531,11 @@ class MainActivity : AppCompatActivity() {
                                 R.id.nav_require,
                                 R.id.nav_user,
                                 R.id.nav_post_memo,
+                                R.id.nav_create_poll,
+                                R.id.nav_polls,
                                 R.id.nav_batteries,
                                 R.id.nav_manage_assets,
+                                R.id.nav_complaints,
                                 R.id.nav_profiles,
                                 R.id.nav_approvals,
                                 R.id.nav_cashflows,
@@ -402,7 +546,6 @@ class MainActivity : AppCompatActivity() {
                                 R.id.nav_weeklyreports,
                                 R.id.nav_settings,
                                 R.id.nav_logout
-
                             )
                         }
                         "Systems, IT" -> {
@@ -416,8 +559,11 @@ class MainActivity : AppCompatActivity() {
                                 R.id.nav_require,
                                 R.id.nav_user,
                                 R.id.nav_post_memo,
+                                R.id.nav_create_poll,
+                                R.id.nav_polls,
                                 R.id.nav_batteries,
                                 R.id.nav_manage_assets,
+                                R.id.nav_complaints,
                                 R.id.nav_profiles,
                                 R.id.nav_approvals,
                                 R.id.nav_cashflows,
@@ -439,8 +585,11 @@ class MainActivity : AppCompatActivity() {
                                 R.id.nav_require,
                                 R.id.nav_user,
                                 R.id.nav_post_memo,
+                                R.id.nav_create_poll,
+                                R.id.nav_polls,
                                 R.id.nav_batteries,
                                 R.id.nav_manage_assets,
+                                R.id.nav_complaints,
                                 R.id.nav_profiles,
                                 R.id.nav_approvals,
                                 R.id.nav_cashflows,
@@ -459,6 +608,8 @@ class MainActivity : AppCompatActivity() {
                                 R.id.nav_clockins,
                                 R.id.nav_clockouts,
                                 R.id.nav_corrections,
+                                R.id.nav_complain,
+                                R.id.nav_polls,
                                 R.id.nav_batteries,
                                 R.id.nav_settings,
                                 R.id.nav_logout
@@ -468,6 +619,8 @@ class MainActivity : AppCompatActivity() {
                             setMenuVisibility(
                                 R.id.nav_home,
                                 R.id.nav_hr,
+                                R.id.nav_complain,
+                                R.id.nav_polls,
                                 R.id.nav_settings,
                                 R.id.nav_logout
                             )
@@ -477,7 +630,8 @@ class MainActivity : AppCompatActivity() {
                     // after we know their rank, now listen for notifs
                     listenForNotifications(userRole)
 
-                } else {
+                }
+                else {
                     Toast.makeText(this, "User data not found", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -530,7 +684,7 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     fun showLocalNotification(title: String, body: String) {
-        val channelId = "admin_alerts"
+        val channelId = "alerts"
         val context = this
 
         // Create channel if needed

@@ -207,23 +207,26 @@ class WeeklyreportsFragment : Fragment() {
 
     // Helper function to extract the start date from the week name
     fun extractStartDateFromWeekName(weekName: String): Date? {
-        // Use regex to extract the start date (e.g., 07 Apr 2025)
-        val regex = """\((\d{2} \w{3} \d{4}) to""".toRegex()
+        // Extract "07 Sep 2025" or "07 Sept 2025"
+        val regex = """\((\d{2} \w{3,4} \d{4}) to""".toRegex()
         val matchResult = regex.find(weekName)
-        val dateString = matchResult?.groups?.get(1)?.value  // Extract the date part
+        var dateString = matchResult?.groups?.get(1)?.value
 
-        return if (dateString != null) {
-            try {
-                val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+        if (dateString != null) {
+            // Normalize "Sept" -> "Sep"
+            dateString = dateString.replace("Sept", "Sep")
+
+            return try {
+                val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH)
                 dateFormat.parse(dateString)
             } catch (e: Exception) {
                 Log.e("Firestore", "Error parsing start date", e)
                 null
             }
-        } else {
-            null
         }
+        return null
     }
+
 
 
     override fun onDestroyView() {

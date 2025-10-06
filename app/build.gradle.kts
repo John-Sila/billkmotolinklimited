@@ -15,7 +15,7 @@ android {
         minSdk = 24
         targetSdk = 35
         versionCode = 6
-        versionName = "1.3.10.2" // changed 21st Aug, Thu
+        versionName = "1.3.10.4" // changed 21st Aug, Thu
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -23,13 +23,15 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -39,6 +41,15 @@ android {
     }
     buildFeatures {
         viewBinding = true
+    }
+
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a")
+            isUniversalApk = true
+        }
     }
 }
 
@@ -54,6 +65,9 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.media3.common.ktx)
     implementation(libs.androidx.ui.text)
+    implementation(libs.androidx.ui.geometry)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.identity.jvm)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -118,5 +132,27 @@ dependencies {
     /*database*/
     implementation("com.google.firebase:firebase-database-ktx:20.3.0")
     implementation("com.firebaseui:firebase-ui-database:8.0.2")
+
+    /*maps from maplibre*/
+    // implementation("org.maplibre.gl:android-sdk:11.13.0")
+
+    /*cloudinary*/
+    implementation("com.cloudinary:cloudinary-android:2.3.1")
+
+    /*image selection*/
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("com.github.dhaval2404:imagepicker:2.1")
+
+    /*image cropping*/
+    implementation("com.github.yalantis:ucrop:2.2.11-native")
+    /*image compressor*/
+    implementation("id.zelory:compressor:3.0.1")
+
+    /*glide*/
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0") // Only needed if using @GlideModule
+
+    /*Render SVG at runtime*/
+    implementation("com.caverock:androidsvg:1.4")
 
 }

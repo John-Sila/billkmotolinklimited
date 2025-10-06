@@ -137,6 +137,7 @@ class ProfilesFragment: Fragment() {
         val sundayTarget = document.getDouble("sundayTarget") ?: 0.0
         val username = document.getString("userName") ?: ""
         var userRank = document.getString("userRank") ?: "Rider"
+        var pfpUrl = document.getString("pfp_url") ?: ""
         val uid = document.id
 
         if (isDeleted || userRank == "CEO") return null
@@ -165,7 +166,8 @@ class ProfilesFragment: Fragment() {
             sundayTarget,
             username,
             userRank,
-            uid
+            uid,
+            pfpUrl
         )
     }
 

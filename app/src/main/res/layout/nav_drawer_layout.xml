@@ -25,19 +25,46 @@
         android:layout_gravity="bottom"
         android:orientation="vertical">
 
-    <!-- Divider -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@android:color/darker_gray" />
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray" />
 
-    <!-- Footer navigation menu -->
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/nav_view_footer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fitsSystemWindows="false"
-        app:menu="@menu/menu_footer" />
+        <!-- Footer navigation menu -->
+        <com.google.android.material.navigation.NavigationView
+            android:id="@+id/nav_view_footer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="false"
+            app:menu="@menu/menu_footer" />
+
+        <!-- Version text -->
+        <TextView
+            android:id="@+id/version_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:gravity="center"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:clickable="false"
+            android:focusable="false"
+            android:textColor="@android:color/darker_gray" />
+        <TextView
+            android:id="@+id/outdated_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:gravity="center"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:clickable="false"
+            android:focusable="false"
+            android:textColor="@android:color/holo_red_dark" />
+
     </LinearLayout>
-    
+
 </LinearLayout>

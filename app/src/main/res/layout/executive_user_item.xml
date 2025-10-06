@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     app:cardCornerRadius="12dp"
+    app:cardBackgroundColor="?attr/cardBackgroundColor"
     app:cardElevation="6dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
@@ -26,7 +27,7 @@
         <TextView
             android:id="@+id/rankTextView"
             android:layout_width="wrap_content"
-            android:textStyle="italic"
+            android:fontFamily="serif"
             android:textColor="@android:color/holo_blue_light"
             android:layout_height="wrap_content"
             android:textSize="16sp"/>

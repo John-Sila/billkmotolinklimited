@@ -64,11 +64,45 @@ class ClockInFragment : Fragment() {
         }
 
         binding.btnChargeBatteries.setOnClickListener {
-            chargeBatteries()
+            android.app.AlertDialog.Builder(requireContext()).apply {
+                // Custom styled title
+                setTitle(createSpannable("Clock Ins", Color.GREEN))
+
+                // Custom styled message
+                setMessage(createSpannable("Charge batteries?", Color.GRAY))
+                setIcon(R.drawable.success)
+                setPositiveButton("Charge") { _, _ -> chargeBatteries() }
+                setNegativeButton("cancel") { dialog, _ -> dialog.dismiss() }
+
+                create().apply {
+                    window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                    show()
+
+                    getButton(android.app.AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                    getButton(android.app.AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)
+                }
+            }
         }
 
         binding.btnReloadBatteries.setOnClickListener {
-            reloadBatteries()
+            android.app.AlertDialog.Builder(requireContext()).apply {
+                // Custom styled title
+                setTitle(createSpannable("Clock Ins", Color.GREEN))
+
+                // Custom styled message
+                setMessage(createSpannable("Reload batteries?", Color.GRAY))
+                setIcon(R.drawable.success)
+                setPositiveButton("Reload") { _, _ -> reloadBatteries() }
+                setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+
+                create().apply {
+                    window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                    show()
+
+                    getButton(android.app.AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                    getButton(android.app.AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)
+                }
+            }
         }
 
         binding.btnManualBatteryDrop.setOnClickListener {
@@ -93,6 +127,12 @@ class ClockInFragment : Fragment() {
 
     }
 
+    private fun createSpannable(text: String, color: Int): SpannableString {
+        return SpannableString(text).apply {
+            setSpan(ForegroundColorSpan(color), 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+    }
+
     private fun showLocationDialog(locations: List<String>) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_location_picker, null)
         val spinner = dialogView.findViewById<Spinner>(R.id.locationSpinner)
@@ -105,12 +145,18 @@ class ClockInFragment : Fragment() {
             .setView(dialogView)
             .setPositiveButton("Select") { _, _ ->
                 val selectedLocation = spinner.selectedItem.toString()
-                Toast.makeText(requireContext(), "Attempting to drop batteries to $selectedLocation.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Dropping batteries to $selectedLocation.", Toast.LENGTH_SHORT).show()
                 // Use selectedLocation here (e.g., store it, pass to ViewModel, etc.)
                 dropBatteriesManually(selectedLocation)
             }
             .setNegativeButton("Cancel", null)
-            .show()
+            .create().apply {
+                window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                show()
+
+                getButton(android.app.AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                getButton(android.app.AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)
+            }
     }
 
     private fun dropBatteriesManually(location: String) {
@@ -120,86 +166,108 @@ class ClockInFragment : Fragment() {
         val auth = FirebaseAuth.getInstance()
         val currentUserEmail = auth.currentUser?.email ?: return
 
-        // Step 1: Get user's userName
+        // Step 1: Locate this user
         db.collection("users").whereEqualTo("email", currentUserEmail).get()
             .addOnSuccessListener { userSnapshot ->
                 val userDoc = userSnapshot.documents.firstOrNull()
 
                 if (userDoc != null) {
                     val userRef = db.collection("users").document(userDoc.id)
-                    // Update the currentBike field to "None"
+
+                    // 1. SET CURRENT BIKE TO NONE
                     userRef.update("currentBike", "None")
                         .addOnSuccessListener {
-                            Toast.makeText(requireContext(), "Current user bike updated.", Toast.LENGTH_SHORT).show()
+                            context?.let { ctx ->
+                                Toast.makeText(ctx, "Current user bike updated.", Toast.LENGTH_SHORT).show()
+                            }
                         }
                         .addOnFailureListener { e ->
-                            Toast.makeText(requireContext(), "Failed to update current bike: ${e.message}", Toast.LENGTH_SHORT).show()
+                            context?.let { ctx ->
+                                Toast.makeText(ctx, "Failed to update current bike: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
                         }
 
                     // drop bikes and batteries
-                    val userName = userDoc?.getString("userName")
+                    val userName = userDoc.getString("userName")
                     if (userName.isNullOrEmpty()) {
-                        Toast.makeText(requireContext(), "User not found. Try Logging out and in again.", Toast.LENGTH_LONG).show()
+                        context?.let { ctx ->
+                            Toast.makeText(ctx, "User not found. Try Logging out and in again.", Toast.LENGTH_LONG).show()
+                        }
                         return@addOnSuccessListener
                     }
+
                     val generalRef = db.collection("general").document("general_variables")
                     db.runTransaction { transaction ->
                         val generalSnapshot = transaction.get(generalRef)
                         val batteriesMap = generalSnapshot.get("batteries") as? MutableMap<String, MutableMap<String, Any>>
                             ?: mutableMapOf()
 
+                        /* 2. DROP BATTERIES */
                         for ((batteryKey, batteryData) in batteriesMap) {
                             if (batteryData["assignedRider"] == userName) {
-
                                 batteryData["assignedRider"] = "None"
                                 batteryData["assignedBike"] = "None"
                                 batteryData["offTime"] = Timestamp.now()
-                                batteryData["batteryLocation"] = location.toString()
-
+                                batteryData["batteryLocation"] = location
                                 batteriesMap[batteryKey] = batteryData
                             }
                         }
-
                         transaction.update(generalRef, "batteries", batteriesMap)
-
-                        // Step 3: Set isAssigned to false on the bike
-                        generalRef.get().addOnSuccessListener { document ->
-                            val bikesMap = document.get("bikes") as? MutableMap<String, MutableMap<String, Any>> ?: mutableMapOf()
-
-                            if (bikesMap.containsKey(userBike)) {
-                                bikesMap[userBike]?.set("isAssigned", false)
-
-                                generalRef.update("bikes", bikesMap)
-                                    .addOnSuccessListener {
-                                        Toast.makeText(requireContext(), "Dropped Bikes and Batteries", Toast.LENGTH_SHORT).show()
-                                    }
-                                    .addOnFailureListener { e ->
-                                        Toast.makeText(requireContext(), "Failed to drop bikes and batteries. Please retry: ${e.message}", Toast.LENGTH_LONG).show()
-                                    }
-                            } else {
-                                Toast.makeText(requireContext(), "Bike not found in database", Toast.LENGTH_SHORT).show()
-                            }
-                        }
 
                         null
                     }
                         .addOnSuccessListener {
-                            Toast.makeText(requireContext(), "Drop process successfully", Toast.LENGTH_SHORT).show()
-                            binding.btnManualBatteryDrop.visibility = View.GONE
-                            loadUserStatus()
+                            // 3. DROP BIKE
+                            generalRef.get().addOnSuccessListener { document ->
+                                val bikesMap = document.get("bikes") as? MutableMap<String, MutableMap<String, Any>> ?: mutableMapOf()
+
+                                if (bikesMap.containsKey(userBike)) {
+                                    bikesMap[userBike]?.apply {
+                                        set("isAssigned", false)
+                                        set("rider", "None")
+                                    }
+
+                                    generalRef.update("bikes", bikesMap)
+                                        .addOnSuccessListener {
+                                            context?.let { ctx ->
+                                                Toast.makeText(ctx, "Bike updated.", Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                        .addOnFailureListener { e ->
+                                            context?.let { ctx ->
+                                                Toast.makeText(ctx, "Failed to drop bikes and batteries. Please retry: ${e.message}", Toast.LENGTH_LONG).show()
+                                            }
+                                        }
+                                } else {
+                                    context?.let { ctx ->
+                                        Toast.makeText(ctx, "$userBike is not in database.", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+
+                            context?.let { ctx ->
+                                Toast.makeText(ctx, "Dropping completed.", Toast.LENGTH_SHORT).show()
+                            }
+                            if (_binding != null) {
+                                binding.btnManualBatteryDrop.visibility = View.GONE
+                                loadUserStatus()
+                            }
                         }
                         .addOnFailureListener { e ->
-                            Toast.makeText(requireContext(), "Dropping failed. Retry failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                            context?.let { ctx ->
+                                Toast.makeText(ctx, "Dropping failed. Retry failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
                         }
-
                 } else {
-                    Toast.makeText(requireContext(), "User not found", Toast.LENGTH_SHORT).show()
+                    context?.let { ctx ->
+                        Toast.makeText(ctx, "User not found", Toast.LENGTH_SHORT).show()
+                    }
                 }
-
-
             }
             .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to fetch user: ${e.message}", Toast.LENGTH_SHORT).show()
+                context?.let { ctx ->
+                    Toast.makeText(ctx, "Failed to fetch user: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
             }
     }
 
@@ -222,7 +290,6 @@ class ClockInFragment : Fragment() {
         val selectedLocation = _binding?.batteryChargeDestination?.selectedItem as? String
         val selectedBatteries = mutableListOf<String>()
 
-
         container?.let {
             for (i in 0 until it.childCount) {
                 val view = it.getChildAt(i)
@@ -240,55 +307,40 @@ class ClockInFragment : Fragment() {
             return
         }
 
-        val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
-        // Custom title with red color
-        val title = SpannableString("Battery Charging")
-        title.setSpan(ForegroundColorSpan(Color.GREEN), 0, title.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        val pBar = _binding?.batteryChargePBar
+        val submitBtn = _binding?.btnChargeBatteries
+        pBar?.visibility = View.VISIBLE
+        submitBtn?.visibility = View.GONE
 
-        // Custom message with black color
-        val message = SpannableString("Confirm action.")
-        message.setSpan(ForegroundColorSpan(Color.GRAY), 0, message.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        binding.clockInPBar.visibility = View.VISIBLE
+        binding.btnClockIn.visibility = View.GONE
 
-        alertDialog.setTitle(title)
-        alertDialog.setMessage(message)
-        alertDialog.setIcon(R.drawable.warn)
+        val db = FirebaseFirestore.getInstance()
+        val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email ?: return
+        // Fetch userName from users collection
+        db.collection("users").whereEqualTo("email", currentUserEmail).get()
+            .addOnSuccessListener { querySnapshot ->
+                val userDoc = querySnapshot.documents.firstOrNull()
 
-        alertDialog.setPositiveButton("Proceed") { _, _ ->
-            val pBar = _binding?.batteryChargePBar
-            val submitBtn = _binding?.btnChargeBatteries
-            pBar?.visibility = View.VISIBLE
-            submitBtn?.visibility = View.GONE
+                val generalRef = db.collection("general").document("general_variables")
+                // action updates batteries
+                db.runTransaction { transaction ->
+                    // 1. Update selected bike's isAssigned = true
+                    val generalSnapshot = transaction.get(generalRef)
+                    val batteriesMap = generalSnapshot.get("batteries") as? MutableMap<String, MutableMap<String, Any>> ?: mutableMapOf()
 
-
-            binding.clockInPBar.visibility = View.VISIBLE
-            binding.btnClockIn.visibility = View.GONE
-
-            val db = FirebaseFirestore.getInstance()
-            val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email ?: return@setPositiveButton
-            // Fetch userName from users collection
-            db.collection("users").whereEqualTo("email", currentUserEmail).get()
-                .addOnSuccessListener { querySnapshot ->
-                    val userDoc = querySnapshot.documents.firstOrNull()
-
-                    val generalRef = db.collection("general").document("general_variables")
-                    // action updates batteries
-                    db.runTransaction { transaction ->
-                        // 1. Update selected bike's isAssigned = true
-                        val generalSnapshot = transaction.get(generalRef)
-                        val batteriesMap = generalSnapshot.get("batteries") as? MutableMap<String, MutableMap<String, Any>> ?: mutableMapOf()
-
-                        for ((batteryKey, batteryData) in batteriesMap) {
-                            if (selectedBatteries.contains(batteryData["batteryName"])) {
-                                batteryData["batteryLocation"] = "Charging at $selectedLocation"
-                                batteryData["assignedBike"] = "None"
-                                batteryData["assignedRider"] = "None"
-                                batteryData["offTime"] = Timestamp.now()
-                                batteriesMap[batteryKey] = batteryData
-                            }
+                    for ((batteryKey, batteryData) in batteriesMap) {
+                        if (selectedBatteries.contains(batteryData["batteryName"])) {
+                            batteryData["batteryLocation"] = "Charging at $selectedLocation"
+                            batteryData["assignedBike"] = "None"
+                            batteryData["assignedRider"] = "None"
+                            batteryData["offTime"] = Timestamp.now()
+                            batteriesMap[batteryKey] = batteryData
                         }
-
-                        transaction.update(generalRef, "batteries", batteriesMap)
                     }
+
+                    transaction.update(generalRef, "batteries", batteriesMap)
+                }
                     .addOnSuccessListener {
                         loadBikes()
                         loadAvailableBatteriesAsCheckboxes()
@@ -310,42 +362,29 @@ class ClockInFragment : Fragment() {
                         Toast.makeText(requireContext(), "Error assigning batteries: ${e.message}", Toast.LENGTH_SHORT).show()
                     }
 
-                    // action updates user to be marked as charging a battery
-                    db.collection("users").document(userDoc?.id.toString())
-                        .update(
-                            mapOf(
-                                "isCharging" to true
-                            )
+                // action updates user to be marked as charging a battery
+                db.collection("users").document(userDoc?.id.toString())
+                    .update(
+                        mapOf(
+                            "isCharging" to true
                         )
-                        .addOnSuccessListener {
-                            // Toast.makeText(requireContext(), "Bike and clock-in time updated!", Toast.LENGTH_SHORT).show()
-                        }
-                        .addOnFailureListener { e ->
-                            Toast.makeText(requireContext(), "Failed to update: ${e.message}", Toast.LENGTH_SHORT).show()
-                        }
-
-                }
-                .addOnFailureListener { e ->
-                    binding.clockInPBar.visibility = View.GONE
-                    binding.btnClockIn.visibility = View.VISIBLE
-                    Toast.makeText(requireContext(), "Failed to fetch user: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-
-
-        }
-
-        alertDialog.setNegativeButton("Cancel") { dialog, _ ->
-            dialog.dismiss() // Dismiss dialog if user cancels
-        }
-
-        val dialog = alertDialog.create()
-        dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
-
-        dialog.show()
-
+                    )
+                    .addOnSuccessListener {
+                        // Toast.makeText(requireContext(), "Bike and clock-in time updated!", Toast.LENGTH_SHORT).show()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(requireContext(), "Failed to update: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+            }
+            .addOnFailureListener { e ->
+                binding.clockInPBar.visibility = View.GONE
+                binding.btnClockIn.visibility = View.VISIBLE
+                Toast.makeText(requireContext(), "Failed to fetch user: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun reloadBatteries() {
+
         val container = _binding?.batteriesToReload
         val selectedBatteries = mutableListOf<String>()
 
@@ -365,112 +404,80 @@ class ClockInFragment : Fragment() {
             Toast.makeText(requireContext(), "Select at least one battery", Toast.LENGTH_SHORT).show()
             return
         }
+        val pBar = _binding?.batteryReloadPBar
+        val submitBtn = _binding?.btnReloadBatteries
+        pBar?.visibility = View.VISIBLE
+        submitBtn?.visibility = View.GONE
 
-        val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
-        // Custom title with red color
-        val title = SpannableString("Battery Load")
-        title.setSpan(ForegroundColorSpan(Color.GREEN), 0, title.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        val db = FirebaseFirestore.getInstance()
+        val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email ?: return
+        // Fetch userName from users collection
+        db.collection("users").whereEqualTo("email", currentUserEmail).get()
+            .addOnSuccessListener { querySnapshot ->
+                val userDoc = querySnapshot.documents.firstOrNull()
+                val username = userDoc?.getString("userName") ?: "Unidentified"
+                val bike = userDoc?.getString("currentBike") ?: "Unidentified"
 
-        // Custom message with black color
-        val message = SpannableString("Confirm action.")
-        message.setSpan(ForegroundColorSpan(Color.GRAY), 0, message.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                val generalRef = db.collection("general").document("general_variables")
+                // action updates batteries
+                db.runTransaction { transaction ->
+                    // 1. Update selected bike's isAssigned = true
+                    val generalSnapshot = transaction.get(generalRef)
+                    val batteriesMap = generalSnapshot.get("batteries") as? MutableMap<String, MutableMap<String, Any>> ?: mutableMapOf()
 
-        alertDialog.setTitle(title)
-        alertDialog.setMessage(message)
-        alertDialog.setIcon(R.drawable.warn)
-
-        alertDialog.setPositiveButton("Proceed") { _, _ ->
-            val pBar = _binding?.batteryReloadPBar
-            val submitBtn = _binding?.btnReloadBatteries
-            pBar?.visibility = View.VISIBLE
-            submitBtn?.visibility = View.GONE
-
-            val db = FirebaseFirestore.getInstance()
-            val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email ?: return@setPositiveButton
-            // Fetch userName from users collection
-            db.collection("users").whereEqualTo("email", currentUserEmail).get()
-                .addOnSuccessListener { querySnapshot ->
-                    val userDoc = querySnapshot.documents.firstOrNull()
-                    val username = userDoc?.getString("userName") ?: "Unidentified"
-                    val bike = userDoc?.getString("currentBike") ?: "Unidentified"
-
-                    val generalRef = db.collection("general").document("general_variables")
-                    // action updates batteries
-                    db.runTransaction { transaction ->
-                        // 1. Update selected bike's isAssigned = true
-                        val generalSnapshot = transaction.get(generalRef)
-                        val batteriesMap = generalSnapshot.get("batteries") as? MutableMap<String, MutableMap<String, Any>> ?: mutableMapOf()
-
-                        for ((batteryKey, batteryData) in batteriesMap) {
-                            if (selectedBatteries.contains(batteryData["batteryName"])) {
-                                batteryData["batteryLocation"] = "In Motion"
-                                batteryData["assignedRider"] = username
-                                batteryData["assignedBike"] = bike
-                                batteryData["offTime"] = Timestamp.now()
-                                batteriesMap[batteryKey] = batteryData
-                            }
+                    for ((batteryKey, batteryData) in batteriesMap) {
+                        if (selectedBatteries.contains(batteryData["batteryName"])) {
+                            batteryData["batteryLocation"] = "In Motion"
+                            batteryData["assignedRider"] = username
+                            batteryData["assignedBike"] = bike
+                            batteryData["offTime"] = Timestamp.now()
+                            batteriesMap[batteryKey] = batteryData
                         }
-
-                        transaction.update(generalRef, "batteries", batteriesMap)
                     }
-                        .addOnSuccessListener {
-                            loadBikes()
-                            loadAvailableBatteriesAsCheckboxes()
-                            loadUserStatus()
 
-                            val grammar = if (batteryCount == 1) "y" else "ies"
-                            lifecycleScope.launch {
-                                Utility.postTrace("Loaded $batteryCount batter$grammar ($batteryNames).")
-                            }
+                    transaction.update(generalRef, "batteries", batteriesMap)
+                }
+                    .addOnSuccessListener {
+                        loadBikes()
+                        loadAvailableBatteriesAsCheckboxes()
+                        loadUserStatus()
 
-                            pBar?.visibility = View.GONE
-                            submitBtn?.visibility = View.VISIBLE
-                            Toast.makeText(requireContext(), "Loaded.", Toast.LENGTH_SHORT).show()
-                        }
-                        .addOnFailureListener { e ->
-                            pBar?.visibility = View.GONE
-                            submitBtn?.visibility = View.VISIBLE
-                            Toast.makeText(requireContext(), "Error loading batteries: ${e.message}", Toast.LENGTH_SHORT).show()
+                        val grammar = if (batteryCount == 1) "y" else "ies"
+                        lifecycleScope.launch {
+                            Utility.postTrace("Loaded $batteryCount batter$grammar ($batteryNames).")
                         }
 
-                    // action updates user to be marked as charging a battery
-                    db.collection("users").document(userDoc?.id.toString())
-                        .update(
-                            mapOf(
-                                "isCharging" to false
-                            )
+                        pBar?.visibility = View.GONE
+                        submitBtn?.visibility = View.VISIBLE
+                        Toast.makeText(requireContext(), "Loaded.", Toast.LENGTH_SHORT).show()
+                    }
+                    .addOnFailureListener { e ->
+                        pBar?.visibility = View.GONE
+                        submitBtn?.visibility = View.VISIBLE
+                        Toast.makeText(requireContext(), "Error loading batteries: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+
+                // action updates user to be marked as charging a battery
+                db.collection("users").document(userDoc?.id.toString())
+                    .update(
+                        mapOf(
+                            "isCharging" to false
                         )
-                        .addOnSuccessListener {
-                            // Toast.makeText(requireContext(), "Bike and clock-in time updated!", Toast.LENGTH_SHORT).show()
-                        }
-                        .addOnFailureListener { e ->
-                            Toast.makeText(requireContext(), "Failed to update: ${e.message}", Toast.LENGTH_SHORT).show()
-                        }
+                    )
+                    .addOnSuccessListener {
+                        // Toast.makeText(requireContext(), "Bike and clock-in time updated!", Toast.LENGTH_SHORT).show()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(requireContext(), "Failed to update: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
 
-                }
-                .addOnFailureListener { e ->
-                    binding.clockInPBar.visibility = View.GONE
-                    binding.btnClockIn.visibility = View.VISIBLE
-                    Toast.makeText(requireContext(), "Failed to fetch user: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-
-
-        }
-
-        alertDialog.setNegativeButton("Cancel") { dialog, _ ->
-            dialog.dismiss() // Dismiss dialog if user cancels
-        }
-
-        val dialog = alertDialog.create()
-        dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
-
-        dialog.show()
-
+            }
+            .addOnFailureListener { e ->
+                binding.clockInPBar.visibility = View.GONE
+                binding.btnClockIn.visibility = View.VISIBLE
+                Toast.makeText(requireContext(), "Failed to fetch user: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
-
-
-
-
 
     /*clock in begins here*/
     private fun handleAssignBatteries() {
@@ -509,6 +516,17 @@ class ClockInFragment : Fragment() {
                 if (selectedBike.isNullOrEmpty()) {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(requireContext(), "Please select a bike", Toast.LENGTH_SHORT).show()
+                        resetUI()
+                    }
+                    return@launch
+                }
+                if (selectedBike.contains("DUMMY", ignoreCase = true)) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            requireContext(),
+                            "Dummy bikes are only used by the IT Department.",
+                            Toast.LENGTH_LONG
+                        ).show()
                         resetUI()
                     }
                     return@launch
@@ -583,6 +601,19 @@ class ClockInFragment : Fragment() {
                     return@launch
                 }
 
+                val hasDummyBattery = selectedBatteries.any { it.contains("DUMMY", ignoreCase = true) }
+                if (hasDummyBattery) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            requireContext(),
+                            "Dummy batteries are only used by the IT Department.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        resetUI()
+                    }
+                    return@launch
+                }
+
                 // Check battery assignments
                 val batteriesMap = document.get("batteries") as? Map<String, Map<String, Any>> ?: emptyMap()
                 val conflictingBattery = batteriesMap.values.firstOrNull { battery ->
@@ -626,7 +657,7 @@ class ClockInFragment : Fragment() {
         mileage: Double,
         selectedBatteries: List<String>
     ) {
-        val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        val alertDialog = AlertDialog.Builder(requireContext())
 
         val title = SpannableString("Clock In").apply {
             setSpan(ForegroundColorSpan(Color.GREEN), 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
@@ -762,10 +793,16 @@ class ClockInFragment : Fragment() {
             dialog.dismiss()
         }
 
-        val dialog = alertDialog.create()
+        val dialog = alertDialog.create().apply {
+            window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+            show()
+
+            // Change button text colors after showing
+            getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+            getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+        }
         dialog.setCancelable(false)
         dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black)
-        dialog.show()
     }
     /*Clock ins end here*/
 
@@ -1038,7 +1075,7 @@ class ClockInFragment : Fragment() {
             return
         }
 
-        val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        val alertDialog = AlertDialog.Builder(requireContext())
         val title = SpannableString("Swap Battery").apply {
             setSpan(ForegroundColorSpan(Color.GREEN), 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
@@ -1129,6 +1166,10 @@ class ClockInFragment : Fragment() {
         alertDialog.create().apply {
             window?.setBackgroundDrawableResource(R.drawable.rounded_black)
             show()
+
+            // Change button text colors after showing
+            getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+            getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
         }
     }
 

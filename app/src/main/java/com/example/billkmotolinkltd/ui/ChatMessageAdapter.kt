@@ -1,22 +1,30 @@
 package com.example.billkmotolinkltd.ui
 
-import android.view.Gravity
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.ImageSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.graphics.Paint
+import android.graphics.Canvas
+import android.widget.LinearLayout
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.billkmotolinkltd.R
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import java.util.concurrent.TimeUnit
+import androidx.core.graphics.withTranslation
 
-class ChatMessageAdapter(private val messages: List<ChatMessage>,
-                         private val currentUserId: String,
-                         private val currentUserName: String,) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class ChatMessageAdapter(
+    private val messages: List<ChatMessage>,
+    private val currentUserId: String,
+    private val currentUserName: String,
+    // private val emojiList: List<ChatActivity.Emoji> // Pass your emoji list here
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
         private const val VIEW_TYPE_SENT = 1
@@ -39,23 +47,69 @@ class ChatMessageAdapter(private val messages: List<ChatMessage>,
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val message = messages[position]
+
+        val screenWidth = holder.itemView.resources.displayMetrics.widthPixels
+        val maxBubbleWidth = (screenWidth * 0.8).toInt() // 80% of screen
+
         if (holder is SentMessageViewHolder) {
-            holder.messageText.text = message.message
+            displayMessageWithEmojis(message.message, holder.messageText)
             holder.senderName.text = "Me"
             holder.messageTime.text = formatTimestamp(message.timestamp)
 
+            // Adjust bubble width
+            val params = holder.messageBubble.layoutParams
+            params.width = ViewGroup.LayoutParams.WRAP_CONTENT
+            holder.messageBubble.layoutParams = params
+
+
+            holder.messageBubble.layoutParams = params
+            holder.messageBubble.post {
+                if (holder.messageBubble.width > maxBubbleWidth) {
+                    holder.messageBubble.layoutParams.width = maxBubbleWidth
+                    holder.messageBubble.requestLayout()
+                }
+            }
+
         } else if (holder is ReceivedMessageViewHolder) {
-            holder.messageText.text = message.message
+            displayMessageWithEmojis(message.message, holder.messageText)
             holder.senderName.text = message.senderName
             holder.messageTime.text = formatTimestamp(message.timestamp)
 
+            val params = holder.messageBubble.layoutParams
+            params.width = LinearLayout.LayoutParams.WRAP_CONTENT
+            holder.messageBubble.layoutParams = params
+            holder.messageBubble.post {
+                if (holder.messageBubble.width > maxBubbleWidth) {
+                    holder.messageBubble.layoutParams.width = maxBubbleWidth
+                    holder.messageBubble.requestLayout()
+                }
+            }
         }
     }
 
-    fun formatTimestamp(timestamp: Long): String {
+
+    override fun getItemCount(): Int = messages.size
+
+    // --- ViewHolders ---
+    class SentMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val messageText: TextView = itemView.findViewById(R.id.messageText)
+        val senderName: TextView = itemView.findViewById(R.id.senderName)
+        val messageTime: TextView = itemView.findViewById(R.id.messageTime)
+        val messageBubble: androidx.cardview.widget.CardView = itemView.findViewById(R.id.messageBubble)
+    }
+
+    class ReceivedMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val messageText: TextView = itemView.findViewById(R.id.messageText)
+        val senderName: TextView = itemView.findViewById(R.id.senderName)
+        val messageTime: TextView = itemView.findViewById(R.id.messageTime)
+        val messageBubble: androidx.cardview.widget.CardView = itemView.findViewById(R.id.messageBubble)
+    }
+
+
+    // --- Timestamp formatting ---
+    private fun formatTimestamp(timestamp: Long): String {
         val now = System.currentTimeMillis()
         val diffMillis = now - timestamp
-        val diffMinutes = TimeUnit.MILLISECONDS.toMinutes(diffMillis)
 
         val messageDate = Calendar.getInstance().apply { timeInMillis = timestamp }
         val today = Calendar.getInstance()
@@ -67,37 +121,17 @@ class ChatMessageAdapter(private val messages: List<ChatMessage>,
         }
 
         return when {
-            diffMinutes < 1 -> {
-                "just now"
-            }
-            diffMinutes < 45 -> {
-                "$diffMinutes m ago"
-            }
-            isSameDay(messageDate, today) -> {
-                "today ${SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(timestamp))}"
-            }
-            isSameDay(messageDate, yesterday) -> {
-                "${SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(timestamp))} (yest...)"
-            }
-            else -> {
-                // Optional fallback: e.g., 03 Aug 16:12
-                SimpleDateFormat("dd MMM HH:mm", Locale.getDefault()).format(Date(timestamp))
-            }
+            isSameDay(messageDate, today) -> SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(timestamp))
+            isSameDay(messageDate, yesterday) -> SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(timestamp)) + " (yest...)"
+            else -> SimpleDateFormat("dd MMM HH:mm", Locale.getDefault()).format(Date(timestamp))
         }
     }
 
+    // --- Emoji replacement function ---
+    private fun displayMessageWithEmojis(message: String, textView: TextView) {
+        val spannable = SpannableString(message)
 
-    override fun getItemCount(): Int = messages.size
-
-    class SentMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val messageText: TextView = itemView.findViewById(R.id.messageText)
-        val senderName: TextView = itemView.findViewById(R.id.senderName)
-        val messageTime: TextView = itemView.findViewById(R.id.messageTime)
+        textView.text = spannable
     }
 
-    class ReceivedMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val messageText: TextView = itemView.findViewById(R.id.messageText)
-        val senderName: TextView = itemView.findViewById(R.id.senderName)
-        val messageTime: TextView = itemView.findViewById(R.id.messageTime)
-    }
 }

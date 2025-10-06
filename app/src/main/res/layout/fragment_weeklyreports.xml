@@ -16,22 +16,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-<!--            <LinearLayout-->
-<!--                android:layout_width="381dp"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_marginTop="20dp"-->
-<!--                android:gravity="center"-->
-<!--                android:orientation="horizontal">-->
-
-<!--                <ImageView-->
-<!--                    android:layout_width="341dp"-->
-<!--                    android:layout_height="255dp"-->
-<!--                    android:layout_marginEnd="8dp"-->
-<!--                    android:contentDescription="@string/money_image"-->
-<!--                    android:scaleType="centerCrop"-->
-<!--                    android:src="@drawable/weekly_reports" />-->
-<!--            </LinearLayout>-->
-
             <ProgressBar
                 android:id="@+id/wRProgressBar"
                 android:layout_width="match_parent"

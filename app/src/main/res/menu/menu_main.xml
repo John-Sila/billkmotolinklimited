@@ -3,11 +3,11 @@
     <group android:id="@+id/group_main" android:checkableBehavior="single">
         <item
             android:id="@+id/nav_home"
-            android:icon="@drawable/house"
+            android:icon="@drawable/home"
             android:title="@string/menu_home" />
         <item
             android:id="@+id/nav_reports"
-            android:icon="@drawable/book"
+            android:icon="@drawable/reports"
             android:visible="false"
             android:title="@string/menu_reports" />
         <item
@@ -27,12 +27,12 @@
             android:title="@string/corrections" />
         <item
             android:id="@+id/nav_complain"
-            android:icon="@drawable/complain"
+            android:icon="@drawable/thumb_down"
             android:visible="false"
             android:title="@string/complain" />
         <item
             android:id="@+id/nav_require"
-            android:icon="@drawable/require"
+            android:icon="@drawable/cctv"
             android:visible="false"
             android:title="@string/require" />
         <item
@@ -46,8 +46,18 @@
             android:icon="@drawable/memo"
             android:title="@string/memo" />
         <item
+            android:id="@+id/nav_create_poll"
+            android:visible="false"
+            android:icon="@drawable/ballot"
+            android:title="@string/create_a_poll" />
+        <item
+            android:id="@+id/nav_polls"
+            android:visible="false"
+            android:icon="@drawable/polls"
+            android:title="@string/polls" />
+        <item
             android:id="@+id/nav_batteries"
-            android:icon="@drawable/bike"
+            android:icon="@drawable/batteries"
             android:visible="false"
             android:title="@string/menu_bike" />
         <item
@@ -55,6 +65,11 @@
             android:icon="@drawable/scooter"
             android:visible="false"
             android:title="@string/asset_management" />
+        <item
+            android:id="@+id/nav_complaints"
+            android:icon="@drawable/crowd"
+            android:visible="false"
+            android:title="@string/complaints" />
         <item
             android:id="@+id/nav_profiles"
             android:icon="@drawable/profiles"

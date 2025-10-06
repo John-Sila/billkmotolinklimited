@@ -10,15 +10,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.billkmotolinkltd.R
 import com.example.billkmotolinkltd.databinding.FragmentLoginBinding
 import com.example.billkmotolinkltd.ui.Utility
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
+import android.view.Gravity
 
 class LoginFragment : Fragment() {
 
@@ -93,10 +96,14 @@ class LoginFragment : Fragment() {
                     dialog.dismiss() // Dismiss dialog if user cancels
                 }
 
-                val dialog = alertDialog.create()
-                dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+                alertDialog.create().apply {
+                    window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                    show()
 
-                dialog.show()
+                    // Change button text colors after showing
+                    getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                    getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+                }
             }
         }
 
@@ -107,27 +114,57 @@ class LoginFragment : Fragment() {
         if (!isAdded || view == null) return // Prevent crash
         binding.fpProgressBar.visibility = View.VISIBLE
         binding.buttonSendLink.visibility = View.GONE
-        auth.sendPasswordResetEmail(email)
-            .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Check your Google® mail inbox.", Toast.LENGTH_LONG).show()
-                binding.loginModal.visibility = View.VISIBLE
-                binding.forgotPasswordModal.visibility = View.GONE
-                binding.forgotPasswordLink.visibility = View.VISIBLE
 
-                binding.fpProgressBar.visibility = View.GONE
-                binding.buttonSendLink.visibility = View.VISIBLE
+        // Check Firestore first
+        val db = FirebaseFirestore.getInstance()
+        db.collection("users")
+            .whereEqualTo("email", email)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                if (!snapshot.isEmpty) {
+                    // Email exists in users collection -> proceed
+                    auth.sendPasswordResetEmail(email)
+                        .addOnSuccessListener {
+                            Toast.makeText(requireContext(), "Check your Google® mail inbox.", Toast.LENGTH_LONG).show()
+                            binding.loginModal.visibility = View.VISIBLE
+                            binding.forgotPasswordModal.visibility = View.GONE
+                            binding.forgotPasswordLink.visibility = View.VISIBLE
 
+                            binding.fpProgressBar.visibility = View.GONE
+                            binding.buttonSendLink.visibility = View.VISIBLE
 
-                lifecycleScope.launch {
-                    Utility.postTrace("$email is trying to reset account password.")
+                            lifecycleScope.launch {
+                                Utility.postTrace("$email is trying to reset account password.")
+                            }
+                        }
+                        .addOnFailureListener {
+                            binding.fpProgressBar.visibility = View.GONE
+                            binding.buttonSendLink.visibility = View.VISIBLE
+                            Toast.makeText(requireContext(), "Failed to send reset email", Toast.LENGTH_SHORT).show()
+                        }
+                } else {
+                    // No such email in users collection
+                    binding.fpProgressBar.visibility = View.GONE
+                    binding.buttonSendLink.visibility = View.VISIBLE
+                    val toast = Toast.makeText(requireContext(), "This email is not registered in BILLK", Toast.LENGTH_LONG)
+                    toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 0)
+                    toast.show()
                 }
             }
-            .addOnFailureListener {
+            .addOnFailureListener { e ->
                 binding.fpProgressBar.visibility = View.GONE
                 binding.buttonSendLink.visibility = View.VISIBLE
-                Toast.makeText(requireContext(), "Failed to send reset email", Toast.LENGTH_SHORT).show()
+                Snackbar.make(
+                    requireView(),
+                    "We couldn't check your account! Try again later.",
+                    Snackbar.LENGTH_LONG
+                ).setAction("OK") {
+                    // Handle OK action
+                }.show()
+
             }
     }
+
 
     private fun loginUser(email: String, password: String) {
         if (email.isEmpty() || password.isEmpty()) {

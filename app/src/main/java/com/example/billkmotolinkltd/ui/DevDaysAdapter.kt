@@ -111,13 +111,13 @@ class DevDaysAdapter(initialDays: List<DevDayData> = emptyList()) :
 
         // Apply conditional coloring
         fun TextView.setColorForValue(value: Double) {
-            setTextColor(ContextCompat.getColor(context, when {
-                value < 0 -> android.R.color.holo_red_light
-                value > 5000 -> android.R.color.holo_green_light
-                else -> android.R.color.holo_orange_dark
-            }))
-
+            when {
+                value < 0 -> setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_light))
+                value < 100 -> setTextColor(ContextCompat.getColor(context, android.R.color.holo_blue_bright))
+                value > 3500 -> setTextColor(ContextCompat.getColor(context, android.R.color.holo_green_light))
+            }
         }
+
 
         with(holder) {
             netIncome.setColorForValue(day.netIncome)

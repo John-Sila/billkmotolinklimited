@@ -35,16 +35,17 @@
 
                     <!--when budget exists-->
                     <androidx.cardview.widget.CardView
+                        android:id="@+id/budgetCard"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="8dp"
                         app:cardCornerRadius="12dp"
                         android:layout_marginBottom="20dp"
+                        app:cardBackgroundColor="?attr/cardBackgroundColor"
                         android:gravity="center"
                         app:cardElevation="6dp">
 
                         <LinearLayout
-                            android:id="@+id/budgetExists"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
@@ -52,119 +53,155 @@
                             android:gravity="center">
 
                             <LinearLayout
-                                android:id="@+id/budgetToggleLayout"
-                                android:layout_width="wrap_content"
+                                android:id="@+id/budgetExists"
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="20dp"
-                                android:orientation="horizontal"
-                                android:gravity="center_vertical"
-                                android:clickable="true"
-                                android:focusable="true">
+                                android:orientation="vertical"
+                                android:padding="15dp"
+                                android:visibility="gone"
+                                android:gravity="center">
 
-                                <TextView
-                                    android:id="@+id/budgetHeading"
+                                <LinearLayout
+                                    android:id="@+id/budgetToggleLayout"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:textSize="16sp"
-                                    android:textColor="@android:color/holo_orange_dark"
-                                    android:textStyle="bold" />
+                                    android:layout_marginTop="20dp"
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical"
+                                    android:clickable="true"
+                                    android:focusable="true">
 
-                                <ImageView
-                                    android:id="@+id/arrowIcon"
+                                    <TextView
+                                        android:id="@+id/budgetHeading"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:textSize="16sp"
+                                        android:textColor="@android:color/holo_orange_dark"
+                                        android:textStyle="bold" />
+
+                                    <ImageView
+                                        android:id="@+id/arrowIcon"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginStart="8dp"
+                                        android:contentDescription="Toggle Icon"
+                                        android:src="@drawable/ic_arrow_up" />
+                                </LinearLayout>
+
+
+                                <TableLayout
+                                    android:id="@+id/tableLayout"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="15dp"
+                                    android:stretchColumns="1">
+                                </TableLayout>
+
+                                <ProgressBar
+                                    android:id="@+id/hrProgressBar2"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginStart="8dp"
-                                    android:contentDescription="Toggle Icon"
-                                    android:src="@drawable/ic_arrow_up" />
+                                    android:visibility="gone"
+                                    android:layout_marginTop="15dp"
+                                    android:layout_gravity="center"/>
+
+                                <!--approve and decline buttons-->
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:gravity="center"
+                                    android:layout_margin="15dp">
+
+                                    <!-- Decline Button -->
+                                    <Button
+                                        android:id="@+id/btnDeclineBudget"
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:text="@string/decline_budget"
+                                        android:backgroundTint="@android:color/holo_red_dark"
+                                        android:padding="12dp"
+                                        android:layout_marginEnd="8dp" />
+
+                                    <!-- Approve Button -->
+                                    <Button
+                                        android:id="@+id/btnApproveBudget"
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:text="@string/approve_budget"
+                                        android:backgroundTint="@android:color/holo_green_dark"
+                                        android:padding="12dp"
+                                        android:layout_marginStart="8dp" />
+
+                                </LinearLayout>
+
+                                <!--approved-->
+                                <Button
+                                    android:id="@+id/btnBudgetApproved"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/waiting_disbursement"
+                                    android:backgroundTint="@android:color/holo_red_dark"
+                                    android:padding="12dp"
+                                    android:visibility="gone"
+                                    android:layout_marginTop="12dp"/>
+
+                                <!--declined-->
+                                <Button
+                                    android:id="@+id/btnBudgetDeclined"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/declined"
+                                    android:backgroundTint="@android:color/holo_red_dark"
+                                    android:padding="12dp"
+                                    android:visibility="gone"
+                                    android:layout_marginTop="12dp"/>
+
+                                <!--disbursed-->
+                                <Button
+                                    android:id="@+id/btnBudgetDisbursed"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/disbursed"
+                                    android:backgroundTint="@color/brown5"
+                                    android:textColor="@color/brown2"
+                                    android:padding="12dp"
+                                    android:visibility="gone"
+                                    android:layout_marginTop="12dp"/>
+
+                                <!--pending-->
+                                <Button
+                                    android:id="@+id/btnBudgetPending"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/awaiting_approval"
+                                    android:backgroundTint="@color/brown1"
+                                    android:padding="12dp"
+                                    android:visibility="gone"
+                                    android:layout_marginTop="12dp"/>
+
                             </LinearLayout>
 
-
-                            <TableLayout
-                                android:id="@+id/tableLayout"
+                            <Button
+                                android:id="@+id/btnApproveAllUsersIncome"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="15dp"
-                                android:stretchColumns="1">
-                            </TableLayout>
-
+                                android:text="@string/format_all_rider_pending_income"
+                                android:backgroundTint="@android:color/holo_orange_dark"
+                                android:padding="12dp"
+                                android:visibility="gone"
+                                android:layout_marginTop="12dp"/>
                             <ProgressBar
-                                android:id="@+id/hrProgressBar2"
+                                android:id="@+id/approveAllUsersIncomeProgressBar"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:visibility="gone"
-                                android:layout_marginTop="15dp"
+                                android:layout_marginTop="12dp"
                                 android:layout_gravity="center"/>
-
-                            <!-- approve Button -->
-                            <Button
-                                android:id="@+id/btnApproveBudget"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="@string/approve_budget"
-                                android:backgroundTint="@android:color/holo_green_dark"
-                                android:padding="12dp"
-                                android:visibility="gone"
-                                android:layout_margin="15dp"
-                                android:layout_marginTop="12dp"/>
-
-                            <!-- decline budget -->
-                            <Button
-                                android:id="@+id/btnDeclineBudget"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="@string/decline_budget"
-                                android:layout_margin="15dp"
-                                android:visibility="gone"
-                                android:backgroundTint="@android:color/holo_red_dark"
-                                android:padding="12dp"
-                                android:layout_marginTop="12dp"/>
-
-                            <!--approved-->
-                            <Button
-                                android:id="@+id/btnBudgetApproved"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="@string/waiting_disbursement"
-                                android:backgroundTint="@android:color/holo_red_dark"
-                                android:padding="12dp"
-                                android:visibility="gone"
-                                android:layout_marginTop="12dp"/>
-
-                            <!--declined-->
-                            <Button
-                                android:id="@+id/btnBudgetDeclined"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="@string/declined"
-                                android:backgroundTint="@android:color/holo_red_dark"
-                                android:padding="12dp"
-                                android:visibility="gone"
-                                android:layout_marginTop="12dp"/>
-
-                            <!--disbursed-->
-                            <Button
-                                android:id="@+id/btnBudgetDisbursed"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="@string/disbursed"
-                                android:backgroundTint="@color/brown5"
-                                android:textColor="@color/brown2"
-                                android:padding="12dp"
-                                android:visibility="gone"
-                                android:layout_marginTop="12dp"/>
-
-                            <!--pending-->
-                            <Button
-                                android:id="@+id/btnBudgetPending"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="@string/awaiting_approval"
-                                android:backgroundTint="@color/brown1"
-                                android:padding="12dp"
-                                android:visibility="gone"
-                                android:layout_marginTop="12dp"/>
-
                         </LinearLayout>
+
                     </androidx.cardview.widget.CardView>
             </LinearLayout>
 

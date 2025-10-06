@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.billkmotolinkltd.R
@@ -18,6 +19,9 @@ import com.example.billkmotolinkltd.ui.TraceWeek
 import com.example.billkmotolinkltd.ui.TraceWeekAdapter
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -50,87 +54,88 @@ class TracerFragment : Fragment() {
         deleteOldTraces()
     }
 
-    fun fetchTraceData() {
+    private fun fetchTraceData() {
         val db = FirebaseFirestore.getInstance()
+
+        if (!isAdded || _binding == null) return
+
+        binding.tracerProgressBar.visibility = View.VISIBLE
+
         db.collection("traces").get()
             .addOnSuccessListener { weeksSnapshot ->
                 if (weeksSnapshot.isEmpty) {
                     Log.d("TRACE_DEBUG", "No data in traces")
-                } else {
-                    Log.d("TRACE_DEBUG", "Data fetched successfully")
-                    val weekList = mutableListOf<TraceWeek>()
+                    return@addOnSuccessListener
+                }
 
-                    for (weekDoc in weeksSnapshot) {
+                // Move parsing to background thread
+                lifecycleScope.launch(Dispatchers.Default) {
+                    val weekList = weeksSnapshot.mapNotNull { weekDoc ->
                         val weekName = weekDoc.id
-                        val users = mutableListOf<TraceUser>()
+                        val users = weekDoc.data.mapNotNull { (userName, userData) ->
+                            if (userName == "Paul Muuo" || userName == "John Sila") return@mapNotNull null
+                            if (userData !is Map<*, *>) return@mapNotNull null
 
-                        weekDoc.data.forEach { (userName, userData) ->
-                            if (userName == "Paul Muuo" || userName == "John Sila") return@forEach
-                            if (userData is Map<*, *>) {
-                                val days = mutableListOf<TraceDay>()
-
-                                val dayOrder = mapOf(
-                                    "Monday" to 1,
-                                    "Tuesday" to 2,
-                                    "Wednesday" to 3,
-                                    "Thursday" to 4,
-                                    "Friday" to 5,
-                                    "Saturday" to 6,
-                                    "Sunday" to 7
-                                )
-
-                                userData.forEach { (dayName, dayContent) ->
-                                    // FIX: Handle List type for dayContent
-                                    when (dayContent) {
-                                        is List<*> -> {
-                                            val messages = dayContent.mapNotNull { messageItem ->
-                                                if (messageItem is Map<*, *>) {
-                                                    TraceMessage(
-                                                        messageItem["message"] as? String ?: "",
-                                                        messageItem["timestamp"] as? Timestamp ?: Timestamp.now()
-                                                    )
-                                                } else null
-                                            }
-                                            days.add(TraceDay(dayName.toString(), messages))
+                            val days = userData.mapNotNull { (dayName, dayContent) ->
+                                when (dayContent) {
+                                    is List<*> -> {
+                                        val messages = dayContent.mapNotNull { item ->
+                                            if (item is Map<*, *>) TraceMessage(
+                                                item["message"] as? String ?: "",
+                                                item["timestamp"] as? Timestamp ?: Timestamp.now()
+                                            ) else null
                                         }
-
-                                        is Map<*, *> -> {
-                                            // Keep original Map handling as fallback
-                                            val messages = mutableListOf<TraceMessage>()
-                                            dayContent.forEach { (_, value) ->
-                                                if (value is Map<*, *>) {
-                                                    messages.add(TraceMessage(
-                                                        value["message"] as? String ?: "",
-                                                        value["timestamp"] as? Timestamp ?: Timestamp.now()
-                                                    ))
-                                                }
-                                            }
-                                            days.add(TraceDay(dayName.toString(), messages))
-                                        }
+                                        TraceDay(dayName.toString(), messages)
                                     }
+
+                                    is Map<*, *> -> {
+                                        val messages = dayContent.mapNotNull { (_, value) ->
+                                            if (value is Map<*, *>) TraceMessage(
+                                                value["message"] as? String ?: "",
+                                                value["timestamp"] as? Timestamp ?: Timestamp.now()
+                                            ) else null
+                                        }
+                                        TraceDay(dayName.toString(), messages)
+                                    }
+
+                                    else -> null
                                 }
-
-                                val sortedDays = days.sortedBy { dayOrder[it.day] ?: Int.MAX_VALUE }
-                                users.add(TraceUser(userName.toString(), sortedDays))
-
-//                                users.add(TraceUser(userName.toString(), days))
                             }
+
+                            val dayOrder = mapOf(
+                                "Monday" to 1,
+                                "Tuesday" to 2,
+                                "Wednesday" to 3,
+                                "Thursday" to 4,
+                                "Friday" to 5,
+                                "Saturday" to 6,
+                                "Sunday" to 7
+                            )
+                            val sortedDays = days.sortedBy { dayOrder[it.day] ?: Int.MAX_VALUE }
+
+                            TraceUser(userName.toString(), sortedDays)
                         }
 
                         val startDate = extractStartDateFromWeekName(weekName)
-                        weekList.add(TraceWeek(weekName, users, startDate))
-                    }
-                    weekList.sortByDescending { it.startDate }
-                    updateRecyclerView(weekList)
+                        TraceWeek(weekName, users, startDate)
+                    }.sortedByDescending { it.startDate }
 
-                    if (weekList.isEmpty()) {
-                        if (_binding == null || !isAdded ) return@addOnSuccessListener
-                        binding.noTraces.visibility = View.VISIBLE
+                    // Post results back to main thread
+                    withContext(Dispatchers.Main) {
+                        updateRecyclerView(weekList)
+
+                        binding.tracerProgressBar.visibility = View.GONE
+                        if (weekList.isEmpty()) {
+                            if (_binding == null || !isAdded) return@withContext
+                            binding.noTraces.visibility = View.VISIBLE
+
+                        }
                     }
                 }
             }
             .addOnFailureListener { e ->
                 Log.e("Firestore", "Error fetching trace data", e)
+                binding.tracerProgressBar.visibility = View.GONE
             }
     }
 

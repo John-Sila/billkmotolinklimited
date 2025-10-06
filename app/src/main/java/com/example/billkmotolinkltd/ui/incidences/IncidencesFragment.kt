@@ -15,8 +15,15 @@ import android.graphics.Color
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
-import android.widget.Button
+import android.util.Log
+import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.lifecycleScope
 import com.google.firebase.Timestamp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import java.util.Calendar
 
 class IncidencesFragment : Fragment() {
 
@@ -47,7 +54,10 @@ class IncidencesFragment : Fragment() {
         binding.reportsRecyclerView.adapter = reportsAdapter
 
         // Fetch reports
-        getReports()
+        lifecycleScope.launch {
+            deleteOldReports()
+            getReports()
+        }
 
         binding.btnClearReports.setOnClickListener {
             val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
@@ -76,14 +86,89 @@ class IncidencesFragment : Fragment() {
                 Toast.makeText(requireContext(), "Deleting all reports is permanent.", Toast.LENGTH_SHORT).show()
             }
 
-            val dialog = alertDialog.create()
-            dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+            alertDialog.create().apply {
+                window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                show()
 
-            dialog.show()
-
-
+                // Change button text colors after showing
+                getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+            }
         }
     }
+
+    private fun deleteOldReports() {
+        // Show loading indicator if needed
+        // binding.progressBar.visibility = View.VISIBLE
+
+        lifecycleScope.launch {
+            when (val result = cleanupReports()) {
+                is CleanupResult.Success -> {
+                    Log.d("ReportsCleanup", result.message)
+                    // Show success message if needed
+                    // Toast.makeText(requireContext(), result.message, Toast.LENGTH_SHORT).show()
+                }
+                is CleanupResult.Error -> {
+                    Log.e("ReportsCleanup", result.errorMessage, result.exception)
+                    // Show error message if needed
+                    // Toast.makeText(requireContext(), "Cleanup failed", Toast.LENGTH_SHORT).show()
+                }
+                is CleanupResult.NotFound -> {
+                    Log.w("ReportsCleanup", result.message)
+                }
+            }
+            // Hide loading indicator
+            // binding.progressBar.visibility = View.GONE
+        }
+    }
+    private suspend fun cleanupReports(): CleanupResult = withContext(Dispatchers.IO) {
+        try {
+            val db = FirebaseFirestore.getInstance()
+            val docRef = db.collection("general").document("general_variables")
+
+            val snapshot = docRef.get().await()
+
+            if (!snapshot.exists()) {
+                return@withContext CleanupResult.NotFound("Document general/general_variables not found")
+            }
+
+            val reports = snapshot.get("reports") as? List<Map<String, Any>> ?: emptyList()
+
+            // Calculate cutoff date
+            val cutoffDate = Calendar.getInstance().apply {
+                add(Calendar.MONTH, -2)
+            }.time
+
+            // Filter reports efficiently
+            val filteredReports = reports.filterTo(ArrayList(reports.size)) { report ->
+                val ts = report["time"] as? com.google.firebase.Timestamp
+                val date = ts?.toDate()
+                date != null && date.after(cutoffDate)
+            }
+
+            // Only update if there are changes
+            if (filteredReports.size < reports.size) {
+                docRef.update("reports", filteredReports).await()
+                return@withContext CleanupResult.Success(
+                    "Old reports deleted. Remaining = ${filteredReports.size}"
+                )
+            } else {
+                return@withContext CleanupResult.Success("No old reports to delete")
+            }
+
+        } catch (e: Exception) {
+            return@withContext CleanupResult.Error("Failed to clean up reports: ${e.message}", e)
+        }
+    }
+
+    // Result sealed class for better error handling
+    sealed class CleanupResult {
+        data class Success(val message: String) : CleanupResult()
+        data class Error(val errorMessage: String, val exception: Exception? = null) : CleanupResult()
+        data class NotFound(val message: String) : CleanupResult()
+    }
+
+
 
 
     private fun getReports() {

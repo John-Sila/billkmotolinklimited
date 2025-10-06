@@ -1,8 +1,11 @@
 package com.example.billkmotolinkltd.ui
 
+import android.animation.ValueAnimator
+import android.graphics.drawable.LayerDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -18,12 +21,21 @@ class ClockoutGroupedAdapter : RecyclerView.Adapter<ClockoutGroupedAdapter.Group
         this,
         object : DiffUtil.ItemCallback<ClockoutGroup>() {
             override fun areItemsTheSame(oldItem: ClockoutGroup, newItem: ClockoutGroup) =
-                oldItem.userName == newItem.userName
+                oldItem.userId == newItem.userId
 
             override fun areContentsTheSame(oldItem: ClockoutGroup, newItem: ClockoutGroup) =
                 oldItem == newItem
         }
     )
+
+    init {
+        setHasStableIds(true)
+    }
+
+    override fun getItemId(position: Int): Long {
+        return differ.currentList[position].userId.hashCode().toLong()
+    }
+
 
     fun updateData(newList: List<ClockoutGroup>) {
         val expandedUsers = expandedGroups.toSet()
@@ -55,6 +67,23 @@ class ClockoutGroupedAdapter : RecyclerView.Adapter<ClockoutGroupedAdapter.Group
                         } else {
                             expandedGroups.add(it.userName)
                             nestedRecyclerView.visibility = View.VISIBLE
+                            nestedRecyclerView.isNestedScrollingEnabled = true
+                        }
+
+                        // Run the background animation
+                        userNameTextView.post {
+                            val bg = userNameTextView.background
+                            if (bg is LayerDrawable) {
+                                val progressDrawable = bg.findDrawableByLayerId(R.id.progress)
+                                val anim = ValueAnimator.ofInt(0, userNameTextView.width)
+                                anim.duration = 8000
+                                anim.addUpdateListener { va ->
+                                    val value = va.animatedValue as Int
+                                    progressDrawable.setBounds(0, 0, value, userNameTextView.height)
+                                    userNameTextView.invalidate()
+                                }
+                                anim.start()
+                            }
                         }
                     }
                 }
@@ -62,7 +91,6 @@ class ClockoutGroupedAdapter : RecyclerView.Adapter<ClockoutGroupedAdapter.Group
         }
 
         fun bind(group: ClockoutGroup) {
-            // Updated to match the actual property name in ClockoutGroup
             entryAdapter.updateEntries(
                 group.entries.sortedByDescending { it.postedAt }
             )
@@ -81,6 +109,7 @@ class ClockoutGroupedAdapter : RecyclerView.Adapter<ClockoutGroupedAdapter.Group
         holder.bind(group)
         holder.nestedRecyclerView.visibility =
             if (group.userName in expandedGroups) View.VISIBLE else View.GONE
+
     }
 
     override fun getItemCount(): Int = differ.currentList.size

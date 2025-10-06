@@ -77,7 +77,7 @@ class ExecutiveUserAdapter(
                             }
 
                             false -> {
-                                "This user's latest clockout is for $formattedDate and recorded a net income of ${formatIncome(user.netIncome ?: 0.0)}."
+                                "$formattedDate, ${user.userName?.substringBefore(" ")}'s clockout recorded a net income of ${formatIncome(user.netIncome ?: 0.0)}."
                             }
 
                             else -> {

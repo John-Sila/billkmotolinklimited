@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -25,6 +26,7 @@
         app:layout_constraintBottom_toTopOf="@id/emojiPanel"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/emojiPanel"
@@ -53,33 +55,23 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textColor="@color/white"
             android:background="@drawable/rounded_inputs"
             android:hint="@string/type_a_message"
             android:imeOptions="actionSend"
             android:inputType="textMultiLine|textCapSentences" />
         <ImageView
-            android:id="@+id/emojiButton"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:src="@drawable/emoji"
-            android:contentDescription="Emojis"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="8dp"
-            android:scaleType="centerInside" />
-        <ImageView
             android:id="@+id/sendButton"
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:src="@drawable/send"
-            android:contentDescription="Send"
+            android:contentDescription="@string/send"
             android:clickable="true"
             android:focusable="true"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="8dp"
             android:scaleType="centerInside" />
 
+
     </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

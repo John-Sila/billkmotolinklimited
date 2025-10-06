@@ -4,7 +4,7 @@
         <!-- Primary brand color. -->
         <!--<item name="colorPrimary">@color/purple_200</item>
         <item name="colorPrimaryVariant">@color/purple_700</item>-->
-        <item name="colorPrimary">@color/brown6</item>
+        <item name="colorPrimary">@color/d1</item>
         <item name="colorPrimaryVariant">@color/brown5</item>
         <item name="colorOnPrimary">@color/black</item>
 
@@ -17,6 +17,9 @@
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+
+        <item name="cardBackgroundColor">@color/d1</item>
+
     </style>
 
     <!--<style name="Theme.BILLKMOTOLINKLTD.Fullscreen" parent="Theme.MaterialComponents.DayNight.NoActionBar">

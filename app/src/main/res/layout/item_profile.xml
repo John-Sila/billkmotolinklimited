@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     app:cardCornerRadius="10dp"
+    app:cardBackgroundColor="?attr/cardBackgroundColor"
     android:layout_margin="8dp"
     android:layout_height="wrap_content"
     android:elevation="4dp">
@@ -14,7 +15,7 @@
         android:layout_height="wrap_content">
 
         <TextView
-            android:id="@+id/tvUsername"
+            android:id="@+id/pUsername"
             android:textStyle="bold"
             android:textSize="20sp"
             android:textColor="@android:color/holo_green_dark"
@@ -58,36 +59,50 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <TextView
-                            android:id="@+id/profileRank"
-                            android:layout_width="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="15dp"
+                        android:gravity="center">
+                        <ImageView
+                            android:id="@+id/profilesPfp"
+                            android:layout_width="75dp"
+                            android:layout_height="75dp"
+                            android:contentDescription="@string/money_image"
+                            android:src="@drawable/male"
+                            android:scaleType="centerCrop"
+                            android:background="@drawable/circle_bg"
+                            android:layout_marginEnd="8dp" />
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text=""
-                            android:textSize="18sp"
-                            android:textStyle="bold"/>
+                            android:orientation="vertical"
+                            android:padding="16dp">
 
-                        <TextView
-                            android:id="@+id/profileEmail"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text=""
-                            android:textSize="14sp"/>
+                            <TextView
+                                android:id="@+id/profileRank"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textSize="18sp"
+                                android:textStyle="bold"/>
 
-                        <TextView
-                            android:id="@+id/profilePhone"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text=""
-                            android:textSize="14sp"/>
+                            <TextView
+                                android:id="@+id/profileEmail"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textSize="14sp"/>
 
+                            <TextView
+                                android:id="@+id/profilePhone"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textSize="14sp"/>
+
+                        </LinearLayout>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </com.facebook.shimmer.ShimmerFrameLayout>
-
-
             <!--uid-->
             <LinearLayout
                 android:orientation="horizontal"
@@ -105,6 +120,7 @@
                 <androidx.cardview.widget.CardView
                     android:layout_width="wrap_content"
                     app:cardCornerRadius="20dp"
+                    app:cardBackgroundColor="?attr/cardBackgroundColor"
                     android:layout_margin="8dp"
                     android:layout_height="wrap_content"
                     android:elevation="4dp">
@@ -137,6 +153,7 @@
                 <androidx.cardview.widget.CardView
                     android:layout_width="wrap_content"
                     app:cardCornerRadius="20dp"
+                    app:cardBackgroundColor="?attr/cardBackgroundColor"
                     android:layout_margin="8dp"
                     android:layout_height="wrap_content"
                     android:elevation="4dp">
@@ -168,6 +185,7 @@
                     android:layout_width="wrap_content"
                     app:cardCornerRadius="20dp"
                     android:layout_margin="8dp"
+                    app:cardBackgroundColor="?attr/cardBackgroundColor"
                     android:layout_height="wrap_content"
                     android:elevation="4dp">
 
@@ -196,6 +214,7 @@
                 <androidx.cardview.widget.CardView
                     android:layout_width="wrap_content"
                     app:cardCornerRadius="20dp"
+                    app:cardBackgroundColor="?attr/cardBackgroundColor"
                     android:layout_margin="8dp"
                     android:layout_height="wrap_content"
                     android:elevation="4dp">
@@ -226,6 +245,7 @@
                 <androidx.cardview.widget.CardView
                     android:layout_width="wrap_content"
                     app:cardCornerRadius="20dp"
+                    app:cardBackgroundColor="?attr/cardBackgroundColor"
                     android:layout_margin="8dp"
                     android:layout_height="wrap_content"
                     android:elevation="4dp">
@@ -256,6 +276,7 @@
                 <androidx.cardview.widget.CardView
                     android:layout_width="wrap_content"
                     app:cardCornerRadius="20dp"
+                    app:cardBackgroundColor="?attr/cardBackgroundColor"
                     android:layout_margin="8dp"
                     android:layout_height="wrap_content"
                     android:elevation="4dp">
@@ -287,6 +308,7 @@
                     android:layout_width="wrap_content"
                     app:cardCornerRadius="20dp"
                     android:layout_margin="8dp"
+                    app:cardBackgroundColor="?attr/cardBackgroundColor"
                     android:layout_height="wrap_content"
                     android:elevation="4dp">
 
@@ -316,6 +338,7 @@
                 <androidx.cardview.widget.CardView
                     android:layout_width="wrap_content"
                     app:cardCornerRadius="20dp"
+                    app:cardBackgroundColor="?attr/cardBackgroundColor"
                     android:layout_margin="8dp"
                     android:layout_height="wrap_content"
                     android:elevation="4dp">
@@ -346,6 +369,7 @@
                 <androidx.cardview.widget.CardView
                     android:layout_width="wrap_content"
                     app:cardCornerRadius="20dp"
+                    app:cardBackgroundColor="?attr/cardBackgroundColor"
                     android:layout_margin="8dp"
                     android:layout_height="wrap_content"
                     android:elevation="4dp">
@@ -376,6 +400,7 @@
                     android:layout_width="wrap_content"
                     app:cardCornerRadius="20dp"
                     android:layout_margin="8dp"
+                    app:cardBackgroundColor="?attr/cardBackgroundColor"
                     android:layout_height="wrap_content"
                     android:elevation="4dp">
 
@@ -405,6 +430,7 @@
                     android:layout_width="wrap_content"
                     app:cardCornerRadius="20dp"
                     android:layout_margin="8dp"
+                    app:cardBackgroundColor="?attr/cardBackgroundColor"
                     android:layout_height="wrap_content"
                     android:elevation="4dp">
                     <TextView
@@ -434,6 +460,7 @@
                 <androidx.cardview.widget.CardView
                     android:layout_width="wrap_content"
                     app:cardCornerRadius="20dp"
+                    app:cardBackgroundColor="?attr/cardBackgroundColor"
                     android:layout_margin="8dp"
                     android:layout_height="wrap_content"
                     android:elevation="4dp">
@@ -464,6 +491,7 @@
                 <androidx.cardview.widget.CardView
                     android:layout_width="wrap_content"
                     app:cardCornerRadius="20dp"
+                    app:cardBackgroundColor="?attr/cardBackgroundColor"
                     android:layout_margin="8dp"
                     android:layout_height="wrap_content"
                     android:elevation="4dp">
@@ -494,6 +522,7 @@
                 <androidx.cardview.widget.CardView
                     android:layout_width="wrap_content"
                     app:cardCornerRadius="20dp"
+                    app:cardBackgroundColor="?attr/cardBackgroundColor"
                     android:layout_margin="8dp"
                     android:layout_height="wrap_content"
                     android:elevation="4dp">
@@ -524,6 +553,7 @@
                 <androidx.cardview.widget.CardView
                     android:layout_width="wrap_content"
                     app:cardCornerRadius="20dp"
+                    app:cardBackgroundColor="?attr/cardBackgroundColor"
                     android:layout_margin="8dp"
                     android:layout_height="wrap_content"
                     android:elevation="4dp">
@@ -554,6 +584,7 @@
                 <androidx.cardview.widget.CardView
                     android:layout_width="wrap_content"
                     app:cardCornerRadius="20dp"
+                    app:cardBackgroundColor="?attr/cardBackgroundColor"
                     android:layout_margin="8dp"
                     android:layout_height="wrap_content"
                     android:elevation="4dp">
@@ -585,6 +616,7 @@
                     android:layout_width="wrap_content"
                     app:cardCornerRadius="20dp"
                     android:layout_margin="8dp"
+                    app:cardBackgroundColor="?attr/cardBackgroundColor"
                     android:layout_height="wrap_content"
                     android:elevation="4dp">
 
@@ -614,6 +646,7 @@
                 <androidx.cardview.widget.CardView
                     android:layout_width="wrap_content"
                     app:cardCornerRadius="20dp"
+                    app:cardBackgroundColor="?attr/cardBackgroundColor"
                     android:layout_margin="8dp"
                     android:layout_height="wrap_content"
                     android:elevation="4dp">

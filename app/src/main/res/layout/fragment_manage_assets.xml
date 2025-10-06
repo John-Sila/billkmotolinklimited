@@ -50,6 +50,7 @@
                 android:layout_margin="8dp"
                 app:cardCornerRadius="12dp"
                 android:visibility="visible"
+                app:cardBackgroundColor="?attr/cardBackgroundColor"
                 android:orientation="vertical"
                 android:layout_marginBottom="15dp"
                 android:gravity="center"
@@ -70,7 +71,7 @@
                         android:textStyle="bold"
                         android:text="@string/manage_bikes_amp_batteries" />
 
-                    <!--plate number-->
+                    <!--add bike-->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -115,7 +116,7 @@
                             android:backgroundTint="@color/brown1"
                             android:padding="12dp"
                             android:layout_marginStart="30dp"
-                            android:visibility="gone"/>
+                            android:enabled="false"/>
                     </LinearLayout>
 
                     <!--Add destination-->
@@ -162,7 +163,7 @@
                             android:backgroundTint="@color/brown2"
                             android:padding="12dp"
                             android:layout_marginStart="30dp"
-                            android:visibility="gone"/>
+                            android:enabled="false"/>
                     </LinearLayout>
 
                     <!--bike to delete-->
@@ -215,7 +216,7 @@
                             android:layout_marginStart="30dp"
                             android:backgroundTint="@color/brown3"
                             android:padding="12dp"
-                            android:visibility="gone"/>
+                            android:enabled="false"/>
                     </LinearLayout>
 
                     <!--divider-->
@@ -310,7 +311,7 @@
                         android:text="@string/add_battery"
                         android:backgroundTint="@color/brown4"
                         android:padding="12dp"
-                        android:visibility="gone"
+                        android:enabled="false"
                         android:layout_marginTop="12dp"/>
 
                     <!--divider-->
@@ -320,6 +321,113 @@
                         android:layout_marginTop="15dp"
                         android:layout_marginBottom="1dp"
                         android:background="@drawable/row_divider"/>
+
+                    <!--battery to delete-->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="15dp"
+                        android:gravity="center|start">
+
+                        <ImageView
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:contentDescription="@string/plate_number"
+                            android:src="@drawable/view"
+                            android:layout_marginEnd="8dp"/>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="10dp"
+                            android:orientation="vertical">
+
+                            <Spinner
+                                android:id="@+id/batteryToDelete"
+                                android:layout_width="170dp"
+                                android:layout_height="wrap_content"/>
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height=".5dp"
+                                android:background="@android:color/holo_orange_dark" /> <!-- underline color -->
+
+                        </LinearLayout>
+
+                        <ProgressBar
+                            android:id="@+id/deleteBatteryProgressBar"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            android:padding="12dp"
+                            android:layout_marginStart="30dp"
+                            android:layout_gravity="center"/>
+
+                        <Button
+                            android:id="@+id/btnDeleteBattery"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:enabled="false"
+                            android:text="@string/delete_battery"
+                            android:layout_marginStart="30dp"
+                            android:backgroundTint="@android:color/holo_red_dark"
+                            android:padding="12dp"/>
+                    </LinearLayout>
+
+                    <!--destination to delete-->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="15dp"
+                        android:gravity="center|start">
+
+                        <ImageView
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:contentDescription="@string/plate_number"
+                            android:src="@drawable/view"
+                            android:layout_marginEnd="8dp"/>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="10dp"
+                            android:orientation="vertical">
+
+                            <Spinner
+                                android:id="@+id/destinationToDelete"
+                                android:layout_width="170dp"
+                                android:layout_height="wrap_content"/>
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height=".5dp"
+                                android:background="@android:color/holo_orange_dark" /> <!-- underline color -->
+
+                        </LinearLayout>
+
+                        <ProgressBar
+                            android:id="@+id/deleteDestinationProgressBar"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            android:padding="12dp"
+                            android:layout_marginStart="30dp"
+                            android:layout_gravity="center"/>
+
+                        <Button
+                            android:id="@+id/btnDeleteDestination"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:enabled="false"
+                            android:text="@string/delete_destination"
+                            android:layout_marginStart="30dp"
+                            android:backgroundTint="@android:color/holo_red_dark"
+                            android:padding="12dp"/>
+                    </LinearLayout>
+
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>

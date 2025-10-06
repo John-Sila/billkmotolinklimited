@@ -1,8 +1,14 @@
 package com.example.billkmotolinkltd.ui.settings
 
+import android.Manifest
+import android.app.Activity
+import android.content.ContentValues
+import android.content.pm.PackageManager
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
@@ -10,12 +16,18 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ImageView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.biometric.BiometricPrompt
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import com.example.billkmotolinkltd.R
 import com.example.billkmotolinkltd.databinding.FragmentSettingsBinding
 import com.example.billkmotolinkltd.ui.Utility
@@ -23,14 +35,26 @@ import com.example.billkmotolinkltd.ui.formatIncome
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.yalantis.ucrop.UCrop
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okio.BufferedSink
+import org.cloudinary.json.JSONObject
+import java.io.File
+import java.io.InputStream
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import okhttp3.RequestBody
+
 
 class SettingsFragment : Fragment() {
 
@@ -40,9 +64,22 @@ class SettingsFragment : Fragment() {
     private var pwModal: Boolean = false
     private var companyIncModal: Boolean = false
     private var companyIncModal2: Boolean = false
-    private var commisionModal: Boolean = false
+    private var commissionModal: Boolean = false
     private var companyInc: Double = 0.0
     private var companyStatus: String = "Unknown"
+
+
+    /*pfp*/
+    private lateinit var btnChoosePhoto: Button
+    private lateinit var btnUpload: Button
+    private lateinit var btnCancel: Button
+    private lateinit var imagePreview: ImageView
+    private lateinit var actionButtons: ConstraintLayout
+    private var selectedImageUri: Uri? = null
+    private lateinit var pickImageLauncher: ActivityResultLauncher<String>
+    private lateinit var takePhotoLauncher: ActivityResultLauncher<Uri>
+    private lateinit var cameraImageUri: Uri
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -59,6 +96,7 @@ class SettingsFragment : Fragment() {
         getCompanyIncome()
         checkIfHrBudgetExists()
         getWeeklyTotals()
+        loadPfpLogic()
 
 
         binding?.btnChangeUsername?.setOnClickListener {
@@ -123,7 +161,7 @@ class SettingsFragment : Fragment() {
                 }
                 else {
 
-                    val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    val alertDialog = AlertDialog.Builder(requireContext())
 
                     // Custom title with red color
                     val title = SpannableString("Withdraw Company Funds")
@@ -155,10 +193,14 @@ class SettingsFragment : Fragment() {
                         dialog.dismiss() // Dismiss dialog if user cancels
                     }
 
-                    val dialog = alertDialog.create()
-                    dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+                    alertDialog.create().apply {
+                        window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                        show()
 
-                    dialog.show()
+                        // Change button text colors after showing
+                        getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                        getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+                    }
                 }
             }
         }
@@ -201,10 +243,14 @@ class SettingsFragment : Fragment() {
                         dialog.dismiss() // Dismiss dialog if user cancels
                     }
 
-                    val dialog = alertDialog.create()
-                    dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+                    alertDialog.create().apply {
+                        window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                        show()
 
-                    dialog.show()
+                        // Change button text colors after showing
+                        getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                        getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+                    }
                 }
             }
         }
@@ -224,7 +270,7 @@ class SettingsFragment : Fragment() {
                         "3. Only CEOs will be allowed to log in.\n\n" +
                         "4. No clockouts can be done.\n\n" +
                         "5. No HR budgets can be submitted.\n\n" +
-                        "6. No bikes or users can be added, deleted, discontinued, activated or deactivated whatsoever."
+                        "6. No bikes, batteries, locations or users can be added, deleted, discontinued, activated or deactivated whatsoever."
             )
             message.setSpan(ForegroundColorSpan(Color.GRAY), 0, message.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
 
@@ -240,10 +286,14 @@ class SettingsFragment : Fragment() {
                 dialog.dismiss() // Dismiss dialog if user cancels
             }
 
-            val dialog = alertDialog.create()
-            dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+            alertDialog.create().apply {
+                window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                show()
 
-            dialog.show()
+                // Change button text colors after showing
+                getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+            }
         }
 
         binding?.btnContinueOperations?.setOnClickListener {
@@ -276,9 +326,9 @@ class SettingsFragment : Fragment() {
         }
 
         binding?.btnChangeCConstant?.setOnClickListener {
-            commisionModal = !getCommissionModal()
+            commissionModal = !getCommissionModal()
 
-            if (commisionModal) {
+            if (commissionModal) {
                 binding?.commissionCLayout?.visibility = View.VISIBLE
                 binding?.btnChangeCConstant?.text = "Change"
             }
@@ -310,10 +360,14 @@ class SettingsFragment : Fragment() {
                         dialog.dismiss() // Dismiss dialog if user cancels
                     }
 
-                    val dialog = alertDialog.create()
-                    dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+                    alertDialog.create().apply {
+                        window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                        show()
 
-                    dialog.show()
+                        // Change button text colors after showing
+                        getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                        getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+                    }
 
                 } else {
                     // Show an error message or handle the case where the input is invalid
@@ -323,7 +377,7 @@ class SettingsFragment : Fragment() {
         }
 
         binding?.btnDisburseBudget?.setOnClickListener {
-            val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            val alertDialog = AlertDialog.Builder(requireContext())
 
             // Custom title with red color
             val title = SpannableString("Confirm")
@@ -345,16 +399,286 @@ class SettingsFragment : Fragment() {
                 dialog.dismiss() // Dismiss dialog if user cancels
             }
 
-            val dialog = alertDialog.create()
-            dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+            alertDialog.create().apply {
+                window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                show()
 
-            dialog.show()
+                // Change button text colors after showing
+                getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+            }
 
         }
     }
 
+    /*companions*/
+    companion object {
+        private const val REQUEST_CAMERA_PERMISSION = 1001
+    }
+
+    private fun loadPfpLogic() {
+        if (_binding == null || !isAdded) return
+        btnChoosePhoto = binding?.btnChoosePhoto!!
+        btnUpload = binding?.btnUpload!!
+        btnCancel = binding?.btnCancel!!
+        imagePreview = binding?.imagePreview!!
+        actionButtons = binding?.actionButtons!!
+
+        // Register image picker (Gallery)
+        pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            uri?.let {
+                selectedImageUri = it
+                // displaySelectedImage()
+                launchCrop(selectedImageUri!!)
+            }
+        }
+
+        // Register camera capture
+        takePhotoLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+            if (success) {
+                selectedImageUri = cameraImageUri
+                launchCrop(selectedImageUri!!)
+            }
+        }
+
+        btnChoosePhoto.setOnClickListener {
+            showImageSourceDialog()
+        }
+
+        btnUpload.setOnClickListener {
+            val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return@setOnClickListener
+            val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+
+            // Custom title with red color
+            val title = SpannableString("BILLK Graphics")
+            title.setSpan(ForegroundColorSpan(Color.RED), 0, title.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+            // Custom message with black color
+            val message = SpannableString("Please confirm upload of your profile picture.")
+            message.setSpan(ForegroundColorSpan(Color.GRAY), 0, message.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+            alertDialog.setTitle(title)
+            alertDialog.setMessage(message)
+            alertDialog.setIcon(R.drawable.warn)
+
+            alertDialog.setPositiveButton("Proceed") { _, _ ->
+                selectedImageUri?.let {
+                    uploadImageToCloudinary(it, userId)
+                }
+            }
+
+            alertDialog.setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss() // Dismiss dialog if user cancels
+            }
+
+            val dialog = alertDialog.create()
+            dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+
+            dialog.show()
+        }
+
+
+        btnCancel.setOnClickListener {
+            resetSelection()
+        }
+    }
+
+    private val cropLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val uri = UCrop.getOutput(result.data!!)
+            uri?.let {
+                selectedImageUri = it
+                displaySelectedImage()
+            }
+        } else if (result.resultCode == UCrop.RESULT_ERROR) {
+            val cropError = UCrop.getError(result.data!!)
+            Log.e("CropError", "Crop failed", cropError)
+        }
+    }
+
+    private fun launchCrop(sourceUri: Uri) {
+        val destinationUri = Uri.fromFile(File(requireContext().cacheDir,
+            "cropped_image_${System.currentTimeMillis()}.jpg"))
+        val options = UCrop.Options().apply {
+            setCompressionQuality(90)
+            setHideBottomControls(true)
+            setFreeStyleCropEnabled(false)
+        }
+
+        val uCrop = UCrop.of(sourceUri, destinationUri)
+            .withAspectRatio(1f, 1f)
+            .withMaxResultSize(1080, 1080)
+            .withOptions(options)
+
+        uCrop.getIntent(requireContext()).also {
+            cropLauncher.launch(it)
+        }
+    }
+    private fun displaySelectedImage() {
+        imagePreview.visibility = View.VISIBLE
+        actionButtons.visibility = View.VISIBLE
+        imagePreview.setImageURI(selectedImageUri)
+        btnChoosePhoto.visibility = View.GONE
+    }
+    private fun showImageSourceDialog() {
+        val options = arrayOf("Take Photo", "Choose from Gallery")
+        AlertDialog.Builder(requireContext())
+            .setTitle("Select Image")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> openCamera()
+                    1 -> pickImageLauncher.launch("image/*")
+                }
+            }
+            .show()
+    }
+    private fun openCamera() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
+            == PackageManager.PERMISSION_GRANTED) {
+
+            val values = ContentValues().apply {
+                put(MediaStore.Images.Media.TITLE, "New Picture")
+                put(MediaStore.Images.Media.DESCRIPTION, "From Camera")
+            }
+            cameraImageUri = requireContext().contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)!!
+            takePhotoLauncher.launch(cameraImageUri)
+
+        } else {
+            requestPermissions(arrayOf(Manifest.permission.CAMERA), REQUEST_CAMERA_PERMISSION)
+        }
+    }
+    private fun resetSelection() {
+        selectedImageUri = null
+        imagePreview.visibility = View.GONE
+        actionButtons.visibility = View.GONE
+        btnChoosePhoto.visibility = View.VISIBLE
+    }
+    private fun uploadImageToCloudinary(imageUri: Uri, userId: String) {
+        if (_binding == null || !isAdded) return
+
+        // Show progress and disable buttons
+        binding?.pfpProgressBar?.visibility = View.VISIBLE
+        binding?.btnUpload?.isEnabled = false
+        binding?.btnCancel?.isEnabled = false
+
+        val cloudName = "dpxcjlg2b"
+        val uploadPreset = "billk_images"
+        val client = OkHttpClient()
+        val firestore = FirebaseFirestore.getInstance()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            var inputStream: InputStream? = null
+            try {
+                inputStream = requireContext().contentResolver.openInputStream(imageUri)
+                if (inputStream == null) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(requireContext(), "Unable to open image", Toast.LENGTH_SHORT).show()
+                        resetUI()
+                    }
+                    return@launch
+                }
+
+                // Prepare request body for Cloudinary
+                val requestBody = MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart(
+                        "file", "image.jpg",
+                        object : RequestBody() {
+                            override fun contentType() = "image/*".toMediaType()
+                            override fun writeTo(sink: BufferedSink) {
+                                inputStream.use { stream ->
+                                    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                                    var bytesRead: Int
+                                    while (stream.read(buffer).also { bytesRead = it } != -1) {
+                                        sink.write(buffer, 0, bytesRead)
+                                    }
+                                }
+                            }
+                        }
+                    )
+                    .addFormDataPart("upload_preset", uploadPreset)
+                    .build()
+
+                val request = Request.Builder()
+                    .url("https://api.cloudinary.com/v1_1/$cloudName/image/upload")
+                    .post(requestBody)
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val responseBody = response.body?.string()
+
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful) {
+                        val json = JSONObject(responseBody ?: "{}")
+                        val imageUrl = json.optString("secure_url", "")
+
+                        Log.d("Cloudinary", "Upload success. Image URL: $imageUrl")
+
+                        // ✅ Save URL to Firestore
+                        val userRef = firestore.collection("users").document(userId)
+                        userRef.update("pfp_url", imageUrl)
+                            .addOnSuccessListener {
+                                binding?.btnChoosePhoto?.text = "Change Profile Photo"
+                                Log.d("Firestore", "Profile image URL updated successfully.")
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("Firestore", "Failed to update Firestore: ${e.message}")
+                            }
+
+                        // ✅ Update ImageView immediately
+                        binding?.malePImage?.let { imageView ->
+                            imageView.visibility = View.VISIBLE
+                            Glide.with(requireContext())
+                                .load(imageUrl)
+                                .placeholder(R.drawable.male)
+                                .circleCrop()
+                                .into(imageView)
+                        }
+
+                        Toast.makeText(requireContext(), "Uploaded Successfully", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Log.e("Cloudinary", "Upload failed. Code: ${response.code}, Body: $responseBody")
+                        Toast.makeText(requireContext(), "Upload failed: ${response.message}", Toast.LENGTH_SHORT).show()
+                    }
+
+                    resetUI()
+                }
+
+            } catch (e: Exception) {
+                Log.e("Cloudinary", "Exception during upload", e)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "Error: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+                    resetUI()
+                }
+            } finally {
+                inputStream?.close()
+            }
+        }
+    }
+    private fun resetUI() {
+        binding?.pfpProgressBar?.visibility = View.GONE
+        binding?.btnUpload?.isEnabled = true
+        binding?.btnCancel?.isEnabled = true
+
+        resetSelection()
+    }
+
+    /*image upload logic ends here*/
+
+
+
+
+
+
+
+
+
+
+    /*weekly totals (This week so far)*/
     private fun getWeeklyTotals() {
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             val calendar = Calendar.getInstance().apply {
                 firstDayOfWeek = Calendar.MONDAY
             }
@@ -364,7 +688,7 @@ class SettingsFragment : Fragment() {
             val endOfWeek = calendar.apply {
                 add(Calendar.DAY_OF_WEEK, 6)
             }.time
-            val dateFormat = SimpleDateFormat("dd-MMM-yyyy", Locale.getDefault())
+            val dateFormat = SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH)
             val week = calendar.get(Calendar.WEEK_OF_YEAR)
             val path = "Week $week (${dateFormat.format(startOfWeek).replace("-", " ")} to ${
                 dateFormat.format(endOfWeek).replace("-", " ")
@@ -379,14 +703,19 @@ class SettingsFragment : Fragment() {
                 //binding?.totalGrossDeviation?.text = totals["totalGrossDeviation"].toString()
                 binding?.totalDifference?.text = formatIncome(totals["totalNetGrossDifference"]?.toDouble() ?: 0.0)
 
-            } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Failed to load totals: ${e.message}", Toast.LENGTH_LONG).show()
-            } finally {
+            }
+            catch (e: Exception){
+                context?.let {
+                    Toast.makeText(it, "Failed to load totals: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+            finally {
             }
         }
-
     }
 
+
+    /*auth through fingerprint, Screen lock*/
     fun authenticateUser(onSuccess: () -> Unit, onFailure: () -> Unit) {
         val executor = ContextCompat.getMainExecutor(requireContext())
 
@@ -437,6 +766,8 @@ class SettingsFragment : Fragment() {
         biometricPrompt.authenticate(promptInfo)
     }
 
+
+    /*getters*/
     fun getUserModalStatus(): Boolean {
         return userNameModal
     }
@@ -453,9 +784,12 @@ class SettingsFragment : Fragment() {
         return companyInc
     }
     fun getCommissionModal(): Boolean {
-        return commisionModal
+        return commissionModal
     }
 
+
+
+    /*Get the current commission*/
     private fun changeCommissionConstant(commissionAmount: Double) {
         binding?.cProgressBar?.visibility = View.VISIBLE
         binding?.btnChangeCConstant?.visibility = View.GONE
@@ -491,7 +825,6 @@ class SettingsFragment : Fragment() {
             binding?.btnChangeCConstant?.visibility = View.VISIBLE
         }
     }
-
 
 
 
@@ -554,7 +887,6 @@ class SettingsFragment : Fragment() {
             }
         }
     }
-
     private suspend fun handleSuccess(currentBudgetCost: Double, currentCompanyIncome: Double, updatedCompanyIncome: Double) {
         if (!isAdded || _binding == null) return
 
@@ -580,7 +912,6 @@ class SettingsFragment : Fragment() {
             showConfirmationDialog(currentBudgetCost)
         }
     }
-
     private fun showConfirmationDialog(amount: Double) {
         val alertDialog = AlertDialog.Builder(requireContext()).apply {
             // Custom title with green color
@@ -604,7 +935,6 @@ class SettingsFragment : Fragment() {
             show()
         }
     }
-
     private fun showError(message: String) {
         if (!isAdded || _binding == null) return
 
@@ -613,7 +943,6 @@ class SettingsFragment : Fragment() {
             binding?.btnDisburseBudget?.visibility = View.VISIBLE
         }
     }
-
     sealed class Result {
         data class Success(
             val currentBudgetCost: Double,
@@ -623,10 +952,11 @@ class SettingsFragment : Fragment() {
 
         data class Failure(val message: String) : Result()
     }
-
     /*budget disbursal ends here*/
 
 
+
+    
     /*fetching totals for this week begin here*/
     suspend fun fetchWeeklyTotals(path: String): Map<String, Int> = withContext(Dispatchers.IO) {
         val db = FirebaseFirestore.getInstance()
@@ -809,7 +1139,7 @@ class SettingsFragment : Fragment() {
         val enteredOldPw = binding?.oldPwInput?.text.toString().trim()
 
         val enteredUsername = binding?.inputNewUsername?.text.toString()
-        val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        val alertDialog = AlertDialog.Builder(requireContext())
 
         // Custom title with red color
         val title = SpannableString("Change Password")
@@ -862,10 +1192,14 @@ class SettingsFragment : Fragment() {
             dialog.dismiss() // Dismiss dialog if user cancels
         }
 
-        val dialog = alertDialog.create()
-        dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+        alertDialog.create().apply {
+            window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+            show()
 
-        dialog.show()
+            // Change button text colors after showing
+            getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+            getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+        }
     }
 
     private fun changeUsername() {
@@ -960,10 +1294,14 @@ class SettingsFragment : Fragment() {
             dialog.dismiss() // Dismiss dialog if user cancels
         }
 
-        val dialog = alertDialog.create()
-        dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+        alertDialog.create().apply {
+            window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+            show()
 
-        dialog.show()
+            // Change button text colors after showing
+            getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+            getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+        }
 
     }
 
@@ -983,6 +1321,7 @@ class SettingsFragment : Fragment() {
                         var phone = document.getString("phoneNumber") ?: ""
                         val gender = document.getString("gender") ?: ""
                         var rank = document.getString("userRank") ?: ""
+                        var pfpUrl = document.getString("pfp_url") ?: ""
 
                         if (phone.length == 9) {
                             phone = "+254$phone"
@@ -1011,13 +1350,26 @@ class SettingsFragment : Fragment() {
                         }
 
                         // Use safe call and check for null before updating views
-                        if (gender == "Male") {
-                            binding?.malePImage?.visibility = View.VISIBLE
-                            binding?.femalePImage?.visibility = View.GONE
-                        } else if (gender == "Female") {
-                            binding?.femalePImage?.visibility = View.VISIBLE
-                            binding?.malePImage?.visibility = View.GONE
+                        if (pfpUrl.isNotEmpty()) {
+                            binding?.malePImage?.let { imageView ->
+                                imageView.visibility = View.VISIBLE
+                                Glide.with(requireContext())
+                                    .load(pfpUrl)
+                                    .placeholder(R.drawable.male)
+                                    .circleCrop()
+                                    .into(imageView)
+                            }
+                            binding?.btnChoosePhoto?.text = "Change Profile Photo"
+                        } else {
+                            if (gender == "Male") {
+                                binding?.malePImage?.visibility = View.VISIBLE
+                                binding?.femalePImage?.visibility = View.GONE
+                            } else if (gender == "Female") {
+                                binding?.femalePImage?.visibility = View.VISIBLE
+                                binding?.malePImage?.visibility = View.GONE
+                            }
                         }
+
 
                         activity?.runOnUiThread {
                             // Safely updating UI elements with the data
@@ -1030,6 +1382,7 @@ class SettingsFragment : Fragment() {
                         }
                         // these are universal and independent of ranks
                         binding?.actionsLayout?.visibility = View.VISIBLE
+                        binding?.pfpCard?.visibility = View.VISIBLE
                         binding?.btnChangeUsername?.visibility = View.VISIBLE
                         binding?.btnChangePassword?.visibility = View.VISIBLE
                         binding?.mainProgressBar?.visibility = View.GONE
@@ -1156,7 +1509,7 @@ class SettingsFragment : Fragment() {
         }
     }
 
-//company status is also here
+    //company status is also here
     private fun getCompanyIncome() {
         val ref = FirebaseFirestore.getInstance().collection("general").document("general_variables")
         ref.get()

@@ -5,13 +5,13 @@
     <string name="nav_header_title">BILLK MOTOLINK LTD</string>
     <string name="nav_header_subtitle">billkmotolinkltd@gmail.com</string>
     <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">Under Maintenance</string>
     <string name="menu_home">Home</string>
     <string name="menu_reports">Reports</string>
     <string name="menu_clockouts">Clock Out</string>
     <string name="menu_user">User Management</string>
     <string name="menu_bike">Batteries</string>
-    <string name="menu_approvals">Income Approval</string>
+    <string name="menu_approvals">Income, Budgets &amp; Trails</string>
     <string name="menu_hr">Human Resource</string>
     <string name="menu_incidents">Incidences &amp; Accidents</string>
     <string name="menu_dailyreports">Daily Reports</string>
@@ -120,10 +120,10 @@
     <string name="old_password">Old Password</string>
     <string name="company_income">Company Income:</string>
     <string name="variables_directly">Variables directly affecting company income</string>
-    <string name="income_approved_from_riders">1. Income approved from riders.</string>
-    <string name="human_resource_budgets">2. Disbursed human resource budgets.</string>
-    <string name="ploughed_back">3. Ploughed back income to evade bankruptcy or substantiate capital.</string>
-    <string name="direct_withdrawals">4. Direct withdrawals from an authorised user.</string>
+    <string name="income_approved_from_riders">1. Income approved from riders <font color="#FFA500"><b>+</b></font>.</string>
+    <string name="human_resource_budgets">2. Disbursed human resource budgets <font color="#FFA500"><b>-</b></font>.</string>
+    <string name="ploughed_back">3. Ploughed back income to evade bankruptcy or substantiate capital <font color="#FFA500"><b>+</b></font>.</string>
+    <string name="direct_withdrawals">4. Direct withdrawals from an authorised user account <font color="#FFA500"><b>-</b></font>.</string>
     <string name="record_withdraw_from_company_to_personal">Withdraw Funds from Company to Personal Account</string>
     <string name="add_to_company_account">Transfer Funds from Personal to Company Account</string>
     <string name="amount">Amount</string>
@@ -134,8 +134,8 @@
     <string name="human_resource">Human Resource</string>
     <string name="there_is_no_outstanding_hr_budget">There is no outstanding HR budget</string>
     <string name="current_hr_budget">Current HR Budget</string>
-    <string name="approve_budget">Approve Budget</string>
-    <string name="decline_budget">Decline Budget</string>
+    <string name="approve_budget">Approve</string>
+    <string name="decline_budget">Decline</string>
     <string name="loading_weather">Checking your environment…</string>
     <string name="custom_string">%1$s</string>
     <string name="percentage">Percentage</string>
@@ -241,7 +241,7 @@
     <string name="post_a_memo">Post a Memo</string>
     <string name="memo">Memo</string>
     <string name="todo">TODO</string>
-    <string name="this_is_a_free_space">This is a free space. Write a complain to your management anonymously. The management <b><i>WILL NOT</i></b> know who wrote the message.</string>
+    <string name="this_is_a_free_space">Write a complain to your management anonymously. The management will <b>never</b> know who wrote the message.</string>
     <string name="complain">Complain</string>
     <string name="select_time">Select Time</string>
     <string name="title">Title</string>
@@ -287,6 +287,34 @@
     <string name="launch_activity">Launch Activity</string>
     <string name="total_rider_expenses">Total Rider Expenses:</string>
     <string name="this_week">This week, so far:</string>
+    <string name="outdated">Outdated</string>
+    <string name="upload">Upload</string>
+    <string name="send">Send</string>
+    <string name="emojis">Emojis</string>
+    <string name="post_complain">Post complain</string>
+    <string name="complaints">Rider Complaints</string>
+    <string name="no_complaints_available">No complaints available</string>
+    <string name="bin">bin</string>
+    <string name="delete_battery">Delete Battery</string>
+    <string name="delete_destination">Delete Destination</string>
+    <string name="write_complain">Write complain</string>
+    <string name="create_a_poll">Create a Poll</string>
+    <string name="after_the_date_selected"><font color="#FF0000">* </font>After the selected date, the poll will no longer accept any more votes.</string>
+    <string name="get_opinions">Get opinions from your team.</string>
+    <string name="a_little_bit_of_detail">A little bit of detail</string>
+    <string name="what_are_the_options_in_this_poll">What are the options in this poll?</string>
+    <string name="post_poll">Post Poll</string>
+    <string name="who_can_vote_on_this_poll">Who can vote on this poll?</string>
+    <string name="in_polls_a_voter_can_only_vote_once">In polls, a voter can only vote once and the vote is anonymous; you won\'t know which voter voted for what opinion. You will, however, know the names of the voters who voted on the poll.</string>
+    <string name="polls">Polls</string>
+    <string name="no_polls_available">No polls available</string>
+    <string name="it_looks_like_you_already_voted_here">This poll has your vote.</string>
+    <string name="cardholder_s_name">CARDHOLDER\'S NAME</string>
+    <string name="attention">Attention</string>
+    <string name="a_poll_awaits_your_vote">A poll awaits your vote.</string>
+    <string name="approve_all_pending_income">Approve All Pending Income</string>
+    <string name="flush_requirement_dates">Flush Requirement Dates</string>
+    <string name="format_all_rider_pending_income">Approve all Rider Pending Income</string>
     <plurals name="participant_count">
         <item quantity="one">%d participant</item>
         <item quantity="other">%d participants</item>

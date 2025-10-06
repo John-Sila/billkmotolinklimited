@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    app:cardBackgroundColor="?attr/cardBackgroundColor"
     app:cardCornerRadius="8dp"
     app:cardElevation="4dp">
 
@@ -155,6 +156,41 @@
 
         </LinearLayout>
 
+        <!--location-->
+        <LinearLayout
+            android:id="@+id/locationLine"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
+            android:gravity="start">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Location:"
+                android:layout_marginEnd="10dp"
+                android:textColor="@android:color/holo_orange_dark"
+                android:textStyle="bold"
+                android:textSize="16sp"/>
+            <ImageView
+                android:id="@+id/locationImage"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/google_maps" />
+            <TextView
+                android:id="@+id/locationLastUpdate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:layout_marginStart="10dp"
+                android:textStyle="bold"
+                android:textSize="14sp"/>
+
+        </LinearLayout>
+
 
 
         <EditText
@@ -198,7 +234,7 @@
             android:id="@+id/btnApproveAllIncome"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Approve All Pending Income"
+            android:text="@string/approve_all_pending_income"
             android:backgroundTint="@color/brown2"
             android:padding="12dp"
             android:layout_marginTop="12dp"/>
@@ -310,7 +346,22 @@
             android:layout_marginTop="12dp"/>
 
 
-
+        <ProgressBar
+            android:id="@+id/flushRequirementsProgressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginTop="12dp"
+            android:layout_gravity="center"/>
+        <Button
+            android:id="@+id/btnFlushRequirements"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/flush_requirement_dates"
+            android:backgroundTint="@android:color/holo_red_dark"
+            android:padding="12dp"
+            android:visibility="gone"
+            android:layout_marginTop="12dp"/>
 
     </LinearLayout>
 

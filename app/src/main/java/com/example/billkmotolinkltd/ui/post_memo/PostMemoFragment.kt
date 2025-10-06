@@ -1,6 +1,7 @@
 package com.example.billkmotolinkltd.ui.post_memo
 
 import android.app.TimePickerDialog
+import android.content.DialogInterface
 import android.content.res.Resources
 import android.graphics.Color
 import android.os.Bundle
@@ -45,7 +46,6 @@ import android.widget.TextView
 class PostMemoFragment: Fragment() {
     private var _binding: FragmentPostMemoBinding? = null
     private val binding get() = _binding!!
-
     private var secondaryVenue: String = ""
 
     override fun onCreateView(
@@ -64,33 +64,22 @@ class PostMemoFragment: Fragment() {
             val calendar = Calendar.getInstance()
             val hour = calendar.get(Calendar.HOUR_OF_DAY)
             val minute = calendar.get(Calendar.MINUTE)
-
             val timePickerDialog = TimePickerDialog(requireContext(), { _, selectedHour, selectedMinute ->
                 val formattedTime = String.format("%02d:%02d", selectedHour, selectedMinute)
                 binding.timeText.text = formattedTime
             }, hour, minute, false)
 
             timePickerDialog.show()
+            timePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(
+                ContextCompat.getColor(requireContext(), R.color.l4)
+            )
+            timePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(
+                ContextCompat.getColor(requireContext(), R.color.l3)
+            )
+
         }
 
         val editText = binding.memoDescription
-
-        editText.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                editText.post {
-                    val maxHeight = 500  // e.g., in pixels
-                    if (editText.height > maxHeight) {
-                        editText.layoutParams.height = maxHeight
-                        editText.isVerticalScrollBarEnabled = true
-                        editText.setScroller(Scroller(context))
-                    }
-                }
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
-        })
 
         binding.boldButton.setOnClickListener {
             val start = binding.memoDescription.selectionStart
@@ -184,8 +173,9 @@ class PostMemoFragment: Fragment() {
             val calendar = Calendar.getInstance()
             val heading = binding.memoHeading.text.toString().trim()
             val time = binding.timeText.text.toString().trim()
-            val htmlDescription = Html.toHtml(binding.memoDescription.text, Html.TO_HTML_PARAGRAPH_LINES_INDIVIDUAL)
-            if (heading.isEmpty() || htmlDescription.isEmpty() || time == "Select Time") {
+            val unHTMLDescr = binding.memoDescription.text.toString().trim()
+            val htmlDescription = Html.toHtml(binding.memoDescription.text, Html.TO_HTML_PARAGRAPH_LINES_INDIVIDUAL).trim()
+            if (heading.isEmpty() || unHTMLDescr.isEmpty() || time == "Select Time") {
                 Toast.makeText(requireContext(), "Please fill all fields before posting.", Toast.LENGTH_LONG).show()
                 binding.btnPostMemo.visibility = View.VISIBLE
                 binding.memoProgressBar.visibility = View.GONE
@@ -249,7 +239,7 @@ class PostMemoFragment: Fragment() {
                             Utility.notifyAdmins("A new memo was posted.", "Memos", roles)
                         }
 
-                        Toast.makeText(requireContext(), "Memo posted!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Memos will auto-delete 3 days after expiry!", Toast.LENGTH_SHORT).show()
                         binding.memoHeading.setText("")
                         binding.memoDescription.setText("")
                         binding.timeText.text = "Select Time"
@@ -271,10 +261,14 @@ class PostMemoFragment: Fragment() {
                 binding.memoProgressBar.visibility = View.GONE
             }
 
-            val dialog = alertDialog.create()
-            dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+            alertDialog.create().apply {
+                window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                show()
 
-            dialog.show()
+                // Change button text colors after showing
+                getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+            }
 
         }
 
@@ -423,5 +417,10 @@ class PostMemoFragment: Fragment() {
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, modes)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = adapter
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

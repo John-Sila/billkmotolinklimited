@@ -3,17 +3,18 @@
     android:shape="rectangle">
 
     <!-- Background color -->
-    <solid android:color="@android:color/black"/>
-
-    <!-- Border color & width -->
-    <stroke android:width="2dp" android:color="@color/teal_200"/>
+    <solid android:color="@android:color/black" />
 
     <!-- Rounded corners -->
-    <corners android:radius="16dp"/>
+    <corners android:radius="16dp" />
 
-    <!-- Padding inside -->
-    <padding android:left="8dp"
-        android:top="8dp"
-        android:right="8dp"
-        android:bottom="8dp"/>
+    <!-- Optional padding inside -->
+    <padding
+        android:left="12dp"
+        android:top="12dp"
+        android:right="12dp"
+        android:bottom="12dp" />
+
+    <!-- Optional border -->
+    <!-- <stroke android:color="@android:color/white" android:width="2dp"/> -->
 </shape>

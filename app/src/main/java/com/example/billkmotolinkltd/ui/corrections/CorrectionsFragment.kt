@@ -18,6 +18,7 @@ import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import com.example.billkmotolinkltd.R
@@ -95,7 +96,7 @@ class CorrectionsFragment: Fragment() {
                 Toast.makeText(requireContext(), "You are grossing an invalid value!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            val alertDialog = AlertDialog.Builder(requireContext())
 
             // Custom title with red color
             val title = SpannableString("Reclock Out")
@@ -119,10 +120,14 @@ class CorrectionsFragment: Fragment() {
                 dialog.dismiss() // Dismiss dialog if user cancels
             }
 
-            val dialog = alertDialog.create()
-            dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+            alertDialog.create().apply {
+                window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                show()
 
-            dialog.show()
+                // Change button text colors after showing
+                getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+            }
         }
 
         binding.dateToCorrect.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -501,7 +506,6 @@ class CorrectionsFragment: Fragment() {
             return
         }
         val selectedDate = selectedItem.toString()
-
         val currentUser = FirebaseAuth.getInstance().currentUser ?: return
         val uid = currentUser.uid
 
@@ -752,7 +756,9 @@ class CorrectionsFragment: Fragment() {
                             .document(uid)
                             .update(updates)
                             .addOnSuccessListener {
-                                Toast.makeText(requireContext(), "Requirement deleted.", Toast.LENGTH_SHORT).show()
+                                context?.let { ctx ->
+                                    Toast.makeText(ctx, "Requirement deleted.", Toast.LENGTH_SHORT).show()
+                                }
                                 if (_binding == null || !isAdded) return@addOnSuccessListener
                                 binding.dateToCorrect.adapter = null
                                 viewLifecycleOwner.lifecycleScope.launch {
@@ -773,6 +779,4 @@ class CorrectionsFragment: Fragment() {
                 Toast.makeText(requireContext(), "Failed to fetch user data.", Toast.LENGTH_SHORT).show()
             }
     }
-
-
 }

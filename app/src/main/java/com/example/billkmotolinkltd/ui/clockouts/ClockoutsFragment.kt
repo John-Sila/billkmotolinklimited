@@ -19,6 +19,7 @@ import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.biometric.BiometricManager
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -180,7 +181,7 @@ class ClockoutsFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            val alertDialog = AlertDialog.Builder(requireContext())
 
             // Custom title with red color
             val title = SpannableString("Clock Out")
@@ -203,10 +204,14 @@ class ClockoutsFragment : Fragment() {
                 dialog.dismiss() // Dismiss dialog if user cancels
             }
 
-            val dialog = alertDialog.create()
-            dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+            val dialog = alertDialog.create().apply {
+                window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                show()
 
-            dialog.show()
+                // Change button text colors after showing
+                getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+            }
         }
     }
 
@@ -625,7 +630,7 @@ class ClockoutsFragment : Fragment() {
 
                     try {
                         // Prepare clockout data
-                        val dateKey = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date())
+                        val dateKey = SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH).format(Date())
                         val clockoutData = createClockoutData(grossIncome, todaysBalance, previousBalance, expenses, mileage)
 
                         // Perform Firestore operations
@@ -747,7 +752,8 @@ class ClockoutsFragment : Fragment() {
                 "isClockedIn" to false,
                 "netClockedLastly" to getNetIncome(),
                 "pendingAmount" to (pendingAmount + getNetIncome()),
-                "lastClockDate" to Timestamp.now()
+                "lastClockDate" to Timestamp.now(),
+                "currentBike" to "None",
             )
         } else {
             mapOf(
@@ -756,7 +762,8 @@ class ClockoutsFragment : Fragment() {
                 "isClockedIn" to false,
                 "netClockedLastly" to getNetIncome(),
                 "pendingAmount" to (pendingAmount + getNetIncome()),
-                "lastClockDate" to Timestamp.now()
+                "lastClockDate" to Timestamp.now(),
+                "currentBike" to "None",
             )
         }
     }
@@ -799,7 +806,7 @@ class ClockoutsFragment : Fragment() {
                 add(Calendar.DAY_OF_WEEK, 6)
             }.time
 
-            val dateFormat = SimpleDateFormat("dd-MMM-yyyy", Locale.getDefault())
+            val dateFormat = SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH)
             val week = calendar.get(Calendar.WEEK_OF_YEAR)
             val path = "Week $week (${dateFormat.format(startOfWeek).replace("-", " ")} to ${
                 dateFormat.format(endOfWeek).replace("-", " ")
@@ -855,8 +862,6 @@ class ClockoutsFragment : Fragment() {
     /*Clocking out ends here*/
 
 
-
-
     /*Dropping bikes, batteries and userBike starts here*/
 
     private suspend fun dropBikesAndBatteries(location: String?, userName: String) = withContext(Dispatchers.IO) {
@@ -892,23 +897,6 @@ class ClockoutsFragment : Fragment() {
             // Execute updates in parallel
             /*User State*/
             coroutineScope {
-                val updateUserJob = launch {
-                    try {
-                        // Update both currentBike and isClockedIn in a single operation
-                        db.collection("users").document(userDoc.id)
-                            .update(
-                                mapOf(
-                                    "currentBike" to "None",
-                                    "isClockedIn" to false
-                                )
-                            )
-                            .await()
-                    } catch (e: Exception) {
-                        Log.e("UserUpdate", "Failed to update user status", e)
-                        // Consider adding error handling/retry logic here
-                    }
-                }
-
                 /*Batteries*/
                 val updateBatteriesJob = launch {
                     db.runTransaction { transaction ->
@@ -961,7 +949,7 @@ class ClockoutsFragment : Fragment() {
                 }
 
                 // Wait for all updates to complete
-                joinAll(updateUserJob, updateBatteriesJob, updateBikesJob)
+                joinAll( updateBatteriesJob, updateBikesJob)
 
             }
         } catch (e: Exception) {

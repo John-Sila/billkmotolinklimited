@@ -23,6 +23,7 @@
                 android:layout_margin="8dp"
                 android:orientation="vertical"
                 android:layout_marginBottom="20dp"
+                app:cardBackgroundColor="?attr/cardBackgroundColor"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="6dp">
 
@@ -192,7 +193,7 @@
                     android:layout_width="25dp"
                     android:layout_height="25dp"
                     android:contentDescription="@string/money_image"
-                    android:src="@drawable/address"
+                    android:src="@drawable/portrait"
                     android:scaleType="centerCrop"
                     android:layout_marginEnd="8dp" />
                 <EditText
@@ -221,7 +222,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/change_username"
-                android:backgroundTint="@color/brown1"
+                android:backgroundTint="@color/d3"
                 android:padding="12dp"
                 android:visibility="gone"
                 android:layout_marginTop="12dp"/>
@@ -267,7 +268,7 @@
 
                 </LinearLayout>
 
-                <!--                new pw-->
+                <!--new pw-->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -323,7 +324,83 @@
                 android:layout_height="100dp"
                 android:layout_gravity="center"/>
 
+            <!--card for pfp-->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/pfpCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="?attr/cardBackgroundColor"
+                android:orientation="vertical"
+                android:layout_marginBottom="20dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="6dp">
 
+                <!--profile picture-->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:padding="16dp">
+
+                    <!--the progress bar-->
+                    <ProgressBar
+                        android:id="@+id/pfpProgressBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        android:layout_marginTop="15dp"
+                        android:layout_gravity="center"/>
+
+                    <!-- Choose Photo Button -->
+                    <Button
+                        android:id="@+id/btnChoosePhoto"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="@android:color/holo_purple"
+                        android:text="Upload Profile Picture" />
+
+                    <!-- Image Preview -->
+                    <ImageView
+                        android:id="@+id/imagePreview"
+                        android:layout_width="300dp"
+                        android:layout_height="300dp"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone"
+                        android:layout_marginTop="16dp" />
+
+                    <!-- Upload and Cancel Buttons -->
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/actionButtons"
+                        android:visibility="gone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp">
+
+                        <Button
+                            android:id="@+id/btnCancel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/cancel"
+                            android:backgroundTint="@android:color/holo_red_dark"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"/>
+
+                        <Button
+                            android:id="@+id/btnUpload"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/upload"
+                            android:backgroundTint="@android:color/holo_green_dark"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"/>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
             <!-- ceo stuff-->
             <LinearLayout
@@ -385,6 +462,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="8dp"
+                        app:cardBackgroundColor="?attr/cardBackgroundColor"
                         android:orientation="vertical"
                         app:cardCornerRadius="12dp"
                         app:cardElevation="6dp">

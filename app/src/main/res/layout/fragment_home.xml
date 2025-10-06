@@ -6,11 +6,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.home.HomeFragment">
-
     <ScrollView
+        android:id="@+id/homeMainScrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <!--main parent-->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -20,6 +21,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
+            <!--parent progress bar-->
             <ProgressBar
                 android:id="@+id/homeProgressBar"
                 android:layout_width="wrap_content"
@@ -28,15 +30,185 @@
                 android:layout_marginTop="15dp"
                 android:layout_gravity="center"/>
 
-            <!--hellos-->
-            <TextView
-                android:id="@+id/helloText"
+            <!--we have a poll that needs our voting-->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/awaitingPoll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/c_w"
-                android:textSize="18sp"
-                android:padding="10dp"
-                android:gravity="start"/>
+                android:layout_margin="8dp"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginBottom="20dp"
+                app:cardCornerRadius="12dp"
+                app:cardBackgroundColor="?attr/cardBackgroundColor"
+                app:cardElevation="6dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="8dp">
+
+                    <View
+                        android:id="@+id/leftBar"
+                        android:layout_width="6dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/green"
+                        android:layout_marginEnd="8dp"
+                        android:layout_gravity="center_vertical"
+                        android:clipToOutline="true" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="18sp"
+                            android:text="@string/attention"
+                            android:textColor="@android:color/holo_orange_dark"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="14sp"
+                            android:text="@string/a_poll_awaits_your_vote"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!--maps-->
+<!--            <org.maplibre.android.maps.MapView-->
+<!--                android:id="@+id/mapView"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="700dp" />-->
+
+
+            <!--billk card-->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/billkCard"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/card_gradient">
+
+                    <View
+                        android:id="@+id/magnetBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="18dp"
+                        android:background="@color/dark1"
+                        android:layout_marginTop="16dp"
+                        android:layout_gravity="center_vertical"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="20dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:gravity="start"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/cardTitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/app_name"
+                                android:textColor="@color/dark1"
+                                android:fontFamily="monospace"
+                                android:textSize="18sp"
+                                android:textStyle="bold"/>
+                            <TextView
+                                android:id="@+id/cardID"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:layout_marginTop="20dp"
+                                android:textColor="@color/gray"
+                                android:fontFamily="monospace"
+                                android:textSize="20sp"
+                                android:letterSpacing="1"
+                                android:textStyle="bold"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/cardholder_s_name"
+                                android:textColor="@color/dark1"
+                                android:fontFamily="serif"
+                                android:layout_marginTop="20dp"
+                                android:textSize="12sp"/>
+
+                            <TextView
+                                android:id="@+id/cardNameAndRank"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textColor="@color/dark1"
+                                android:fontFamily="monospace"
+                                android:layout_marginTop="10dp"
+                                android:textStyle="bold"
+                                android:textSize="18sp"/>
+                            <TextView
+                                android:id="@+id/cardEmail"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textColor="@color/gray"
+                                android:fontFamily="monospace"
+                                android:layout_marginTop="20dp"
+                                android:textSize="18sp"/>
+
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="end"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:contentDescription="@string/money_image"
+                                android:src="@drawable/chip"
+                                android:layout_marginEnd="8dp" />
+
+                            <TextView
+                                android:id="@+id/cardExpiry"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textColor="@color/dark1"
+                                android:fontFamily="monospace"
+                                android:layout_marginTop="20dp"
+                                android:textSize="11sp"/>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+
+            <!--where we say hello-->
             <TextView
                 android:id="@+id/userNameTextView"
                 android:layout_width="match_parent"
@@ -84,17 +256,19 @@
                 android:visibility="gone"
                 android:layout_marginBottom="20dp"
                 app:cardCornerRadius="12dp"
+                app:cardBackgroundColor="?attr/cardBackgroundColor"
                 app:cardElevation="6dp">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!--notice board-->
+                    <!--notice board text-->
                     <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="8dp"
+                        app:cardBackgroundColor="?attr/cardBackgroundColor"
                         app:cardCornerRadius="12dp"
                         android:gravity="center"
                         app:cardElevation="6dp">
@@ -126,6 +300,7 @@
                         android:layout_height="wrap_content"
                         android:layout_margin="8dp"
                         app:cardCornerRadius="12dp"
+                        app:cardBackgroundColor="?attr/cardBackgroundColor"
                         app:cardElevation="6dp">
 
                         <TextView
@@ -331,6 +506,7 @@
 
                 <!--amount pending approval-->
                 <LinearLayout
+                    android:id="@+id/pendingAmountLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
@@ -369,6 +545,7 @@
 
                 <!--expected target-->
                 <LinearLayout
+                    android:id="@+id/expectedTargetLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
@@ -408,6 +585,7 @@
 
                 <!-- online hrs -->
                 <LinearLayout
+                    android:id="@+id/onlineHrsLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
@@ -484,7 +662,6 @@
 
                 </LinearLayout>
 
-
                 <!-- bike -->
                 <LinearLayout
                     android:id="@+id/bikeLayout"
@@ -556,11 +733,13 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
                     android:orientation="vertical"
+                    app:cardBackgroundColor="?attr/cardBackgroundColor"
                     android:layout_marginBottom="20dp"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="6dp">
 
                     <LinearLayout
+                        android:id="@+id/clockoutsDiv"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
@@ -649,65 +828,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="300dp"
                     android:layout_margin="16dp" />
-            </LinearLayout>
 
-            <!--CEOS-->
-            <LinearLayout
-                android:id="@+id/chiefExecutive"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                android:orientation="vertical">
-
-                <!--overview text -->
-                <LinearLayout
-                    android:id="@+id/actionsLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="30dp"
-                    android:paddingStart="30dp"
-                    android:gravity="center">
-
-                    <ImageView
-                        android:layout_width="120dp"
-                        android:layout_height="120dp"
-                        android:contentDescription="@string/money_image"
-                        android:src="@drawable/business_meeting"
-                        android:scaleType="centerCrop"
-                        android:layout_marginEnd="8dp" />
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/overview"
-                        android:textSize="22sp"
-                        android:textColor="@android:color/holo_blue_bright"
-                        android:padding="16dp"
-                        android:textStyle="bold"
-                        android:gravity="start"/>
-                </LinearLayout>
-
+                <!-- dummy -->
                 <TextView
-                    android:id="@+id/noUsers"
+                    android:id="@+id/dummy"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/you_do_not_have_any_riders_yet"
-                    android:textSize="18sp"
-                    android:textColor="@android:color/holo_red_dark"
-                    android:padding="16dp"
-                    android:visibility="gone"
+                    android:text=""
                     android:textStyle="bold"
-                    android:gravity="center"/>
-
-
-                <!-- RecyclerView to show the user list -->
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerView"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="5dp"/>
-
+                    android:gravity="start"/>
             </LinearLayout>
 
             <!--HRs-->
@@ -723,14 +852,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="30dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
                     android:paddingStart="30dp"
                     android:gravity="center">
 
                     <ImageView
-                        android:layout_width="120dp"
-                        android:layout_height="120dp"
+                        android:layout_width="30dp"
+                        android:layout_height="40dp"
                         android:contentDescription="@string/money_image"
                         android:src="@drawable/business_meeting"
                         android:scaleType="centerCrop"
@@ -753,7 +882,7 @@
                     android:text="You haven't posted any budgets lately."
                     android:textSize="18sp"
                     android:textColor="@android:color/holo_red_dark"
-                    android:padding="16dp"
+                    android:padding="4dp"
                     android:visibility="gone"
                     android:textStyle="bold"
                     android:gravity="center"/>
@@ -848,6 +977,64 @@
                         android:layout_marginTop="5dp"/>
                 </LinearLayout>
 
+            </LinearLayout>
+
+            <!--CEOS--> <!--list of riders-->
+            <LinearLayout
+                android:id="@+id/chiefExecutive"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:id="@+id/actionsLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="30dp"
+                    android:paddingStart="30dp"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="120dp"
+                        android:layout_height="120dp"
+                        android:contentDescription="@string/money_image"
+                        android:src="@drawable/business_meeting"
+                        android:scaleType="centerCrop"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/overview"
+                        android:textSize="22sp"
+                        android:textColor="@android:color/holo_blue_bright"
+                        android:padding="16dp"
+                        android:textStyle="bold"
+                        android:gravity="start"/>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/noUsers"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/you_do_not_have_any_riders_yet"
+                    android:textSize="18sp"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:padding="16dp"
+                    android:visibility="gone"
+                    android:textStyle="bold"
+                    android:gravity="center"/>
+
+                <!-- RecyclerView with weight -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/homeAllUsersRecycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:layout_marginTop="5dp"/>
             </LinearLayout>
 
 

@@ -1,41 +1,67 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
+    android:clipToPadding="false"
+    android:clipChildren="false"
     android:layout_height="wrap_content"
-    android:gravity="end"
-    android:orientation="vertical"
     android:padding="8dp">
 
-
-    <LinearLayout
+    <androidx.cardview.widget.CardView
         android:id="@+id/messageBubble"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_bubble_right"
-        android:orientation="vertical"
-        android:padding="10dp">
-        <TextView
-            android:id="@+id/senderName"
+        android:layout_marginBottom="20dp"
+        app:cardCornerRadius="12dp"
+        android:layout_margin="0dp"
+        app:cardUseCompatPadding="true"
+        app:cardElevation="6dp"
+        app:cardBackgroundColor="?attr/cardBackgroundColor"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="You"
-            android:textSize="12sp" />
+            android:orientation="horizontal"
+            android:padding="10dp">
 
-        <TextView
-            android:id="@+id/messageText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Message"
-            android:textColor="@color/brown5"
-            android:textSize="16sp" />
+            <View
+                android:layout_width="6dp"
+                android:layout_height="match_parent"
+                android:background="@android:color/holo_orange_dark"/>
 
-            <TextView
-                android:id="@+id/messageTime"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingTop="4dp"
-                android:layout_gravity="end"
-                android:text=""
-                android:textSize="10sp" />
-    </LinearLayout>
-</LinearLayout>
+                android:orientation="vertical"
+                android:padding="10dp">
+
+                <TextView
+                    android:id="@+id/senderName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Me"
+                    android:textSize="12sp"
+                    android:textColor="@android:color/holo_orange_dark"/>
+
+                <TextView
+                    android:id="@+id/messageText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textSize="16sp"/>
+
+                <TextView
+                    android:id="@+id/messageTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:text=""
+                    android:textSize="10sp"
+                    android:textColor="@android:color/holo_orange_dark"/>
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

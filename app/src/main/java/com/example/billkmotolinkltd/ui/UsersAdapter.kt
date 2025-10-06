@@ -1,7 +1,9 @@
 package com.example.billkmotolinkltd.ui
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
@@ -11,10 +13,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -30,6 +34,15 @@ import androidx.fragment.app.FragmentActivity
 import com.example.billkmotolinkltd.MainActivity
 import com.example.billkmotolinkltd.ui.approvals.ApprovalsFragment
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
+import java.util.Date
+import androidx.core.net.toUri
+import com.google.firebase.firestore.FieldValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 // this is for approvals ONLY
 class UsersAdapter(private val fragment: ApprovalsFragment) : ListAdapter<User, UsersAdapter.UserViewHolder>(UserDiffCallback()) {
@@ -53,6 +66,8 @@ class UsersAdapter(private val fragment: ApprovalsFragment) : ListAdapter<User, 
         private val textViewDailyTarget: TextView = itemView.findViewById(R.id.textViewDailyTarget)
         private val textViewCurrentInAppBal: TextView = itemView.findViewById(R.id.textViewCurrentInAppBal)
         private val textViewSundayTarget: TextView = itemView.findViewById(R.id.textViewSundayTarget)
+        private val locationLastUpdate: TextView = itemView.findViewById(R.id.locationLastUpdate)
+
 
         private val btnApprovePartial: Button = itemView.findViewById(R.id.btnApprovePartial)
         private val btnApproveAllIncome: Button = itemView.findViewById(R.id.btnApproveAllIncome)
@@ -60,11 +75,14 @@ class UsersAdapter(private val fragment: ApprovalsFragment) : ListAdapter<User, 
         private val btnChangeSundayTarget: Button = itemView.findViewById(R.id.btnChangeSundayTarget)
         private val btnChangeInAppBalance: Button = itemView.findViewById(R.id.btnChangeInAppBalance)
         private val btnChangeSundayWorkingStatus: Button = itemView.findViewById(R.id.btnChangeSundayWorkingStatus)
+        private val btnFlushRequirements: Button = itemView.findViewById(R.id.btnFlushRequirements)
 
         private val inputPartialApproval: EditText = itemView.findViewById(R.id.inputPartialApproval)
         private val inputDailyTarget: EditText = itemView.findViewById(R.id.inputDailyTarget)
         private val inputSundayTarget: EditText = itemView.findViewById(R.id.inputSundayTarget)
         private val inputInAppBal: EditText = itemView.findViewById(R.id.inputInAppBal)
+
+
 
         private val pApprovalProgressBar: ProgressBar = itemView.findViewById(R.id.pApprovalProgressBar)
         private val approvalProgressBar: ProgressBar = itemView.findViewById(R.id.approvalProgressBar)
@@ -72,11 +90,16 @@ class UsersAdapter(private val fragment: ApprovalsFragment) : ListAdapter<User, 
         private val sTargetProgressBar: ProgressBar = itemView.findViewById(R.id.sTargetProgressBar)
         private val iABalProgressBar: ProgressBar = itemView.findViewById(R.id.iABalProgressBar)
         private val sWStatusProgressBar: ProgressBar = itemView.findViewById(R.id.sWStatusProgressBar)
+        private val flushRequirementsProgressBar: ProgressBar = itemView.findViewById(R.id.flushRequirementsProgressBar)
 
         private val pALine: LinearLayout = itemView.findViewById(R.id.pALine)
         private val dTLine: LinearLayout = itemView.findViewById(R.id.dTLine)
         private val cIALine: LinearLayout = itemView.findViewById(R.id.cIALine)
         private val sTLine: LinearLayout = itemView.findViewById(R.id.sTLine)
+        private val locationLine: LinearLayout = itemView.findViewById(R.id.locationLine)
+
+        private val locationImage: ImageView = itemView.findViewById(R.id.locationImage)
+
 
         fun bind(user: User) {
              val calendar = Calendar.getInstance()
@@ -89,12 +112,21 @@ class UsersAdapter(private val fragment: ApprovalsFragment) : ListAdapter<User, 
                  else -> "this sunday"
              }
 
-             var sundayText = ""
-             sundayText = if (user.isWorkingOnSunday) {
-                 "User is set to work $dayDescription"
+             var sundayText = if (user.isWorkingOnSunday) {
+                 if (user.requirements.isNotEmpty()) "${user.userName.substringBefore(" ")} has ${user.requirements.size} requirement${if (user.requirements.size > 1) "s" else ""} to fill in and is set to work $dayDescription"
+                 else {
+                     "${user.userName.substringBefore(" ")} is set to work $dayDescription"
+                 }
              } else {
-                 "User will not be working $dayDescription"
+                 if (user.requirements.isNotEmpty()) "${user.userName.substringBefore(" ")} has ${user.requirements.size} requirement${if (user.requirements.size > 1) "s" else ""} to fill in and is set to NOT work $dayDescription"
+                 else {
+                     "${user.userName.substringBefore(" ")} will not be working $dayDescription"
+                 }
              }
+
+            if (user.requirements.isNotEmpty())  {
+                btnFlushRequirements.visibility = View.VISIBLE
+            }
 
             // if the user is an HR, don't display much
             if (user.userRank == "HR") {
@@ -112,8 +144,59 @@ class UsersAdapter(private val fragment: ApprovalsFragment) : ListAdapter<User, 
 
                 sundayText = "This user is bound to work indefinitely."
             }
+            val location = user.location
+            if (location != null) {
+                val latitude = location.latitude
+                val longitude = location.longitude
+                val timestamp = location.timestamp
 
-             fun formatIncome(amount: Double): String {
+                val timeDiff = System.currentTimeMillis() - timestamp
+                val hours = timeDiff / (1000 * 60 * 60)
+                val minutes = (timeDiff / (1000 * 60)) % 60
+
+                val timeFormat = SimpleDateFormat("HHmm", Locale.getDefault())
+                val formattedTime = timeFormat.format(Date(timestamp))
+
+                if (hours > 100) {
+                    // Location data is stale — hide map button and show message
+                    locationImage.visibility = View.GONE
+                    locationLastUpdate.text = "This user has denied background location permissions"
+                    locationLastUpdate.setTextColor(Color.RED) // optional emphasis
+                    locationLine.visibility = View.VISIBLE
+                } else {
+                    // Location data is recent — show map button and time info
+                    locationImage.visibility = View.VISIBLE
+
+                    val elapsedText = when {
+                        hours <= 0 && minutes <= 1 -> "Click to open the location as updated just now at $formattedTime hrs"
+                        hours <= 0 -> "Click to open the location as updated $minutes min${if (minutes > 1) "s" else ""} ago at $formattedTime hrs"
+                        else -> "Click to open the location as updated $hours hr${if (hours > 1) "s" else ""} $minutes min${if (minutes > 1) "s" else ""} ago at $formattedTime Hrs"
+                    }
+
+                    locationLastUpdate.text = elapsedText
+                    locationLine.visibility = View.VISIBLE
+
+                    // Google Maps click handler
+                    locationImage.setOnClickListener {
+                        val gmmIntentUri =
+                            "geo:$latitude,$longitude?q=$latitude,$longitude(Location)".toUri()
+                        val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+                        mapIntent.setPackage("com.google.android.apps.maps")
+
+                        try {
+                            it.context.startActivity(mapIntent)
+                        } catch (e: Exception) {
+                            Toast.makeText(it.context, "Google Maps not available", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            } else {
+                // Hide layout if no location data exists
+                locationLine.visibility = View.GONE
+            }
+
+
+            fun formatIncome(amount: Double): String {
                  val symbols = DecimalFormatSymbols(Locale("en", "KE")).apply {
                      currencySymbol = "Ksh. "
                  }
@@ -148,6 +231,80 @@ class UsersAdapter(private val fragment: ApprovalsFragment) : ListAdapter<User, 
             }
             btnChangeSundayWorkingStatus.setOnClickListener {
                 changeSundayStatus(user.email, user.isWorkingOnSunday ,sWStatusProgressBar, itemView.context)
+            }
+            btnFlushRequirements.setOnClickListener {
+                flushRequirements(user.email, flushRequirementsProgressBar, itemView.context)
+            }
+
+        }
+
+        private fun flushRequirements(email: String, progressbar: View, context: Context) {
+            val alertDialog = AlertDialog.Builder(context)
+
+            val title = SpannableString("Requirements").apply {
+                setSpan(ForegroundColorSpan(Color.RED), 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+
+            val message = SpannableString(
+                "This will delete all requirement entries previously associated with this user."
+            ).apply {
+                setSpan(ForegroundColorSpan(Color.GRAY), 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+
+            alertDialog.setTitle(title)
+            alertDialog.setMessage(message)
+            alertDialog.setIcon(R.drawable.warn)
+
+            alertDialog.setPositiveButton("Confirm") { _, _ ->
+                btnFlushRequirements.visibility = View.GONE
+                progressbar.visibility = View.VISIBLE
+
+                // Use coroutine to avoid blocking UI
+                CoroutineScope(Dispatchers.IO).launch {
+                    val db = FirebaseFirestore.getInstance()
+                    val usersRef = db.collection("users")
+
+                    try {
+                        val querySnapshot = usersRef.whereEqualTo("email", email).get().await()
+
+                        if (!querySnapshot.isEmpty) {
+                            val document = querySnapshot.documents.first()
+                            val userRef = document.reference
+
+                            userRef.update("requirements", FieldValue.delete()).await()
+
+                            withContext(Dispatchers.Main) {
+                                progressbar.visibility = View.GONE
+                                Toast.makeText(context, "Requirements flushed successfully.", Toast.LENGTH_SHORT).show()
+                                btnFlushRequirements.visibility = View.GONE
+                                fragment.fetchUsersData()
+                            }
+                        } else {
+                            withContext(Dispatchers.Main) {
+                                progressbar.visibility = View.GONE
+                                Toast.makeText(context, "No user found with that email.", Toast.LENGTH_SHORT).show()
+                                btnFlushRequirements.visibility = View.VISIBLE
+                            }
+                        }
+                    } catch (e: Exception) {
+                        withContext(Dispatchers.Main) {
+                            progressbar.visibility = View.GONE
+                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                            btnFlushRequirements.visibility = View.VISIBLE
+                        }
+                    }
+                }
+            }
+
+            alertDialog.setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+
+            alertDialog.create().apply {
+                window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                show()
+                getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)
+                getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)
             }
         }
 
@@ -263,10 +420,14 @@ class UsersAdapter(private val fragment: ApprovalsFragment) : ListAdapter<User, 
                         inputPartialApproval.text.clear()
                     }
 
-                    val dialog = alertDialog.create()
-                    dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+                    alertDialog.create().apply {
+                        window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                        show()
 
-                    dialog.show()
+                        // Change button text colors after showing
+                        getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                        getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+                    }
 
 
                 }.duration = 100
@@ -360,10 +521,14 @@ class UsersAdapter(private val fragment: ApprovalsFragment) : ListAdapter<User, 
                         inputDailyTarget.text.clear()
                     }
 
-                    val dialog = alertDialog.create()
-                    dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+                    alertDialog.create().apply {
+                        window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                        show()
 
-                    dialog.show()
+                        // Change button text colors after showing
+                        getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                        getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+                    }
 
                 }.duration = 100
             }
@@ -455,10 +620,14 @@ class UsersAdapter(private val fragment: ApprovalsFragment) : ListAdapter<User, 
                         inputSundayTarget.text.clear()
                     }
 
-                    val dialog = alertDialog.create()
-                    dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+                    alertDialog.create().apply {
+                        window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                        show()
 
-                    dialog.show()
+                        // Change button text colors after showing
+                        getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                        getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+                    }
 
                 }.duration = 100
             }
@@ -552,10 +721,14 @@ class UsersAdapter(private val fragment: ApprovalsFragment) : ListAdapter<User, 
                         inputPartialApproval.text.clear()
                     }
 
-                    val dialog = alertDialog.create()
-                    dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+                    alertDialog.create().apply {
+                        window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                        show()
 
-                    dialog.show()
+                        // Change button text colors after showing
+                        getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                        getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+                    }
 
 
 
@@ -583,7 +756,7 @@ class UsersAdapter(private val fragment: ApprovalsFragment) : ListAdapter<User, 
         )
 
         // approve all income
-        fun approveAllIncome(email: String, progressbar: View, context: Context) {
+        private fun approveAllIncome(email: String, progressbar: View, context: Context) {
             val alertDialog = androidx.appcompat.app.AlertDialog.Builder(itemView.context)
 
             // Custom title with red color
@@ -667,12 +840,19 @@ class UsersAdapter(private val fragment: ApprovalsFragment) : ListAdapter<User, 
                 inputPartialApproval.text.clear()
             }
 
-            val dialog = alertDialog.create()
-            dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+            alertDialog.create().apply {
+                window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                show()
 
-            dialog.show()
+                // Change button text colors after showing
+                getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+            }
 
         }
+
+        /*absolute approval*/
+
 
         // their sunday working status
         fun changeSundayStatus(email: String, currentStatus: Boolean, progressbar: View, context: Context) {
@@ -756,10 +936,14 @@ class UsersAdapter(private val fragment: ApprovalsFragment) : ListAdapter<User, 
                 dialog.dismiss()
             }
 
-            val dialog = alertDialog.create()
-            dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+            alertDialog.create().apply {
+                window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                show()
 
-            dialog.show()
+                // Change button text colors after showing
+                getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+            }
         }
     }
 

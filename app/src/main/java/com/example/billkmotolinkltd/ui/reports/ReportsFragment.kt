@@ -17,9 +17,6 @@ import androidx.fragment.app.Fragment
 import com.example.billkmotolinkltd.databinding.FragmentReportsBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.firebase.firestore.FirebaseFirestore
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import android.location.Location
 import android.text.Spannable
 import android.text.SpannableString
@@ -33,7 +30,12 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FieldValue
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import java.util.Calendar
+import androidx.core.view.isVisible
 
 class ReportsFragment : Fragment() {
 
@@ -56,6 +58,15 @@ class ReportsFragment : Fragment() {
 
         // Initialize fusedLocationClient
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
+
+        lifecycleScope.launch {
+            loadBikes()
+            loadSpinners(view)
+        }
+
+    }
+
+    private fun loadSpinners(view: View) {
 
         val spinner: Spinner = binding.reportType
         val layoutOption1 = binding.layoutOption1
@@ -97,7 +108,7 @@ class ReportsFragment : Fragment() {
             }
         }
 
-        loadBikes()
+
 
         val radioGroup1 = view.findViewById<RadioGroup>(R.id.layoutOption1)
         val radioGroup2 = view.findViewById<RadioGroup>(R.id.layoutOption2)
@@ -121,8 +132,6 @@ class ReportsFragment : Fragment() {
             } else
                 binding.inputOtherFormOfDescription.visibility = View.GONE
         }
-
-
         binding.btnSubmit.setOnClickListener {
             validateAndConfirmSubmission()
         }
@@ -149,19 +158,16 @@ class ReportsFragment : Fragment() {
 
             // Custom styled message
             setMessage(createSpannable("Send report?", Color.GRAY))
-
             setIcon(R.drawable.success)
             setPositiveButton("Send") { _, _ -> submitReport() }
             setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
 
-            // Optional neutral button
-            // setNeutralButton("More Info") { _, _ ->
-            //     showToast("Deleting all reports is permanent.")
-            // }
-
             create().apply {
                 window?.setBackgroundDrawableResource(R.drawable.rounded_black)
                 show()
+
+                getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)
             }
         }
     }
@@ -265,7 +271,7 @@ class ReportsFragment : Fragment() {
     private fun getCheckedRadioValue(): String {
         val radioGroups = listOf(binding.layoutOption1, binding.layoutOption2, binding.layoutOption3)
         for (group in radioGroups) {
-            if (group.visibility == View.VISIBLE) {
+            if (group.isVisible) {
                 val checkedId = group.checkedRadioButtonId
                 if (checkedId != -1) {
                     return group.findViewById<RadioButton>(checkedId).text.toString()

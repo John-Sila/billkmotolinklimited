@@ -25,7 +25,7 @@
                 android:id="@+id/timeText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Select Time"
+                android:text="@string/select_time"
                 android:background="@drawable/rounded_light_gray"
                 android:padding="10dp"
                 android:textColor="@color/gray"
@@ -40,6 +40,7 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:cardBackgroundColor="?attr/cardBackgroundColor"
                 android:layout_margin="8dp"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="6dp">
@@ -66,6 +67,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="8dp"
+                        app:cardBackgroundColor="?attr/cardBackgroundColor"
                         app:cardCornerRadius="12dp"
                         app:cardElevation="6dp">
 
@@ -128,10 +130,13 @@
 
             </androidx.cardview.widget.CardView>
 
+
+            <!--venues-->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
+                app:cardBackgroundColor="?attr/cardBackgroundColor"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="6dp">
 
@@ -202,7 +207,8 @@
                                         android:id="@+id/checkboxMeet"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:buttonTint="@color/black"/>
+                                        android:checked="true"
+                                        app:buttonTint="@color/checkbox_tint"/>
 
                                     <ImageView
                                         android:layout_width="24dp"
@@ -233,7 +239,7 @@
                                         android:id="@+id/checkboxTeams"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:buttonTint="@color/black"/>
+                                        app:buttonTint="@color/checkbox_tint"/>
 
                                     <ImageView
                                         android:layout_width="24dp"
@@ -264,7 +270,7 @@
                                         android:id="@+id/checkboxZoom"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:buttonTint="@color/black"/>
+                                        app:buttonTint="@color/checkbox_tint"/>
 
                                     <ImageView
                                         android:layout_width="24dp"
@@ -295,7 +301,7 @@
                                         android:id="@+id/checkboxWhatsApp"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:buttonTint="@color/black"/>
+                                        app:buttonTint="@color/checkbox_tint"/>
 
                                     <ImageView
                                         android:layout_width="24dp"
@@ -331,6 +337,7 @@
                 android:id="@+id/btnPostMemo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:backgroundTint="@color/l4"
                 android:text="@string/post_memo"
                 android:textColor="@color/white"
                 android:padding="12dp"

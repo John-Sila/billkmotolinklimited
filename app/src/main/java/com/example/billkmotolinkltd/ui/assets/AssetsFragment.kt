@@ -11,15 +11,18 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.billkmotolinkltd.R
 import com.example.billkmotolinkltd.databinding.FragmentManageAssetsBinding
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import java.util.Calendar
-import kotlin.text.clear
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import kotlin.toString
 
 class AssetsFragment: Fragment() {
@@ -40,7 +43,10 @@ class AssetsFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        loadBikes()
+        lifecycleScope.launch {
+            loadOperations()
+            // loadBatteries()
+        }
 
         binding.btnAddBike.setOnClickListener{
             val plateNumber = binding.inputPlateNumber.text.toString().trim()
@@ -72,10 +78,14 @@ class AssetsFragment: Fragment() {
                 dialog.dismiss() // Dismiss dialog if user cancels
             }
 
-            val dialog = alertDialog.create()
-            dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+            alertDialog.create().apply {
+                window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                show()
 
-            dialog.show()
+                // Change button text colors after showing
+                getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+            }
         }
 
         binding.btnAddDestination.setOnClickListener{
@@ -108,10 +118,14 @@ class AssetsFragment: Fragment() {
                 dialog.dismiss() // Dismiss dialog if user cancels
             }
 
-            val dialog = alertDialog.create()
-            dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+            alertDialog.create().apply {
+                window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                show()
 
-            dialog.show()
+                // Change button text colors after showing
+                getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+            }
         }
 
         binding.btnDeleteBike.setOnClickListener{
@@ -138,10 +152,14 @@ class AssetsFragment: Fragment() {
                 dialog.dismiss() // Dismiss dialog if user cancels
             }
 
-            val dialog = alertDialog.create()
-            dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+            alertDialog.create().apply {
+                window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                show()
 
-            dialog.show()
+                // Change button text colors after showing
+                getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+            }
         }
 
         binding.btnAddBattery.setOnClickListener {
@@ -153,7 +171,7 @@ class AssetsFragment: Fragment() {
                 return@setOnClickListener
             }
 
-            val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            val alertDialog = AlertDialog.Builder(requireContext())
 
             // Custom title with red color
             val title = SpannableString("Add Battery")
@@ -175,119 +193,389 @@ class AssetsFragment: Fragment() {
                 dialog.dismiss() // Dismiss dialog if user cancels
             }
 
-            val dialog = alertDialog.create()
-            dialog.window?.setBackgroundDrawableResource(R.drawable.rounded_black) // (Optional) Custom background
+            alertDialog.create().apply {
+                window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                show()
 
-            dialog.show()
+                // Change button text colors after showing
+                getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+            }
 
+        }
+
+        binding.btnDeleteBattery.setOnClickListener {
+            val batteryName = binding.batteryToDelete.selectedItem as? String
+
+            if (batteryName?.isEmpty() == true) {
+                Toast.makeText(requireContext(), "No battery selected.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val alertDialog = AlertDialog.Builder(requireContext())
+
+            // Custom title with red color
+            val title = SpannableString("Delete Battery")
+            title.setSpan(ForegroundColorSpan(Color.RED), 0, title.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+            // Custom message with black color
+            val message = SpannableString("Confirm action.")
+            message.setSpan(ForegroundColorSpan(Color.GRAY), 0, message.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+            alertDialog.setTitle(title)
+            alertDialog.setMessage(message)
+            alertDialog.setIcon(R.drawable.success)
+
+            alertDialog.setPositiveButton("Delete") { _, _ ->
+                deleteBattery(batteryName)
+            }
+
+            alertDialog.setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss() // Dismiss dialog if user cancels
+            }
+
+            alertDialog.create().apply {
+                window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                show()
+
+                // Change button text colors after showing
+                getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+            }
+        }
+
+        binding.btnDeleteDestination.setOnClickListener {
+            val destinationName = binding.destinationToDelete.selectedItem as? String
+
+            if (destinationName?.isEmpty() == true) {
+                Toast.makeText(requireContext(), "No destination selected.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val alertDialog = AlertDialog.Builder(requireContext())
+
+            // Custom title with red color
+            val title = SpannableString("Delete Destination")
+            title.setSpan(ForegroundColorSpan(Color.RED), 0, title.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+            // Custom message with black color
+            val message = SpannableString("Confirm action.")
+            message.setSpan(ForegroundColorSpan(Color.GRAY), 0, message.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+            alertDialog.setTitle(title)
+            alertDialog.setMessage(message)
+            alertDialog.setIcon(R.drawable.success)
+
+            alertDialog.setPositiveButton("Delete") { _, _ ->
+                deleteDestination(destinationName)
+            }
+
+            alertDialog.setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss() // Dismiss dialog if user cancels
+            }
+
+            alertDialog.create().apply {
+                window?.setBackgroundDrawableResource(R.drawable.rounded_black)
+                show()
+
+                // Change button text colors after showing
+                getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(Color.GREEN)  // confirm button
+                getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(Color.RED)    // cancel button
+            }
+        }
+    }
+
+    private fun deleteDestination(destinationName: String?) {
+        if (destinationName.isNullOrBlank()) {
+            Toast.makeText(requireContext(), "Invalid destination", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        try {
+            _binding.let {
+                binding.deleteDestinationProgressBar.visibility = View.VISIBLE
+                binding.btnDeleteDestination.visibility = View.GONE
+            }
+            val db = FirebaseFirestore.getInstance()
+            val destinationsRef = db.collection("general").document("general_variables")
+
+            // Remove the destination from the array
+            destinationsRef.update("destinations", FieldValue.arrayRemove(destinationName))
+                .addOnSuccessListener {
+                    Toast.makeText(requireContext(), "Destination deleted successfully", Toast.LENGTH_SHORT).show()
+                    loadBikes() // Refresh UI/spinners
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(requireContext(), "Failed to delete destination: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+        }
+        catch (_: Exception) {
+
+        }
+        finally {
+            _binding.let {
+                binding.deleteDestinationProgressBar.visibility = View.GONE
+                binding.btnDeleteDestination.visibility = View.VISIBLE
+            }
         }
 
     }
 
+    private fun deleteBattery(batteryName: String?) {
+        if (batteryName.isNullOrEmpty()) {
+            Toast.makeText(requireContext(), "No battery selected", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+
+        val db = FirebaseFirestore.getInstance()
+        val batteriesRef = db.collection("general").document("general_variables")
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                _binding.let {
+                    binding.deleteBatteryProgressBar.visibility = View.VISIBLE
+                    binding.btnDeleteBattery.visibility = View.GONE
+                }
+                val batteriesDoc = withContext(Dispatchers.IO) { batteriesRef.get().await() }
+                val batteriesMap = batteriesDoc.get("batteries") as? Map<String, Map<String, Any>> ?: emptyMap()
+
+                // Find the key (0,1,2,...) for the matching battery
+                val targetKey = batteriesMap.entries.find { entry ->
+                    val data = entry.value as? Map<*, *> ?: return@find false
+                    val name = data["batteryName"] as? String ?: return@find false
+                    name == batteryName
+                }?.key
+
+                if (targetKey == null) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(requireContext(), "$batteryName not found", Toast.LENGTH_SHORT).show()
+                    }
+                    return@launch
+                }
+
+                // Delete the field "batteries.targetKey"
+                withContext(Dispatchers.IO) {
+                    batteriesRef.update("batteries.$targetKey", FieldValue.delete()).await()
+                }
+
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "Battery deleted successfully", Toast.LENGTH_SHORT).show()
+                    loadBatteries() // refresh the list
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "Failed to delete: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+            finally {
+                _binding.let {
+                    binding.deleteBatteryProgressBar.visibility = View.GONE
+                    binding.btnDeleteBattery.visibility = View.VISIBLE
+                }
+            }
+        }
+    }
+
     // load bikes, destinations, and company state
+    private fun loadOperations() {
+        val db = FirebaseFirestore.getInstance()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                // --- Company State ---
+                val companyDoc = withContext(Dispatchers.IO) { db.collection("general").document("general_variables").get().await() }
+                val companyStatus = companyDoc.getString("companyState") ?: "Unknown"
+
+                withContext(Dispatchers.Main) {
+                    if (!isAdded || _binding == null) return@withContext
+                    when (companyStatus) {
+                        "Paused" -> {
+                            binding.btnOperationsPaused.visibility = View.VISIBLE
+                        }
+                        "Continuing" -> {
+                            lifecycleScope.launch {
+                                loadBikes()
+                                loadBatteries()
+
+                                _binding?.let { binding ->
+                                    binding.btnAddBike.isEnabled = true
+                                    binding.btnAddDestination.isEnabled = true
+                                    binding.btnAddBattery.isEnabled = true
+                                    binding.btnDeleteDestination.isEnabled = true
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    if (isAdded && _binding != null) {
+                        Toast.makeText(requireContext(), "Failed to load bikes: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+
+    /*this fetches bikes and destinations*/
     private fun loadBikes() {
         val db = FirebaseFirestore.getInstance()
         val bikesRef = db.collection("general").document("general_variables")
 
-        // Fetch bikes
-        bikesRef.get()
-            .addOnSuccessListener { document ->
-                if (!isAdded || _binding == null) return@addOnSuccessListener
-                val bikesMap = document.get("bikes") as? Map<String, Map<String, Any>> ?: emptyMap()
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                // --- Bikes ---
+                val bikesDoc = withContext(Dispatchers.IO) { bikesRef.get().await() }
+                if (!isAdded || _binding == null) return@launch
+
+                val bikesMap = bikesDoc.get("bikes") as? Map<String, Map<String, Any>> ?: emptyMap()
                 val bikePlates = mutableListOf<String>()
                 val disabledBikes = mutableSetOf<String>()
 
-                for ((plate, bikeData) in bikesMap) {
-                    val isAssigned = (bikeData as? Map<*, *>)?.get("isAssigned") as? Boolean ?: false
-                    bikePlates.add(plate)
-                    if (isAssigned) {
-                        disabledBikes.add(plate)
+                // Heavy loop moved off UI thread
+                withContext(Dispatchers.Default) {
+                    for ((plate, bikeData) in bikesMap) {
+                        val isAssigned = (bikeData as? Map<*, *>)?.get("isAssigned") as? Boolean ?: false
+                        bikePlates.add(plate)
+                        if (isAssigned) disabledBikes.add(plate)
                     }
                 }
 
-                // Custom Adapter
-                val adapter = object : ArrayAdapter<String>(
-                    requireContext(),
-                    android.R.layout.simple_spinner_item,
-                    bikePlates
-                ) {
-                    override fun isEnabled(position: Int): Boolean {
-                        return bikePlates[position] !in disabledBikes
-                    }
-
-                    override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-                        val view = super.getDropDownView(position, convertView, parent)
-                        val textView = view as TextView
-                        val name = bikePlates[position]
-
-                        when (name) {
-                            in disabledBikes -> textView.setTextColor(Color.GRAY)
-                            //else -> textView.setTextColor(Color.BLACK)/**/
+                // Back to Main thread for adapter setup
+                withContext(Dispatchers.Main) {
+                    if (!isAdded || _binding == null) return@withContext
+                    val adapter = object : ArrayAdapter<String>(
+                        requireContext(),
+                        android.R.layout.simple_spinner_item,
+                        bikePlates
+                    ) {
+                        override fun isEnabled(position: Int) = bikePlates[position] !in disabledBikes
+                        override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+                            val view = super.getDropDownView(position, convertView, parent)
+                            val textView = view as TextView
+                            if (bikePlates[position] in disabledBikes) {
+                                textView.setTextColor(Color.GRAY)
+                            }
+                            return view
                         }
+                    }
 
-                        return view
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    binding.bikeToManage.adapter = adapter
+
+                    val firstEnabledIndex = bikePlates.indexOfFirst { it !in disabledBikes }
+                    if (firstEnabledIndex != -1) {
+                        binding.bikeToManage.setSelection(firstEnabledIndex)
+                        binding.bikeToManage.isEnabled = true
+                        binding.btnDeleteBike.isEnabled = true
+                    } else {
+                        Toast.makeText(requireContext(), "All bikes are currently assigned and can't be deleted.", Toast.LENGTH_LONG).show()
+                        binding.bikeToManage.isEnabled = false
+                        binding.btnDeleteBike.isEnabled = false
+                        binding.btnDeleteBike.setBackgroundColor(Color.LTGRAY)
                     }
                 }
 
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                binding.bikeToManage.adapter = adapter
+                // --- Destinations ---
+                val destinationsList = bikesDoc.get("destinations") as? List<String> ?: emptyList()
+                withContext(Dispatchers.Main) {
+                    if (!isAdded || _binding == null) return@withContext
 
-                // Find the first enabled bike
-                val firstEnabledIndex = bikePlates.indexOfFirst { it !in disabledBikes }
-                if (firstEnabledIndex != -1) {
-                    binding.bikeToManage.setSelection(firstEnabledIndex)
-                    binding.bikeToManage.isEnabled = true
-                    binding.btnDeleteBike.isEnabled = true
-                } else {
-                    // All bikes are assigned (disabled)
-                    Toast.makeText(requireContext(), "All bikes are currently assigned and can't be deleted.", Toast.LENGTH_LONG).show()
-                    binding.bikeToManage.isEnabled = false
-                    binding.btnDeleteBike.isEnabled = false
-                    binding.btnDeleteBike.setBackgroundColor(Color.LTGRAY)
+                    if (destinationsList.isNotEmpty()) {
+                        val destAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, destinationsList)
+                        destAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+                        // First spinner
+                        binding.batteryDestination.adapter = destAdapter
+
+                        // Second spinner (destinationToDelete)
+                        val deleteAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, destinationsList)
+                        deleteAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                        binding.destinationToDelete.adapter = deleteAdapter
+                    } else {
+                        Toast.makeText(requireContext(), "No destinations found", Toast.LENGTH_SHORT).show()
+                    }
                 }
 
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to load bikes: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
+            } catch (e: Exception) {
 
-
-        // Fetch destinations
-        bikesRef.get()
-            .addOnSuccessListener { document ->
-                if (!isAdded || _binding == null) return@addOnSuccessListener
-
-                val destinationsList = document.get("destinations") as? List<String> ?: emptyList()
-
-                if (destinationsList.isEmpty()) {
-                    Toast.makeText(requireContext(), "No destinations found", Toast.LENGTH_SHORT).show()
-                    return@addOnSuccessListener
-                }
-
-                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, destinationsList)
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                binding.batteryDestination.adapter = adapter
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to load destinations: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-
-        // Check company state
-        val cRef = db.collection("general").document("general_variables")
-        cRef.get().addOnSuccessListener { companyDoc ->
-            val companyStatus = companyDoc.getString("companyState") ?: "Unknown"
-            if (!isAdded || view == null || _binding == null) return@addOnSuccessListener
-
-            if (companyStatus == "Paused") {
-                binding.btnOperationsPaused.visibility = View.VISIBLE
-            } else if (companyStatus == "Continuing") {
-                binding.btnAddBike.visibility = View.VISIBLE
-                binding.btnAddDestination.visibility = View.VISIBLE
-                binding.btnAddBattery.visibility = View.VISIBLE
-                binding.btnDeleteBike.visibility = View.VISIBLE
             }
         }
+    }
 
+    private fun loadBatteries() {
+        val db = FirebaseFirestore.getInstance()
+        val batteriesRef = db.collection("general").document("general_variables")
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val batteriesDoc = withContext(Dispatchers.IO) { batteriesRef.get().await() }
+                if (!isAdded || _binding == null) return@launch
+
+                val batteriesMap = batteriesDoc.get("batteries") as? Map<String, Map<String, Any>> ?: emptyMap()
+                val batteryNames = mutableListOf<String>()
+                val disabledBatteries = mutableSetOf<String>()
+
+                withContext(Dispatchers.Default) {
+                    for ((_, batteryData) in batteriesMap) {
+                        val data = batteryData as? Map<*, *> ?: continue
+                        val name = data["batteryName"] as? String ?: continue
+                        val assignedRider = data["assignedRider"] as? String ?: "None"
+
+                        batteryNames.add(name)
+                        if (assignedRider != "None") {
+                            disabledBatteries.add(name)
+                        }
+                    }
+                    batteryNames.sort()
+                }
+
+                withContext(Dispatchers.Main) {
+                    if (!isAdded || _binding == null) return@withContext
+
+                    val adapter = object : ArrayAdapter<String>(
+                        requireContext(),
+                        android.R.layout.simple_spinner_item,
+                        batteryNames
+                    ) {
+                        override fun isEnabled(position: Int): Boolean {
+                            return batteryNames[position] !in disabledBatteries
+                        }
+
+                        override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+                            val view = super.getDropDownView(position, convertView, parent)
+                            val textView = view as TextView
+                            if (batteryNames[position] in disabledBatteries) {
+                                textView.setTextColor(Color.GRAY)
+                            }
+                            return view
+                        }
+                    }
+
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    binding.batteryToDelete.adapter = adapter
+
+                    val firstEnabledIndex = batteryNames.indexOfFirst { it !in disabledBatteries }
+                    if (firstEnabledIndex != -1) {
+                        binding.batteryToDelete.setSelection(firstEnabledIndex)
+                        binding.batteryToDelete.isEnabled = true
+                        binding.btnDeleteBattery.isEnabled = true
+                    } else {
+                        Toast.makeText(requireContext(), "All batteries are currently assigned and can't be deleted.", Toast.LENGTH_LONG).show()
+                        binding.batteryToDelete.isEnabled = false
+                        binding.btnDeleteBattery.isEnabled = false
+                        binding.btnDeleteBattery.setBackgroundColor(Color.LTGRAY)
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    if (isAdded && _binding != null) {
+                        Toast.makeText(requireContext(), "Failed to load batteries: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
     }
 
     private fun deleteBike() {
@@ -383,7 +671,8 @@ class AssetsFragment: Fragment() {
 
                 val updatedBikes = currentBikes.toMutableMap()
                 updatedBikes[plateNumber] = mapOf(
-                    "isAssigned" to false
+                    "isAssigned" to false,
+                    "assignedRider" to "None"
                 )
 
                 bikesRef.update("bikes", updatedBikes)
@@ -421,7 +710,8 @@ class AssetsFragment: Fragment() {
         val db = FirebaseFirestore.getInstance()
         val generalRef = db.collection("general").document("general_variables")
 
-        generalRef.get().addOnSuccessListener { document ->
+        generalRef.get()
+            .addOnSuccessListener { document ->
             val currentBatteries = document.get("batteries") as? Map<String, Map<String, Any>> ?: emptyMap()
 
             // Check if battery with same name already exists (case-insensitive)
@@ -455,6 +745,7 @@ class AssetsFragment: Fragment() {
             generalRef.update("batteries", updatedBatteries)
                 .addOnSuccessListener {
                     Toast.makeText(requireContext(), "Battery added successfully.", Toast.LENGTH_SHORT).show()
+                    loadBatteries()
                     if (!isAdded || _binding == null) return@addOnSuccessListener
                     binding.btnAddBattery.visibility = View.VISIBLE
                     binding.addBatteryPBar.visibility = View.GONE
@@ -467,7 +758,8 @@ class AssetsFragment: Fragment() {
                     binding.addBatteryPBar.visibility = View.GONE
                 }
 
-        }.addOnFailureListener { e ->
+        }
+            .addOnFailureListener { e ->
             Toast.makeText(requireContext(), "Failed to fetch battery data: ${e.message}", Toast.LENGTH_SHORT).show()
             if (!isAdded || _binding == null) return@addOnFailureListener
             binding.btnAddBattery.visibility = View.VISIBLE

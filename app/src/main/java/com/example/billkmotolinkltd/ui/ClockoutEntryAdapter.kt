@@ -7,6 +7,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.billkmotolinkltd.R
+import java.text.DecimalFormat
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -39,21 +41,36 @@ class ClockoutEntryAdapter(private val entries: MutableList<ClockoutEntry>) :
         return EntryViewHolder(view)
     }
 
+    // For money
+    fun Number.asCurrency(): String {
+        val formatter = NumberFormat.getNumberInstance(Locale("en", "KE"))
+        formatter.minimumFractionDigits = 2
+        formatter.maximumFractionDigits = 2
+        return "Ksh. ${formatter.format(this.toDouble())}"
+    }
+
+    // For kilometers
+    fun Number.asKm(): String {
+        val formatter = NumberFormat.getNumberInstance(Locale("en", "KE"))
+        formatter.maximumFractionDigits = 0 // no decimals
+        return "${formatter.format(this.toDouble())} km"
+    }
+
     override fun onBindViewHolder(holder: EntryViewHolder, position: Int) {
         val entry = entries[position]
         val dateFormatter = SimpleDateFormat("dd/MM/yyyy, HH:mm:ss", Locale.getDefault())
 
         holder.date.text = entry.date
-        holder.net.text = "Ksh.${String.format(" %,.2f", entry.netIncome)}"
-        holder.gross.text = "Ksh.${String.format(" %,.2f", entry.grossIncome)}"
-        holder.iab.text = "Ksh.${String.format(" %,.2f", entry.inAppBal)}"
-        holder.iad.text = "Ksh.${String.format(" %,.2f", entry.inAppDiff)}"
-        holder.ci_mileage.text = "${entry.clockinMileage} KMs"
-        holder.co_mileage.text = "${entry.clockoutMileage} KMs"
-        holder.mileage_diff.text = "${entry.mileageDifference} KMs"
+        holder.net.text = entry.netIncome.asCurrency()
+        holder.gross.text = entry.grossIncome.asCurrency()
+        holder.iab.text = entry.todaysInAppBalance.asCurrency()
+        holder.iad.text = entry.inAppDifference.asCurrency()
+        holder.ci_mileage.text = entry.clockinMileage.asKm()
+        holder.co_mileage.text = entry.clockoutMileage.asKm()
+        holder.mileage_diff.text = entry.mileageDifference.asKm()
+
         holder.et.text = entry.elapsedTime
         holder.postTime.text = entry.postedAt?.toDate()?.let { dateFormatter.format(it) } ?: "Unknown"
-
         // Clear any previous expense views
         holder.expensesContainer.removeAllViews()
 
@@ -62,7 +79,7 @@ class ClockoutEntryAdapter(private val entries: MutableList<ClockoutEntry>) :
             holder.expensesTitle.visibility = View.VISIBLE
             for ((label, value) in entry.expenses) {
                 val expenseView = TextView(holder.itemView.context)
-                expenseView.text = "$label: Ksh. ${String.format("%,.2f", value)}"
+                expenseView.text = "$label: ${value.asCurrency()}"
                 expenseView.setPadding(0, 4, 0, 0)
                 holder.expensesContainer.addView(expenseView)
             }
