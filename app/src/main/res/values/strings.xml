@@ -293,7 +293,7 @@
     <string name="emojis">Emojis</string>
     <string name="post_complain">Post complain</string>
     <string name="complaints">Rider Complaints</string>
-    <string name="no_complaints_available">No complaints available</string>
+    <string name="no_complaints_available">Your riders are satisfied.</string>
     <string name="bin">bin</string>
     <string name="delete_battery">Delete Battery</string>
     <string name="delete_destination">Delete Destination</string>

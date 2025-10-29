@@ -107,10 +107,12 @@
 
                                 <!--approve and decline buttons-->
                                 <LinearLayout
+                                    android:id="@+id/declineAndApproveButtons"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:orientation="horizontal"
                                     android:gravity="center"
+                                    android:visibility="gone"
                                     android:layout_margin="15dp">
 
                                     <!-- Decline Button -->

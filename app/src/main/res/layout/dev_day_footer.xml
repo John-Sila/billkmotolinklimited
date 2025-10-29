@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@color/black">
+    android:background="@drawable/rounded_table_footer">
 
     <TableRow
         android:layout_width="match_parent"
@@ -50,9 +50,4 @@
             android:textStyle="bold"
             android:textAlignment="center"/>
     </TableRow>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="?attr/colorPrimaryDark"/>
 </LinearLayout>

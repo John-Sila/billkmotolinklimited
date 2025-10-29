@@ -7,15 +7,15 @@ plugins {
 }
 
 android {
-    namespace = "com.example.billkmotolinkltd"
+    namespace = "com.billkmotolink.ltd"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.billkmotolinkltd"
+        applicationId = "com.billkmotolink.ltd"
         minSdk = 24
         targetSdk = 35
         versionCode = 6
-        versionName = "1.3.10.4" // changed 21st Aug, Thu
+        versionName = "1.4.0" // changed 9th Oct, Thu
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true

@@ -7,106 +7,106 @@
 
     <fragment
         android:id="@+id/nav_home"
-        android:name="com.example.billkmotolinkltd.ui.home.HomeFragment"
+        android:name="com.billkmotolink.ltd.ui.home.HomeFragment"
         android:label="@string/menu_home"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/nav_reports"
-        android:name="com.example.billkmotolinkltd.ui.reports.ReportsFragment"
+        android:name="com.billkmotolink.ltd.ui.reports.ReportsFragment"
         android:label="@string/menu_reports"
         tools:layout="@layout/fragment_reports" />
 
     <fragment
         android:id="@+id/nav_clockins"
-        android:name="com.example.billkmotolinkltd.ui.clockins.ClockInFragment"
+        android:name="com.billkmotolink.ltd.ui.clockins.ClockInFragment"
         android:label="Clock In"
         tools:layout="@layout/fragment_clockins" />
 
     <fragment
         android:id="@+id/nav_clockouts"
-        android:name="com.example.billkmotolinkltd.ui.clockouts.ClockoutsFragment"
+        android:name="com.billkmotolink.ltd.ui.clockouts.ClockoutsFragment"
         android:label="@string/menu_clockouts"
         tools:layout="@layout/fragment_clockouts" />
 
     <fragment
         android:id="@+id/nav_require"
-        android:name="com.example.billkmotolinkltd.ui.require_reclock.RequireReclockFragment"
+        android:name="com.billkmotolink.ltd.ui.require_reclock.RequireReclockFragment"
         android:label="Require"
         tools:layout="@layout/fragment_require_reclock" />
 
     <fragment
         android:id="@+id/nav_corrections"
-        android:name="com.example.billkmotolinkltd.ui.corrections.CorrectionsFragment"
+        android:name="com.billkmotolink.ltd.ui.corrections.CorrectionsFragment"
         android:label="Corrections"
         tools:layout="@layout/fragment_corrections" />
 
     <fragment
         android:id="@+id/nav_complain"
-        android:name="com.example.billkmotolinkltd.ui.complain.ComplainFragment"
+        android:name="com.billkmotolink.ltd.ui.complain.ComplainFragment"
         android:label="Complain"
         tools:layout="@layout/fragment_complain" />
 
     <fragment
         android:id="@+id/nav_user"
-        android:name="com.example.billkmotolinkltd.ui.users.UsersFragment"
+        android:name="com.billkmotolink.ltd.ui.users.UsersFragment"
         android:label="@string/menu_user"
         tools:layout="@layout/fragment_users" />
     <fragment
         android:id="@+id/nav_post_memo"
-        android:name="com.example.billkmotolinkltd.ui.post_memo.PostMemoFragment"
+        android:name="com.billkmotolink.ltd.ui.post_memo.PostMemoFragment"
         android:label="@string/memo"
         tools:layout="@layout/fragment_post_memo" />
     <fragment
         android:id="@+id/nav_create_poll"
-        android:name="com.example.billkmotolinkltd.ui.create_poll.CreatePollFragment"
+        android:name="com.billkmotolink.ltd.ui.create_poll.CreatePollFragment"
         android:label="@string/create_a_poll"
         tools:layout="@layout/fragment_create_poll" />
     <fragment
         android:id="@+id/nav_polls"
-        android:name="com.example.billkmotolinkltd.ui.polls.PollsFragment"
+        android:name="com.billkmotolink.ltd.ui.polls.PollsFragment"
         android:label="Polls"
         tools:layout="@layout/fragment_polls" />
     <fragment
         android:id="@+id/nav_batteries"
-        android:name="com.example.billkmotolinkltd.ui.batteries.BatteriesFragment"
+        android:name="com.billkmotolink.ltd.ui.batteries.BatteriesFragment"
         android:label="@string/menu_bike"
         tools:layout="@layout/fragment_batteries" />
 
     <fragment
         android:id="@+id/nav_manage_assets"
-        android:name="com.example.billkmotolinkltd.ui.assets.AssetsFragment"
+        android:name="com.billkmotolink.ltd.ui.assets.AssetsFragment"
         android:label="@string/asset_management"
         tools:layout="@layout/fragment_manage_assets" />
 
     <fragment
         android:id="@+id/nav_complaints"
-        android:name="com.example.billkmotolinkltd.ui.complaints.ComplaintsFragment"
+        android:name="com.billkmotolink.ltd.ui.complaints.ComplaintsFragment"
         android:label="@string/complaints"
         tools:layout="@layout/fragment_complaints" />
     <fragment
         android:id="@+id/nav_profiles"
-        android:name="com.example.billkmotolinkltd.ui.profiles.ProfilesFragment"
+        android:name="com.billkmotolink.ltd.ui.profiles.ProfilesFragment"
         android:label="User Profiler"
         tools:layout="@layout/fragment_profiles" />
     <fragment
         android:id="@+id/nav_approvals"
-        android:name="com.example.billkmotolinkltd.ui.approvals.ApprovalsFragment"
+        android:name="com.billkmotolink.ltd.ui.approvals.ApprovalsFragment"
         android:label="@string/menu_approvals"
         tools:layout="@layout/fragment_approvals" />
     <fragment
         android:id="@+id/nav_cashflows"
-        android:name="com.example.billkmotolinkltd.ui.cashflows.CashflowsFragment"
+        android:name="com.billkmotolink.ltd.ui.cashflows.CashflowsFragment"
         android:label="@string/cash_flows"
         tools:layout="@layout/fragment_cashflows" />
     <fragment
         android:id="@+id/nav_tracer"
-        android:name="com.example.billkmotolinkltd.ui.tracer.TracerFragment"
+        android:name="com.billkmotolink.ltd.ui.tracer.TracerFragment"
         android:label="Tracer"
         tools:layout="@layout/fragment_tracer" />
     <fragment
         android:id="@+id/nav_restoration"
-        android:name="com.example.billkmotolinkltd.ui.restoration.RestorationFragment"
+        android:name="com.billkmotolink.ltd.ui.restoration.RestorationFragment"
         android:label="Restoration"
         tools:layout="@layout/fragment_restoration" />
     <fragment
@@ -116,47 +116,47 @@
         tools:layout="@layout/fragment_hr" />
     <fragment
         android:id="@+id/nav_incidences"
-        android:name="com.example.billkmotolinkltd.ui.incidences.IncidencesFragment"
+        android:name="com.billkmotolink.ltd.ui.incidences.IncidencesFragment"
         android:label="@string/menu_incidents"
         tools:layout="@layout/fragment_incidences" />
     <fragment
         android:id="@+id/nav_dailyreports"
-        android:name="com.example.billkmotolinkltd.ui.dailyreports.DailyreportsFragment"
+        android:name="com.billkmotolink.ltd.ui.dailyreports.DailyreportsFragment"
         android:label="@string/menu_dailyreports"
         tools:layout="@layout/fragment_dailyreports" />
     <fragment
         android:id="@+id/nav_weeklyreports"
-        android:name="com.example.billkmotolinkltd.ui.weeklyreports.WeeklyreportsFragment"
+        android:name="com.billkmotolink.ltd.ui.weeklyreports.WeeklyreportsFragment"
         android:label="@string/menu_weeklyreports"
         tools:layout="@layout/fragment_weeklyreports" />
     <fragment
         android:id="@+id/nav_chatrooms"
-        android:name="com.example.billkmotolinkltd.ui.chatrooms.ChatroomsFragment"
+        android:name="com.billkmotolink.ltd.ui.chatrooms.ChatroomsFragment"
         android:label="Chatrooms"
         tools:layout="@layout/fragment_chatrooms" />
     <fragment
         android:id="@+id/nav_mpesa"
-        android:name="com.example.billkmotolinkltd.ui.mpesa.MpesaFragment"
+        android:name="com.billkmotolink.ltd.ui.mpesa.MpesaFragment"
         android:label="Mpesa"
         tools:layout="@layout/fragment_mpesa" />
     <fragment
         android:id="@+id/nav_settings"
-        android:name="com.example.billkmotolinkltd.ui.settings.SettingsFragment"
+        android:name="com.billkmotolink.ltd.ui.settings.SettingsFragment"
         android:label="@string/menu_settings"
         tools:layout="@layout/fragment_settings" />
     <fragment
         android:id="@+id/nav_logout"
-        android:name="com.example.billkmotolinkltd.ui.logout.LogoutFragment"
+        android:name="com.billkmotolink.ltd.ui.logout.LogoutFragment"
         android:label="@string/menu_logout"
         tools:layout="@layout/fragment_logout" />
     <fragment
         android:id="@+id/nav_login"
-        android:name="com.example.billkmotolinkltd.ui.login.LoginFragment"
+        android:name="com.billkmotolink.ltd.ui.login.LoginFragment"
         android:label="@string/menu_login"
         tools:layout="@layout/fragment_login" />
     <fragment
         android:id="@+id/nav_loading"
-        android:name="com.example.billkmotolinkltd.ui.loading.LoadingFragment"
+        android:name="com.billkmotolink.ltd.ui.LoadingFragment"
         android:label="Loading"
         tools:layout="@layout/fragment_loading" />
 
