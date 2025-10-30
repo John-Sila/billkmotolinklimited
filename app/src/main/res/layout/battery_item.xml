@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardRoot"
+    app:cardBackgroundColor="?attr/cardBackgroundColor"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    android:layout_margin="8dp"
+    android:padding="12dp">
+
+    <LinearLayout
+        android:id="@+id/batteryItemRoot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="15sp"
+        android:orientation="vertical">
+
+        <!-- Battery name (color-coded) -->
+        <TextView
+            android:id="@+id/tvBatteryName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Battery_001"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingBottom="6dp" />
+
+        <!-- Collapsible details area (hidden by default) -->
+        <LinearLayout
+            android:id="@+id/detailsLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:paddingTop="6dp">
+
+            <androidx.cardview.widget.CardView
+                app:cardBackgroundColor="?attr/cardBackgroundColor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                android:layout_margin="8dp"
+                android:padding="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="15sp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="15sp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@android:color/holo_orange_dark"
+                            android:textSize="16sp"
+                            android:layout_marginEnd="12sp"
+                            android:text="Bike:" />
+
+                        <TextView
+                            android:id="@+id/tvAssignedBike"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="15sp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@android:color/holo_orange_dark"
+                            android:textSize="16sp"
+                            android:layout_marginEnd="12sp"
+                            android:text="Rider:" />
+
+                        <TextView
+                            android:id="@+id/tvAssignedRider"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="15sp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@android:color/holo_orange_dark"
+                            android:textSize="16sp"
+                            android:layout_marginEnd="12sp"
+                            android:text="Location:" />
+
+                        <TextView
+                            android:id="@+id/tvBatteryLocation"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="15sp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@android:color/holo_orange_dark"
+                            android:textSize="16sp"
+                            android:layout_marginEnd="12sp"
+                            android:text="State changed:" />
+
+                        <TextView
+                            android:id="@+id/tvOffTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="" />
+                    </LinearLayout>
+
+
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+
+                <Button
+                    android:id="@+id/btnMoreInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="More Info..."
+                    android:backgroundTint="@android:color/holo_orange_dark"
+                    android:padding="12dp"
+                    android:layout_marginTop="12dp"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

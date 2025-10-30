@@ -61,9 +61,6 @@ class UsersAdapter(private val fragment: ApprovalsFragment) : ListAdapter<User, 
         private val textViewDailyTarget: TextView = itemView.findViewById(R.id.textViewDailyTarget)
         private val textViewCurrentInAppBal: TextView = itemView.findViewById(R.id.textViewCurrentInAppBal)
         private val textViewSundayTarget: TextView = itemView.findViewById(R.id.textViewSundayTarget)
-        private val locationLastUpdate: TextView = itemView.findViewById(R.id.locationLastUpdate)
-
-
         private val btnApprovePartial: Button = itemView.findViewById(R.id.btnApprovePartial)
         private val btnApproveAllIncome: Button = itemView.findViewById(R.id.btnApproveAllIncome)
         private val btnChangeDailyTarget: Button = itemView.findViewById(R.id.btnChangeDailyTarget)
@@ -91,9 +88,6 @@ class UsersAdapter(private val fragment: ApprovalsFragment) : ListAdapter<User, 
         private val dTLine: LinearLayout = itemView.findViewById(R.id.dTLine)
         private val cIALine: LinearLayout = itemView.findViewById(R.id.cIALine)
         private val sTLine: LinearLayout = itemView.findViewById(R.id.sTLine)
-        private val locationLine: LinearLayout = itemView.findViewById(R.id.locationLine)
-
-        private val locationImage: ImageView = itemView.findViewById(R.id.locationImage)
 
 
         fun bind(user: User) {
@@ -139,57 +133,6 @@ class UsersAdapter(private val fragment: ApprovalsFragment) : ListAdapter<User, 
 
                 sundayText = "This user is bound to work indefinitely."
             }
-            val location = user.location
-            if (location != null) {
-                val latitude = location.latitude
-                val longitude = location.longitude
-                val timestamp = location.timestamp
-
-                val timeDiff = System.currentTimeMillis() - timestamp
-                val hours = timeDiff / (1000 * 60 * 60)
-                val minutes = (timeDiff / (1000 * 60)) % 60
-
-                val timeFormat = SimpleDateFormat("HHmm", Locale.getDefault())
-                val formattedTime = timeFormat.format(Date(timestamp))
-
-                if (hours > 100) {
-                    // Location data is stale — hide map button and show message
-                    locationImage.visibility = View.GONE
-                    locationLastUpdate.text = "This user has denied background location permissions"
-                    locationLastUpdate.setTextColor(Color.RED) // optional emphasis
-                    locationLine.visibility = View.VISIBLE
-                } else {
-                    // Location data is recent — show map button and time info
-                    locationImage.visibility = View.VISIBLE
-
-                    val elapsedText = when {
-                        hours <= 0 && minutes <= 1 -> "Click to open the location as updated just now at $formattedTime hrs"
-                        hours <= 0 -> "Click to open the location as updated $minutes min${if (minutes > 1) "s" else ""} ago at $formattedTime hrs"
-                        else -> "Click to open the location as updated $hours hr${if (hours > 1) "s" else ""} $minutes min${if (minutes > 1) "s" else ""} ago at $formattedTime Hrs"
-                    }
-
-                    locationLastUpdate.text = elapsedText
-                    locationLine.visibility = View.VISIBLE
-
-                    // Google Maps click handler
-                    locationImage.setOnClickListener {
-                        val gmmIntentUri =
-                            "geo:$latitude,$longitude?q=$latitude,$longitude(Location)".toUri()
-                        val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
-                        mapIntent.setPackage("com.google.android.apps.maps")
-
-                        try {
-                            it.context.startActivity(mapIntent)
-                        } catch (e: Exception) {
-                            Toast.makeText(it.context, "Google Maps not available", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-            } else {
-                // Hide layout if no location data exists
-                locationLine.visibility = View.GONE
-            }
-
 
             fun formatIncome(amount: Double): String {
                  val symbols = DecimalFormatSymbols(Locale("en", "KE")).apply {
@@ -230,7 +173,6 @@ class UsersAdapter(private val fragment: ApprovalsFragment) : ListAdapter<User, 
             btnFlushRequirements.setOnClickListener {
                 flushRequirements(user.email, user.userName, flushRequirementsProgressBar, itemView.context)
             }
-
         }
 
         private fun flushRequirements(email: String, userName: String,  progressbar: View, context: Context) {

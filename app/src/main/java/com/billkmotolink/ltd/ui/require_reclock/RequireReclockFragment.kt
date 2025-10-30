@@ -169,7 +169,7 @@ class RequireReclockFragment : Fragment() {
                         if (userRank == "Admin") {
                             adminNames.add(userName)
                         }
-                        if (userRank == "Systems, ITT" || userRank == "HR") {
+                        if (userRank == "Systems, IT" || userRank == "HR") {
                             disabledNames.add(userName)
                         }
                     }

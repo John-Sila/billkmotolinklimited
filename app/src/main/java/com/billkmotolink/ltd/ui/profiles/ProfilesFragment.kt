@@ -37,6 +37,7 @@ class ProfilesFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
+        setUpScrolling()
         fetchInfo()
     }
 
@@ -53,6 +54,11 @@ class ProfilesFragment: Fragment() {
             setHasFixedSize(true)
             itemAnimator = null
         }
+    }
+
+    private fun setUpScrolling() {
+        if (!isAdded || _binding == null) return
+        binding.recyclerViewProfiles.isNestedScrollingEnabled = false
     }
 
 

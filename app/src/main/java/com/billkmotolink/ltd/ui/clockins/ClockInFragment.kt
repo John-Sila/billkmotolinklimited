@@ -35,7 +35,6 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import kotlin.collections.iterator
-import kotlin.toString
 
 class ClockInFragment : Fragment() {
     private var _binding: FragmentClockinsBinding? = null
@@ -477,7 +476,6 @@ class ClockInFragment : Fragment() {
                 }
 
                 val username = userDoc.getString("userName") ?: "Unidentified"
-                val bike = userDoc.getString("currentBike") ?: "Unidentified"
 
                 // Update batteries on new path
                 for (batteryName in selectedBatteries) {
@@ -501,7 +499,7 @@ class ClockInFragment : Fragment() {
                     val updates = mapOf(
                         "batteryLocation" to "In Motion",
                         "assignedRider" to username,
-                        "assignedBike" to bike,
+                        "assignedBike" to getUserBike(),
                         "offTime" to Timestamp.now(),
                         "traces" to traces
                     )
@@ -905,18 +903,6 @@ class ClockInFragment : Fragment() {
                 // Coroutine-based transaction
                 viewLifecycleOwner.lifecycleScope.launch {
                     try {
-                        // Fetch userName
-                        val userSnapshot = withContext(Dispatchers.IO) {
-                            db.collection("users").whereEqualTo("email", currentUserEmail).get().await()
-                        }
-                        val userDoc = userSnapshot.documents.firstOrNull()
-                        val userName = userDoc?.getString("userName") ?: run {
-                            binding.batterySwapPBar.visibility = View.GONE
-                            binding.btnSwapBatteries.visibility = View.VISIBLE
-                            Toast.makeText(requireContext(), "User not found", Toast.LENGTH_SHORT).show()
-                            return@launch
-                        }
-
                         // Process offload batteries
                         selectedOffloadBatteries.forEach { batteryName ->
                             val batteryQuery = db.collection("batteries").whereEqualTo("batteryName", batteryName).get().await()
@@ -928,7 +914,7 @@ class ClockInFragment : Fragment() {
                             // Update fields and traces
                             val traces = batteryDoc.get("traces") as? MutableMap<String, MutableMap<String, Any>> ?: mutableMapOf()
                             val todayEntries = traces[todayKey]?.get("entries") as? MutableList<String> ?: mutableListOf()
-                            todayEntries.add("Battery dropped via swap by $userName at ${SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())}")
+                            todayEntries.add("Battery dropped via swap by $derivedUserName at ${SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())}")
                             traces[todayKey] = mutableMapOf("entries" to todayEntries, "dateEdited" to Timestamp.now())
 
                             batteryRef.update(
@@ -953,14 +939,14 @@ class ClockInFragment : Fragment() {
 
                             val traces = batteryDoc.get("traces") as? MutableMap<String, MutableMap<String, Any>> ?: mutableMapOf()
                             val todayEntries = traces[todayKey]?.get("entries") as? MutableList<String> ?: mutableListOf()
-                            todayEntries.add("Battery loaded via swap by $userName at ${SimpleDateFormat("HH:mm", Locale.getDefault()).format(
+                            todayEntries.add("Battery loaded via swap by $derivedUserName at ${SimpleDateFormat("HH:mm", Locale.getDefault()).format(
                                 Date()
                             )}")
                             traces[todayKey] = mutableMapOf("entries" to todayEntries, "dateEdited" to Timestamp.now())
 
                             batteryRef.update(
                                 mapOf(
-                                    "assignedRider" to userName,
+                                    "assignedRider" to derivedUserName,
                                     "assignedBike" to getUserBike(),
                                     "batteryLocation" to "In Motion",
                                     "offTime" to Timestamp.now(),
@@ -1045,6 +1031,7 @@ class ClockInFragment : Fragment() {
                         val isClockedIn = userData.getBoolean("isClockedIn") == true
                         val isWorkingOnSunday = userData.getBoolean("isWorkingOnSunday") == true
                         derivedUserName = userName
+                        userBike = userData.getString("currentBike") ?: "Unknown"
 
                         // Fetch batteries from the correct location: batteries/{uniqueID}
                         db.collection("batteries")

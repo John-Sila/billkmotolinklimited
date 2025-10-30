@@ -855,6 +855,9 @@ class SettingsFragment : Fragment() {
                     val currentBudgetCost = (budget["budgetCost"] as? Number)?.toDouble() ?: 0.0
                     val currentCompanyIncome = (document.get("companyIncome") as? Number)?.toDouble() ?: 0.0
                     val updatedCompanyIncome = currentCompanyIncome - currentBudgetCost
+                    if (currentBudgetCost > currentCompanyIncome) {
+                        return@withContext Result.Failure("Insufficient company income")
+                    }
 
                     val updatedBudget = budget.toMutableMap().apply {
                         put("budgetStatus", "Disbursed")

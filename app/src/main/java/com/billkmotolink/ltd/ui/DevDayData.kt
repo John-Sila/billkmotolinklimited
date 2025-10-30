@@ -16,6 +16,7 @@ import java.util.Date
 import java.util.Locale
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.util.concurrent.TimeUnit
 
 data class DevDayData(
     val dayName: String,
@@ -43,6 +44,44 @@ val globalDateKey: String
 
         return "${day}_${dateFormat.format(date)}${suffix}_${monthFormat.format(date)}"
     }
+
+suspend fun cleanOldTracesSuspend(daysToKeep: Int = 7) = withContext(Dispatchers.IO) {
+    val db = FirebaseFirestore.getInstance()
+    val batteriesRef = db.collection("batteries")
+    val cutoffMillis = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(daysToKeep.toLong())
+
+    try {
+        val snapshot = batteriesRef.get().await()
+        for (doc in snapshot.documents) {
+            val tracesAny = doc.get("traces")
+            if (tracesAny !is Map<*, *>) continue
+
+            // traces as Map<String, Map<String, Any?>>
+            @Suppress("UNCHECKED_CAST")
+            val traces = tracesAny as Map<String, Map<String, Any?>>
+
+            // Build new map keeping only recent keys
+            val kept = LinkedHashMap<String, Map<String, Any?>>()
+            for ((dateKey, traceValue) in traces) {
+                val dateEdited = traceValue["dateEdited"] as? Timestamp
+                // If dateEdited missing -> keep (conservative)
+                if (dateEdited == null || dateEdited.toDate().time >= cutoffMillis) {
+                    kept[dateKey] = traceValue
+                }
+            }
+
+            // If something was removed, push updated map
+            if (kept.size != traces.size) {
+                // Firestore expects plain Map<String, Any>
+                val cleaned: Map<String, Any> = kept.mapValues { it.value as Any }
+                doc.reference.update("traces", cleaned).await()
+            }
+        }
+    } catch (e: Exception) {
+        // bubble up or log; caller can handle
+        throw e
+    }
+}
 
 data class User(
     val userName: String = "",
@@ -132,13 +171,17 @@ data class ProfileUser(
     val pfpUrl: String
 )
 
-data class Battery(
+data class BatteryModel(
+    val id: String = "",
     val batteryName: String = "",
+    val batteryNameLower: String = "",
     val batteryLocation: String = "",
     val assignedBike: String = "",
     val assignedRider: String = "",
-    val offTime: Timestamp? = null
+    val offTime: Timestamp? = null,
+    val traces: Map<String, Map<String, Any>> = emptyMap()
 )
+
 
 data class Option(
     val name: String = "",
